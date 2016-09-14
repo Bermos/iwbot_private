@@ -29,7 +29,7 @@ public class Connections {
 					"/" + info.DB +
 					"?user=" + info.US +
 					"&password=" + info.PW);
-			
+
 		} catch (FileNotFoundException e) {
 			System.out.println("[Error] 'login.json' not found.");
 		} catch (Exception e) {

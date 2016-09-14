@@ -27,6 +27,11 @@ public class StatusGenerator extends Thread {
 				Thread.sleep(5*60*1000);
 			} catch (Exception e) {
 				e.printStackTrace();
+				try {
+					Thread.sleep(60 * 1000);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}

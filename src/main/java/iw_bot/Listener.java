@@ -24,6 +24,7 @@ import net.dv8tion.jda.events.user.UserAvatarUpdateEvent;
 import net.dv8tion.jda.events.user.UserNameUpdateEvent;
 import net.dv8tion.jda.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
+import provider.Connections;
 import provider.DiscordInfo;
 import provider.Statistics;
 
@@ -31,7 +32,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	public static long startupTime;
 	public static SimpleDateFormat sdf;
-	public static final String VERSION_NUMBER = "2.3.0_26";
+	public static final String VERSION_NUMBER = "2.3.1_26";
 	
 	public Listener() {
 		this.commands = new Commands();
@@ -47,6 +48,8 @@ public class Listener extends ListenerAdapter {
 		for (Guild guild : event.getJDA().getGuilds()) {
 			System.out.println("	" + guild.getName());
 		}
+
+		new Connections().getConnection();
 
 		Statistics stats = Statistics.getInstance();
 		stats.connect(event.getJDA());
@@ -123,7 +126,7 @@ public class Listener extends ListenerAdapter {
 		TextChannel channel = event.getGuild().getPublicChannel(); 
 		channel.sendTyping();
 		
-		channel.sendMessageAsync(DiscordInfo.getNewMemberInfo().replaceAll("<user>", event.getUser().getUsername()), null);
+		channel.sendMessageAsync(DiscordInfo.getNewMemberInfo().replaceAll("<user>", event.getUser().getAsMention()), null);
 		event.getJDA().getTextChannelById(DiscordInfo.getAdminChanID())
 			.sendMessageAsync("New user, " + event.getUser().getUsername() + ", just joined!", null);
 		

@@ -48,7 +48,7 @@ public class Users {
 			while (rs.next()) {
 				User user = guild.getJDA().getUserById(Long.toString(rs.getLong("iduser")));
 				if (user == null) {
-					us.setInt	 (1, 3);
+					us.setInt	 (1, 4);
 					us.setNull	 (2, Types.VARCHAR);
 					us.setString (3, "No membership");
 					us.setLong	 (4, rs.getLong("iduser"));
@@ -94,7 +94,7 @@ public class Users {
 		}
 		
 		System.out.println("[MYSQL] Sync finished.\n"
-						 + "[Revmoved] " + leftUsers + "\n"
+						 + "[Removed] " + leftUsers + "\n"
 						 + "[Added]    " + newUsers  + "\n"
 						 + "[Stayed]   " + iwUsers   + "\n"
 						 + "[Deleted]  " + delUsers);
@@ -135,16 +135,16 @@ public class Users {
 	
 	public static void roleUpdate(GuildMemberRoleAddEvent event) {
 		System.out.printf("[Role Added] %s: %s\n", event.getUser().getUsername(), event.getRoles().get(0).getName());
-		roleUpdate(event.getRoles(), event.getGuild(), event.getUser());
+		roleUpdate(event.getGuild(), event.getUser());
 	}
 	
 	public static void roleUpdate(GuildMemberRoleRemoveEvent event) {
 		System.out.printf("[Role Removed] %s: %s\n", event.getUser().getUsername(), event.getRoles().get(0).getName());
-		roleUpdate(event.getRoles(), event.getGuild(), event.getUser());
+		roleUpdate(event.getGuild(), event.getUser());
 		
 	}
 	
-	private static void roleUpdate(List<Role> roles, Guild guild, User user) {
+	private static void roleUpdate(Guild guild, User user) {
 		String rName = guild.getRolesForUser(user).isEmpty() ? "none" : guild.getRolesForUser(user).get(0).getName();
 		System.out.printf("[Role Display] %s: %s\n", user.getUsername(), rName);
 		

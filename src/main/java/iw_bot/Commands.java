@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
+import misc.INARALookup;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -109,7 +110,7 @@ public class Commands {
 		pmCommands.put("dist", new PMCommand() {
 			public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
 				if (args.length < 2) {
-					event.getChannel().sendMessageAsync("[Error] Not enough systems specified", null);
+					event.getChannel().sendMessageAsync("Sorry, I need 2 systems, separated by a ',' to give you what you want.", null);
 					return;
 				}
 				boolean failed = false;
@@ -161,7 +162,7 @@ public class Commands {
 
 					event.getChannel().sendMessageAsync(String.format("Distance: %.1f ly", dist), null);
 				} catch (JsonSyntaxException e) {
-					event.getChannel().sendMessageAsync("[Error] Processing edsm result failed", null);
+					event.getChannel().sendMessageAsync("[Error] Processing edsm result failed. Please contact Bermos.", null);
 				} catch (SocketException e) {
 					event.getChannel().sendMessageAsync("[Error] Failed connecting to edsm. You might want to retry in a few", null);
 				} catch (IOException e) {
@@ -192,7 +193,10 @@ public class Commands {
 					totalSets = nForm.format(rs.getInt("total_sets")).replace('.', '\'');
 					rs.close();
 					ps.close();
-				} catch (SQLException e) { e.printStackTrace(); }
+				} catch (SQLException e) {
+					event.getChannel().sendMessageAsync("Hmm, looks like I fucked up the number of datasets. Here's the rest of the result:", null);
+					e.printStackTrace();
+				}
 				
 				String contOut = "```"
 						+ "Uptime              | " + String.format("%dd %02d:%02d:%02d\n", days, hours, minutes, seconds)
@@ -268,7 +272,7 @@ public class Commands {
 				//Permission check
 				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getRolesForUser(event.getAuthor()))))
 					return "";
-				return "Upload desiered pic to discord and enter command in the description prompt";
+				return "Upload desired pic to discord and enter command in the description prompt";
 			}
 		});
 
@@ -1081,6 +1085,19 @@ public class Commands {
 
 			public String getHelp(GuildMessageReceivedEvent event) {
 				return "Syntax is: '/reminder ##t, reason' - ## number, t time unit (s, m, h, d, w, y), reason is optional";
+			}
+		});
+
+		guildCommands.put("whois", new GuildCommand() {
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				if (args.length == 1) {
+					String info = INARALookup.whois(args[0]);
+					event.getChannel().sendMessageAsync(info, null);
+				}
+			}
+
+			public String getHelp(GuildMessageReceivedEvent event) {
+				return "Finds all the information available on inara.cz";
 			}
 		});
 		

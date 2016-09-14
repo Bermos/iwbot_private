@@ -17,6 +17,7 @@ public class DiscordInfo {
 	private static Info info;
 	private class Info {
 		String token;
+		String inaraPW;
 		List<String> idOwner;
 		List<String> idRoles;
 		String newMember;
@@ -199,5 +200,11 @@ public class DiscordInfo {
 		if (info == null)
 			getInfo();
 		return info.channels;
+	}
+
+	public static String getInaraPW() {
+		if (info == null)
+			getInfo();
+		return info.inaraPW;
 	}
 }
