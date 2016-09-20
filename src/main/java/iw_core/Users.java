@@ -159,9 +159,6 @@ public class Users {
 	}
 	
 	public static void setOnlineStatus(UserOnlineStatusUpdateEvent event) {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getUsername(), event.getUser().getOnlineStatus().name());
 		try {
 			if(event.getUser().getOnlineStatus().name().equals("AWAY")) {
 				PreparedStatement ps = connect.prepareStatement("UPDATE iwmembers.user SET onlinestatus = ? WHERE iduser = ?");

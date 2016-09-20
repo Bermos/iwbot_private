@@ -34,9 +34,10 @@ public class DankMemes {
 				if (event.getGuild().getNicknameForUser(user) != null)
 					mentionedUsers.add(event.getGuild().getNicknameForUser(user).toLowerCase());
 				else
-					mentionedUsers.add(event.getGuild().getNicknameForUser(user).toLowerCase());
+					mentionedUsers.add(user.getUsername());
 			}
 		}
+
 		for (Meme meme : memes) {
 			boolean checkSuccessful = false;
 			//Check this if the meme requires the command to match exactly
@@ -68,9 +69,9 @@ public class DankMemes {
 				continue;
 
 			checkSuccessful = false;
-			if (mentionedUsers.isEmpty())
+			if (mentionedUsers.isEmpty()) {
 				checkSuccessful = true;
-			else if (!Collections.disjoint(mentionedUsers, meme.keys)) {
+			} else if (Collections.disjoint(mentionedUsers, meme.keys)) {
 				checkSuccessful = true;
 			}
 			if (!checkSuccessful)

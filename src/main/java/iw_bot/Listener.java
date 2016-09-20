@@ -32,11 +32,11 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	public static long startupTime;
 	public static SimpleDateFormat sdf;
-	public static final String VERSION_NUMBER = "2.3.1_26";
+	public static final String VERSION_NUMBER = "2.3.1_28";
 	
 	public Listener() {
 		this.commands = new Commands();
-		sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		sdf = new SimpleDateFormat("HH:mm:ss");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		DankMemes.update();
 	}
@@ -65,7 +65,9 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
-		System.out.printf("[" + sdf.format(new Date()) + "][PM] %s: %s\n", 	event.getAuthor().getUsername(),
+		System.out.printf("[" + sdf.format(new Date()) + "][PM][%s] %s: %s\n",
+											event.getChannel().getUser().getUsername(),
+											event.getAuthor().getUsername(),
 											event.getMessage().getContent());
 		
 		//Check for command
@@ -150,6 +152,7 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
+		System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getUsername(), event.getUser().getOnlineStatus().name());
 		Users.setOnlineStatus(event);
 	}
 	
