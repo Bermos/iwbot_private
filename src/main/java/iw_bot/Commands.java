@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
-import misc.INARALookup;
+import misc.CMDRLookup;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -1091,7 +1091,7 @@ public class Commands {
 		guildCommands.put("whois", new GuildCommand() {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
 				if (args.length == 1) {
-					String info = INARALookup.whois(args[0]);
+					String info = CMDRLookup.whois(args[0]);
 					event.getChannel().sendMessageAsync(info, null);
 				}
 			}

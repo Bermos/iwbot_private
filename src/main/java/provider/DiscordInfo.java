@@ -18,6 +18,7 @@ public class DiscordInfo {
 	private class Info {
 		String token;
 		String inaraPW;
+		String googleToken;
 		List<String> idOwner;
 		List<String> idRoles;
 		String newMember;
@@ -206,5 +207,11 @@ public class DiscordInfo {
 		if (info == null)
 			getInfo();
 		return info.inaraPW;
+	}
+
+	public static String getGoogleToken() {
+		if (info == null)
+			getInfo();
+		return info.googleToken;
 	}
 }

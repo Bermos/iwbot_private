@@ -13,9 +13,22 @@ import java.io.IOException;
 /**
  * Created by Bermos on 13.09.2016.
  */
-public class INARALookup {
+public class CMDRLookup {
     public static String whois(String username) {
-        String info = "Nothing found, sorry.";
+        String info;
+        String inara   = inara(username);
+        String loggers = loggers(username);
+        String reddit  = reddit(username);
+
+        info  = inara + "\n";
+        info += loggers + "\n";
+        //info += reddit + "\n";
+
+        return info;
+    }
+
+    private static String inara(String username) {
+        String info = "Nothing found on INARA";
 
         String url = "http://inara.cz/search?location=search&searchglobal=" + username.replaceAll(" ", "+");
         try {
@@ -70,5 +83,38 @@ public class INARALookup {
         }
 
         return info;
+    }
+
+    private static String loggers(String username) {
+        String info = "Nothing found on r/EliteCombatLoggers";
+        String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DiscordInfo.getGoogleToken();
+
+        try {
+            String doc = Jsoup.connect(url).get().body().text();
+            String[] lines = doc.split("\n");
+
+            for (int i = 1; i < lines.length; i++) {
+                String[] rows = lines[i].split(",");
+                if (rows[0].equalsIgnoreCase(username)) {
+                    info = "Exact CMDR name: " + rows[0] + "\n"
+                         + "No of logs: " + rows[1] + "\n"
+                         + "Method: " + rows[2] + "\n"
+                         + "Platform: " + rows[3];
+                }
+            }
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return info;
+    }
+
+    private static String reddit(String username) {
+        //TODO
+        return null;
     }
 }
