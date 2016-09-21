@@ -28,7 +28,7 @@ public class CMDRLookup {
     }
 
     private static String inara(String username) {
-        String info = "Nothing found on INARA";
+        String info = "__INARA__\nNothing found";
 
         String url = "http://inara.cz/search?location=search&searchglobal=" + username.replaceAll(" ", "+");
         try {
@@ -56,7 +56,7 @@ public class CMDRLookup {
             }
 
             if (cmdrLinks.size() > 0)
-                info = "";
+                info = "__INARA__\n";
             for (Element link : cmdrLinks) {
                 if (StringUtils.getJaroWinklerDistance(username, link.text()) > 0.90) {
                     url = "http://inara.cz" + link.attr("href");
@@ -86,20 +86,22 @@ public class CMDRLookup {
     }
 
     private static String loggers(String username) {
-        String info = "Nothing found on r/EliteCombatLoggers";
+        String info = "__r/EliteCombatLoggers__\nNothing found";
         String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DiscordInfo.getGoogleToken();
 
         try {
             String doc = Jsoup.connect(url).get().body().text();
-            String[] lines = doc.split("\n");
+            String[] rows = doc.split(", ");
 
-            for (int i = 1; i < lines.length; i++) {
-                String[] rows = lines[i].split(",");
-                if (rows[0].equalsIgnoreCase(username)) {
-                    info = "Exact CMDR name: " + rows[0] + "\n"
-                         + "No of logs: " + rows[1] + "\n"
-                         + "Method: " + rows[2] + "\n"
-                         + "Platform: " + rows[3];
+            for (int i = 0; i < rows.length; i++) {
+                String[] values = rows[i].split(",");
+
+                if (values.length > 0 && values[0].equalsIgnoreCase(username)) {
+                    info = "__r/EliteCombatLoggers__" + "\n"
+                         + "Exact CMDR name: " + values[0] + "\n"
+                         + "No of logs: " + values[1] + "\n"
+                         + "Method: " + values[2] + "\n"
+                         + "Platform: " + values[3];
                 }
             }
 
