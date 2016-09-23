@@ -1091,13 +1091,17 @@ public class Commands {
 		guildCommands.put("whois", new GuildCommand() {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
 				if (args.length == 1) {
-					String info = CMDRLookup.whois(args[0]);
+					String info = CMDRLookup.whois(args[0], false);
+					event.getChannel().sendMessageAsync(info, null);
+				}
+				else if (args.length == 2) {
+					String info = CMDRLookup.whois(args[0], args[1].equalsIgnoreCase("update"));
 					event.getChannel().sendMessageAsync(info, null);
 				}
 			}
 
 			public String getHelp(GuildMessageReceivedEvent event) {
-				return "Finds all the information available on inara.cz";
+				return "Finds all the information available on inara.cz and r/EliteCombatLoggers";
 			}
 		});
 		

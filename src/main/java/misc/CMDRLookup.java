@@ -7,21 +7,33 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import provider.DiscordInfo;
+import structs.CombatLogger;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Bermos on 13.09.2016.
  */
 public class CMDRLookup {
-    public static String whois(String username) {
+    private static long last_lookup;
+    private static List<CombatLogger> combat_loggers;
+
+    public static void setup()
+    {
+        combat_loggers = new ArrayList<CombatLogger>();
+    }
+
+    public static String whois(String username, boolean force_update) {
         String info;
         String inara   = inara(username);
-        String loggers = loggers(username);
+        String loggers = loggers(username, force_update);
         String reddit  = reddit(username);
 
-        info  = inara + "\n";
-        info += loggers + "\n";
+        info  = inara + "\n\n";
+        info += loggers + "\n\n";
         //info += reddit + "\n";
 
         return info;
@@ -85,32 +97,66 @@ public class CMDRLookup {
         return info;
     }
 
-    private static String loggers(String username) {
-        String info = "__r/EliteCombatLoggers__\nNothing found";
+    private static String loggers(String username, boolean force_update)
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        String info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
         String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DiscordInfo.getGoogleToken();
 
-        try {
-            String doc = Jsoup.connect(url).get().body().text();
-            String[] rows = doc.split(", ");
+        if ((last_lookup + (3*60*60*1000) < System.currentTimeMillis()) || force_update)
+        {
+            try
+            {
+                String doc = Jsoup.connect(url).get().body().text();
+                last_lookup = System.currentTimeMillis();
+                String[] rows = doc.split(", ");
+                combat_loggers.clear();
 
-            for (int i = 0; i < rows.length; i++) {
-                String[] values = rows[i].split(",");
+                for (int i = 0; i < rows.length; i++)
+                {
+                    String[] values = rows[i].split(",");
 
-                if (values.length > 0 && values[0].equalsIgnoreCase(username)) {
-                    info = "__r/EliteCombatLoggers__" + "\n"
-                         + "Exact CMDR name: " + values[0] + "\n"
-                         + "No of logs: " + values[1] + "\n"
-                         + "Method: " + values[2] + "\n"
-                         + "Platform: " + values[3];
+                    if (values.length == 4)
+                    {
+                        if (values[0].equalsIgnoreCase(username)) {
+                            info = "__r/EliteCombatLoggers__" + "\n"
+                                    + "Exact CMDR name: " + values[0] + "\n"
+                                    + "No of logs: " + values[1] + "\n"
+                                    + "Method: " + values[2] + "\n"
+                                    + "Platform: " + values[3] + "\n"
+                                    + "This information was updated on: " + sdf.format(last_lookup);
+                        }
+
+                        CombatLogger new_logger = new CombatLogger();
+                        new_logger.name = values[0];
+                        new_logger.no_of_logs = values[1];
+                        new_logger.type_of_log = values[2];
+                        new_logger.platform = values[3];
+                        combat_loggers.add(new_logger);
+                    }
                 }
             }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
 
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
+        else
+        {
+            for (CombatLogger logger : combat_loggers)
+            {
+                if (logger.name.equalsIgnoreCase(username)) {
+                    info = "__r/EliteCombatLoggers__" + "\n"
+                            + "Exact CMDR name: " + logger.name + "\n"
+                            + "No of logs: " + logger.no_of_logs + "\n"
+                            + "Method: " + logger.type_of_log + "\n"
+                            + "Platform: " + logger.platform + "\n"
+                            + "This information was updated on: " + sdf.format(last_lookup);
+                    return info;
+                }
+            }
+        }
 
         return info;
     }

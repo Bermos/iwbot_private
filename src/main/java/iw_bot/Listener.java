@@ -7,6 +7,7 @@ import java.util.TimeZone;
 import iw_bot.Commands;
 import iw_core.Channels;
 import iw_core.Users;
+import misc.CMDRLookup;
 import misc.DankMemes;
 import misc.Reminder;
 import misc.StatusGenerator;
@@ -32,7 +33,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	public static long startupTime;
 	public static SimpleDateFormat sdf;
-	public static final String VERSION_NUMBER = "2.3.2_29";
+	public static final String VERSION_NUMBER = "2.3.3_30";
 	
 	public Listener() {
 		this.commands = new Commands();
@@ -61,6 +62,7 @@ public class Listener extends ListenerAdapter {
 		Users.sync(event);
 
 		new Reminder().startChecks(event.getJDA());
+		CMDRLookup.setup();
 	}
 	
 	@Override
