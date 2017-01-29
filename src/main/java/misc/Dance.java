@@ -1,7 +1,7 @@
 package misc;
 
-import net.dv8tion.jda.entities.Message;
-import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 public class Dance extends Thread{
 	public enum ASCII {
@@ -21,13 +21,13 @@ public class Dance extends Thread{
 		if (iAnimation == ASCII.DANCE) {
 			for (int i = 0; i < 15; i++) {
 				if (i == 0) {
-					message  = event.getChannel().sendMessage("/o/");
+					message  = event.getChannel().sendMessage("/o/").complete();
 				}
 				else if (i%2 == 0) {
-					message.updateMessage("/o/");
+					message.editMessage("/o/").complete();
 				}
 				else {
-					message.updateMessage("\\o\\");
+					message.editMessage("\\o\\").complete();
 				}
 				try {
 					Thread.sleep(800);
@@ -35,7 +35,7 @@ public class Dance extends Thread{
 					e.printStackTrace();
 				}
 			}
-			message.updateMessage("\\o/");
+			message.editMessage("\\o/").queue();
 		}
 	}
 

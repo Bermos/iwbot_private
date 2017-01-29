@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.concurrent.TimeUnit;
 
+import net.dv8tion.jda.core.entities.Member;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
@@ -11,10 +12,9 @@ import org.influxdb.dto.Pong;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
-import net.dv8tion.jda.JDA;
-import net.dv8tion.jda.OnlineStatus;
-import net.dv8tion.jda.entities.User;
-import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 public class Statistics extends Thread {
 	private static Statistics instance;
@@ -22,7 +22,7 @@ public class Statistics extends Thread {
 	private static String dbName = "iw_monitor";
 	private static JDA jda;
 
-	class InfluxInfo {
+	private class InfluxInfo {
 		String IP;
 		String US;
 		String PW;
@@ -78,8 +78,8 @@ public class Statistics extends Thread {
 			try {
 				//update statistics
 				int onlineUser = 0;
-				for(User user : jda.getUsers()) {
-					if (!user.getOnlineStatus().equals(OnlineStatus.OFFLINE))
+				for(Member member : jda.getGuildById("142749481530556416").getMembers()) {
+					if (!member.getOnlineStatus().equals(OnlineStatus.OFFLINE))
 						onlineUser++;
 				}
 				Point users = Point.measurement("users")
@@ -109,7 +109,7 @@ public class Statistics extends Thread {
 		Point messages = Point.measurement("messages")
 				.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
 				.addField("content_length", event.getMessage().getContent().length())
-				.addField("author", event.getAuthor().getUsername())
+				.addField("author", event.getAuthor().getName())
 				.addField("channel", event.getChannel().getName())
 				.build();
 		influxDB.write(dbName, "default", messages);

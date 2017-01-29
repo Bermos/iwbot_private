@@ -11,7 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import net.dv8tion.jda.entities.Role;
+import net.dv8tion.jda.core.entities.Role;
 
 public class DiscordInfo {
 	private static Info info;
@@ -160,7 +160,7 @@ public class DiscordInfo {
 	
 	/**
 	 * 
-	 * @param id
+	 * @param id of the admin role
 	 * @throws IOException
 	 */
 	public static void addAdminRoleID(String id) {

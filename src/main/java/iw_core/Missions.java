@@ -8,19 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.dv8tion.jda.MessageHistory;
-import net.dv8tion.jda.Permission;
-import net.dv8tion.jda.entities.Message;
-import net.dv8tion.jda.entities.Role;
-import net.dv8tion.jda.entities.TextChannel;
-import net.dv8tion.jda.entities.User;
-import net.dv8tion.jda.managers.ChannelManager;
-import net.dv8tion.jda.managers.GuildManager;
-import net.dv8tion.jda.managers.PermissionOverrideManager;
+import net.dv8tion.jda.core.MessageHistory;
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.managers.ChannelManager;
+import net.dv8tion.jda.core.managers.GuildManager;
+import net.dv8tion.jda.core.managers.PermOverrideManager;
+import net.dv8tion.jda.core.managers.PermOverrideManagerUpdatable;
 import provider.DiscordInfo;
 
 public class Missions {
-	private static List<MissionChannel> missionChannels = new ArrayList<MissionChannel>();
+	private static List<MissionChannel> missionChannels = new ArrayList<>();
 
 	private static MissionChannel getChannel(String textChanID) {
 		for (MissionChannel chan : missionChannels) {
@@ -49,53 +47,57 @@ public class Missions {
 		getChannel(textChanID).print(true);
 	}
 	
-	public static void create(String name, GuildManager guildManager, User explorer) {
-		ChannelManager missionChannelManager = null;
-		Role iwRole = guildManager.getGuild().getRoleById("143171790225670145");
-		Role explorerRole = guildManager.getGuild().getRoleById("143403360081543168");
-		Role everyoneRole = guildManager.getGuild().getPublicRole();
-		Role moderatorRole = guildManager.getGuild().getRoleById(DiscordInfo.getAdminRoleIDs().get(0));
+	public static void create(String name, GuildManager guildManager, Member explorer) {
+		Channel missionChannel;
+		Guild guild = guildManager.getGuild();
+		Role iwRole = guild.getRoleById("143171790225670145");
+		Role explorerRole = guild.getRoleById("143403360081543168");
+		Role everyoneRole = guild.getPublicRole();
+		Role moderatorRole = guild.getRoleById(DiscordInfo.getAdminRoleIDs().get(0));
 		
 		String channelName = "mission_" + name;
 		String explName = "*edit*";
-		
-		missionChannelManager = guildManager.getGuild().createTextChannel(channelName);
-		PermissionOverrideManager permissionManager = missionChannelManager.getChannel().createPermissionOverride(moderatorRole);
-		permissionManager.grant(Permission.MESSAGE_READ);
-		permissionManager.grant(Permission.MESSAGE_WRITE);
-		permissionManager.grant(Permission.MESSAGE_MENTION_EVERYONE);
-		permissionManager.grant(Permission.MESSAGE_HISTORY);
-		permissionManager.grant(Permission.MANAGE_PERMISSIONS);
-		permissionManager.grant(Permission.MANAGE_CHANNEL);
-		permissionManager.update();
-		
-		permissionManager = missionChannelManager.getChannel().createPermissionOverride(iwRole);
-		permissionManager.grant(Permission.MESSAGE_READ);
-		permissionManager.grant(Permission.MESSAGE_WRITE);
-		permissionManager.grant(Permission.MESSAGE_MENTION_EVERYONE);
-		permissionManager.grant(Permission.MESSAGE_HISTORY);
-		permissionManager.update();
-		
-		permissionManager = missionChannelManager.getChannel().createPermissionOverride(everyoneRole);
-		permissionManager.deny (Permission.MESSAGE_READ);
-		permissionManager.deny (Permission.MESSAGE_WRITE);
-		permissionManager.update();
-		
+
+		missionChannel = guild.getController().createTextChannel(channelName).complete();
+
+		// Set permissions for moderators
+		PermOverrideManagerUpdatable permManager = missionChannel.createPermissionOverride(moderatorRole).complete().getManagerUpdatable();
+		permManager.grant(Permission.MESSAGE_READ)
+			.grant(Permission.MESSAGE_WRITE)
+			.grant(Permission.MESSAGE_MENTION_EVERYONE)
+			.grant(Permission.MESSAGE_HISTORY)
+			.grant(Permission.MANAGE_PERMISSIONS)
+			.grant(Permission.MANAGE_CHANNEL)
+			.update().queue();
+
+		// Set permissions for iwmembers
+		permManager = missionChannel.createPermissionOverride(iwRole).complete().getManagerUpdatable();
+		permManager.grant(Permission.MESSAGE_READ)
+			.grant(Permission.MESSAGE_WRITE)
+			.grant(Permission.MESSAGE_MENTION_EVERYONE)
+			.grant(Permission.MESSAGE_HISTORY)
+			.update().queue();
+
+		// Set permissions for @everyone
+		permManager = missionChannel.createPermissionOverride(everyoneRole).complete().getManagerUpdatable();
+		permManager.deny (Permission.MESSAGE_READ)
+			.deny (Permission.MESSAGE_WRITE)
+			.update().queue();
+
+		// In case the explorer is mentioned in the message...
 		if (explorer != null) {
-			permissionManager = missionChannelManager.getChannel().createPermissionOverride(explorer);
-			permissionManager.grant(Permission.MESSAGE_READ);
-			permissionManager.grant(Permission.MESSAGE_WRITE);
-			permissionManager.grant(Permission.MESSAGE_MENTION_EVERYONE);
-			permissionManager.grant(Permission.MESSAGE_HISTORY);
-			permissionManager.update();
-			
-			guildManager.addRoleToUser(explorer, explorerRole);
-			guildManager.update();
-			
-			if (guildManager.getGuild().getNicknameForUser(explorer) != null)
-				explName = guildManager.getGuild().getNicknameForUser(explorer);
-			else
-				explName = explorer.getUsername();
+			// Set permissions for the explorer
+			permManager = missionChannel.createPermissionOverride(explorer).complete().getManagerUpdatable();
+			permManager.grant(Permission.MESSAGE_READ)
+				.grant(Permission.MESSAGE_WRITE)
+				.grant(Permission.MESSAGE_MENTION_EVERYONE)
+				.grant(Permission.MESSAGE_HISTORY)
+				.update().queue();
+
+			// Give the explorer role to the explorer
+			guildManager.getGuild().getController().addRolesToMember(explorer, explorerRole).queue();
+
+			explName = explorer.getEffectiveName();
 		}
 		
 		String topic = "__**Explorer:**__\n"
@@ -115,7 +117,7 @@ public class Missions {
 							+ "Alpha: *TBA*\n"
 							+ "Bravo: *TBA*\n";
 		
-		missionChannelManager.setTopic(topic).update();
+		missionChannel.getManager().setTopic(topic).queue();
 	}
 
 	public static void archive(TextChannel channel, String id) {
@@ -133,13 +135,13 @@ public class Missions {
 				assoRole = role;
 		}
 		
-		List<String> lines = new ArrayList<String>();
-		List<Message> history = new MessageHistory(channel).retrieveAll();
+		List<String> lines = new ArrayList<>();
+		List<Message> history = new MessageHistory(channel).retrievePast(1000).complete();
 		Collections.reverse(history);
 		lines.add("*****************START OF CHANNEL '" + channel.getName() + "' LOG*****************");
 		for (Message message : history) {
-			String timestamp = message.getTime() 	== null ? "[?]" : "[" + message.getTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "]";
-			String author	 = message.getAuthor() 	== null ? "?" 	: message.getAuthor().getUsername();
+			String timestamp = message.getCreationTime() == null ? "[?]" : "[" + message.getCreationTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "]";
+			String author	 = message.getAuthor() 	== null ? "?" 	: message.getAuthor().getName();
 			String content 	 = message.getContent() == null ? "?" 	: message.getContent();
 			lines.add(timestamp + " " + author + ": " + content);
 		}
@@ -157,11 +159,16 @@ public class Missions {
 
 		File file = new File ("./ChannelLogs/" + channel.getName() + ".txt");
 		channel.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendMessage(channel.getName() + " archived.");
-		channel.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendFile(file, null);
-		channel.getManager().delete();
+		try {
+			channel.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendFile(file, null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		channel.delete().queue();
 		
 		if (assoRole != null)
-			assoRole.getManager().delete();
+			assoRole.delete().queue();
 	}
 
 	public static void archiveRequest(TextChannel channel, String id) {

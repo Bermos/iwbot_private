@@ -1,6 +1,6 @@
 package misc;
 
-import net.dv8tion.jda.JDA;
+import net.dv8tion.jda.core.JDA;
 import provider.Connections;
 
 import java.sql.Connection;
@@ -12,9 +12,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by Bermos on 29.08.2016.
- */
 public class Reminder {
 
     public static void add (String userid, String reason, long time) {
@@ -36,11 +33,11 @@ public class Reminder {
         timer.scheduleAtFixedRate(new CheckTask(jda), new Date(), TimeUnit.MILLISECONDS.convert(10, TimeUnit.SECONDS));
     }
 
-    class CheckTask extends TimerTask {
+    private class CheckTask extends TimerTask {
         private JDA jda;
         private Connection connect;
 
-        public CheckTask(JDA jda) {
+        CheckTask(JDA jda) {
             this.jda = jda;
             this.connect = new Connections().getConnection();
             boolean initialised = jda != null && connect != null;
@@ -62,7 +59,7 @@ public class Reminder {
                 ResultSet rs = ps.executeQuery();
 
                 while (rs.next()) {
-                    jda.getUserById(rs.getString("userid")).getPrivateChannel().sendMessageAsync("REMINDED!\n" + rs.getString("reason"), null);
+                    jda.getUserById(rs.getString("userid")).getPrivateChannel().sendMessage("REMINDED!\n" + rs.getString("reason")).queue();
                 }
                 ps.close();
                 ps = connect.prepareStatement("UPDATE reminders SET reminded = 1 WHERE reminded = 0 AND time < ?");

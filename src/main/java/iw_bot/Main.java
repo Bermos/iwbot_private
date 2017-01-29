@@ -2,7 +2,9 @@ package iw_bot;
 
 import javax.security.auth.login.LoginException;
 
-import net.dv8tion.jda.JDABuilder;
+import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import provider.DiscordInfo;
 
 public class Main {
@@ -11,8 +13,8 @@ public class Main {
 
 		try {
 			
-			new JDABuilder()
-			.setBotToken(DiscordInfo.getToken())
+			new JDABuilder(AccountType.BOT)
+			.setToken(DiscordInfo.getToken())
 			.addListener(new Listener())
 			.buildBlocking();
 			
@@ -21,6 +23,8 @@ public class Main {
 		} catch (IllegalArgumentException e) {
 			System.out.println("[Error] no bot token found.");
 		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (RateLimitedException e) {
 			e.printStackTrace();
 		}
 	}

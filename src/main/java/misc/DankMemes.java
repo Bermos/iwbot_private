@@ -13,9 +13,10 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import net.dv8tion.jda.MessageBuilder;
-import net.dv8tion.jda.entities.User;
-import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import structs.Meme;
 
 public class DankMemes {
@@ -26,15 +27,13 @@ public class DankMemes {
 	}
 	
 	public static void check(GuildMessageReceivedEvent event) {
-		List<String> mentionedUsers = new ArrayList<String>();
-		if (event.getAuthor().equals(event.getJDA().getSelfInfo()))
+		List<String> mentionedUsers = new ArrayList<>();
+		if (event.getAuthor().equals(event.getJDA().getSelfUser()))
 			return;
 		if (!event.getMessage().getMentionedUsers().isEmpty()) {
+			Guild guild = event.getGuild();
 			for (User user : event.getMessage().getMentionedUsers()) {
-				if (event.getGuild().getNicknameForUser(user) != null)
-					mentionedUsers.add(event.getGuild().getNicknameForUser(user).toLowerCase());
-				else
-					mentionedUsers.add(user.getUsername());
+					mentionedUsers.add(guild.getMember(user).getEffectiveName());
 			}
 		}
 
@@ -91,12 +90,12 @@ public class DankMemes {
 			MessageBuilder messageBuild = new MessageBuilder();
 			messageBuild.setTTS(meme.tts);
 			int rand = new Random().nextInt(meme.outputs.size());
-			event.getChannel().sendMessageAsync(messageBuild.appendString(meme.outputs.get(rand)).build(), null);
+			event.getChannel().sendMessage(messageBuild.append(meme.outputs.get(rand)).build()).queue();
 		} else {
 			for (String out : meme.outputs) {
 				MessageBuilder messageBuild = new MessageBuilder();
 				messageBuild.setTTS(meme.tts);
-				event.getChannel().sendMessageAsync(messageBuild.appendString(out).build(), null);
+				event.getChannel().sendMessage(messageBuild.append(out).build()).queue();
 			}
 		}
 		
@@ -115,7 +114,7 @@ public class DankMemes {
 		}
 	}
 
-	public static void saveChanges() {
+	private static void saveChanges() {
 		try {
 			Type listType = new TypeToken<ArrayList<Meme>>(){}.getType();
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();

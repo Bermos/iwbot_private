@@ -14,23 +14,20 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Bermos on 13.09.2016.
- */
 public class CMDRLookup {
     private static long last_lookup;
     private static List<CombatLogger> combat_loggers;
 
     public static void setup()
     {
-        combat_loggers = new ArrayList<CombatLogger>();
+        combat_loggers = new ArrayList<>();
     }
 
     public static String whois(String username, boolean force_update) {
         String info;
         String inara   = inara(username);
         String loggers = loggers(username, force_update);
-        String reddit  = reddit(username);
+        //String reddit  = reddit(username);
 
         info  = inara + "\n\n";
         info += loggers + "\n\n";
@@ -112,12 +109,10 @@ public class CMDRLookup {
                 String[] rows = doc.split(", ");
                 combat_loggers.clear();
 
-                for (int i = 0; i < rows.length; i++)
-                {
-                    String[] values = rows[i].split(",");
+                for (String row : rows) {
+                    String[] values = row.split(",");
 
-                    if (values.length == 4)
-                    {
+                    if (values.length == 4) {
                         if (values[0].equalsIgnoreCase(username)) {
                             info = "__r/EliteCombatLoggers__" + "\n"
                                     + "Exact CMDR name: " + values[0] + "\n"
@@ -161,8 +156,8 @@ public class CMDRLookup {
         return info;
     }
 
-    private static String reddit(String username) {
+    /*private static String reddit(String username) {
         //TODO
         return null;
-    }
+    } */
 }

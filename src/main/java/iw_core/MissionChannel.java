@@ -3,26 +3,26 @@ package iw_core;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.dv8tion.jda.entities.Guild;
-import net.dv8tion.jda.entities.Message;
-import net.dv8tion.jda.entities.impl.TextChannelImpl;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.impl.TextChannelImpl;
 
 class MissionChannel extends TextChannelImpl {
 	private Message message;
 	private int next = 0;
 	private String delRequestID = null;
-	private List<NavSystem> systems = new ArrayList<NavSystem>();
+	private List<NavSystem> systems = new ArrayList<>();
 	
-	class NavSystem {
+	private class NavSystem {
 		String name;
 		boolean scoopable;
 	}
 
-	public MissionChannel(String id, Guild guild) {
+	MissionChannel(String id, Guild guild) {
 		super(id, guild);
 	}
 	
-	public void add(String list) {
+	void add(String list) {
 		systems.clear();
 		next = 0;
 		String[] listSystems = list.split("\n");
@@ -38,14 +38,14 @@ class MissionChannel extends TextChannelImpl {
 		print(true);
 	}
 	
-	public void next() {
+	void next() {
 		next++;
 		print(false);
 	}
 	
-	public void print(boolean newMessage) {
+	void print(boolean newMessage) {
 		if (systems.isEmpty()) {
-			sendMessageAsync("You have to add systems before starting your journey", null);
+			sendMessage("You have to add systems before starting your journey").queue();
 			return;
 		}
 			
@@ -58,20 +58,16 @@ class MissionChannel extends TextChannelImpl {
 		content += "```";
 		
 		if (message == null || newMessage)
-			message = sendMessage(content);
+			sendMessage(content).queue(m -> message = m);
 		else
-			message.updateMessageAsync(content, null);
+			message.editMessage(content).queue();
 	}
 
-	public void primeForDelete(String id) {
+	void primeForDelete(String id) {
 		delRequestID = id;
 	}
 	
-	public boolean isPrimed(String id) {
-		if (delRequestID == null)
-			return false;
-		if (delRequestID.equals(id))
-			return true;
-		return false;
+	boolean isPrimed(String id) {
+		return delRequestID != null && delRequestID.equals(id);
 	}
 }

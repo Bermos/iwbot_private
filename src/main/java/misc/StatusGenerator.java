@@ -4,11 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import net.dv8tion.jda.managers.AccountManager;
+import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.managers.Presence;
 import provider.Connections;
 
 public class StatusGenerator extends Thread {
-	private AccountManager accountManager;
+	private Presence presence;
 	private Connection connect = new Connections().getConnection();
 	
 	public void run() {
@@ -22,7 +23,7 @@ public class StatusGenerator extends Thread {
 				rs.next();
 				String newStatus = rs.getString("word1") + " " + rs.getString("word3") + " " + rs.getString("word5");
 				
-				accountManager.setGame(newStatus.trim());
+				presence.setGame(Game.of(newStatus.trim()));
 				
 				Thread.sleep(5*60*1000);
 			} catch (Exception e) {
@@ -36,8 +37,8 @@ public class StatusGenerator extends Thread {
 		}
 	}
 	
-	public StatusGenerator (AccountManager accountManager) {
-		this.accountManager = accountManager;
+	public StatusGenerator (Presence presence) {
+		this.presence = presence;
 		
 		this.start();
 	}
