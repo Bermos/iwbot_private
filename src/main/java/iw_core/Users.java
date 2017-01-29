@@ -88,7 +88,7 @@ public class Users {
 		}
 		
 		System.out.println("[MYSQL] Sync finished.\n"
-						 + "[Removed] " + leftUsers + "\n"
+						 + "[Removed]  " + leftUsers + "\n"
 						 + "[Added]    " + newUsers  + "\n"
 						 + "[Stayed]   " + iwUsers   + "\n"
 						 + "[Deleted]  " + delUsers);

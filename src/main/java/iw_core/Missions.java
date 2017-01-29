@@ -136,7 +136,14 @@ public class Missions {
 		}
 		
 		List<String> lines = new ArrayList<>();
-		List<Message> history = new MessageHistory(channel).retrievePast(1000).complete();
+		List<Message> history = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			List<Message> tempHist = new MessageHistory(channel).retrievePast(100).complete();
+			history.addAll(tempHist);
+			channel.deleteMessages(tempHist);
+			if (tempHist.size() < 100)
+				break;
+		}
 		Collections.reverse(history);
 		lines.add("*****************START OF CHANNEL '" + channel.getName() + "' LOG*****************");
 		for (Message message : history) {
