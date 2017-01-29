@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 import misc.CMDRLookup;
+import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.entities.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -1057,7 +1059,71 @@ class Commands {
 				return "Finds all the information available on inara.cz and r/EliteCombatLoggers";
 			}
 		});
-		
+
+		guildCommands.put("clear", new GuildCommand() {
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				event.getChannel().sendTyping();
+				//Permission check
+				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+					return;
+				}
+
+				if (args.length == 0) {
+					event.getChannel().sendMessage("[Error] Please specify the number of messages you want to delete").queue();
+				} else if (args[0].contains("h") || args[0].contains("m")){
+					long diff = Integer.parseInt(args[1].toLowerCase().replace("m", "").replace("h", ""));
+					if (args[1].toLowerCase().contains("h"))
+						diff *= 60;
+
+					OffsetDateTime upTo = OffsetDateTime.now().minusMinutes(diff);
+
+					List<Message> toDelete = new ArrayList<>();
+
+					outer: while (true) {
+						for (Message message : new MessageHistory(event.getChannel()).retrievePast(100).complete()) {
+							if (message.getCreationTime().isAfter(upTo))
+								toDelete.add(message);
+							else {
+								event.getChannel().deleteMessages(toDelete).queue();
+								break outer;
+							}
+						}
+						event.getChannel().deleteMessages(toDelete).queue();
+					}
+
+					event.getChannel().sendMessage("Last " + toDelete.size() + " messages deleted").queue();
+				} else {
+					int number = Integer.parseInt(args[0]);
+					int secondNum = (int) Math.floor(number/100);
+					int rest = number % 100;
+
+					for (int i = 0; i < secondNum; i++) {
+						List<Message> hist = new MessageHistory(event.getChannel()).retrievePast(100).complete();
+						event.getChannel().deleteMessages(hist).queue();
+						System.out.println("del " + hist.size());
+					}
+					if (rest != 0) {
+						List<Message> hist = new MessageHistory(event.getChannel()).retrievePast(rest).complete();
+						event.getChannel().deleteMessages(hist).queue();
+						System.out.println("del " + hist.size());
+					}
+
+					if (number == 1)
+						event.getChannel().sendMessage("Last message deleted. But why use me for that you lazy son of a @&?%!\nbtw, that was only the command you typed. Jeez, people...").queue();
+					else
+						event.getChannel().sendMessage("Last " + number + " messages deleted").queue();
+				}
+			}
+
+			public String getHelp(GuildMessageReceivedEvent event) {
+				//Permission check
+				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+					return "";
+				return "<###|##t> - deletes either the last ## messages or the last ##h/##m of messages";
+			}
+		});
+
 		//end of commands
 	}
 }

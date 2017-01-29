@@ -30,7 +30,7 @@ class Listener extends ListenerAdapter {
 	private Commands commands;
 	static long startupTime;
 	private static SimpleDateFormat sdf;
-	static final String VERSION_NUMBER = "2.4.0_31";
+	static final String VERSION_NUMBER = "2.4.1_32";
 	
 	Listener() {
 		this.commands = new Commands();
