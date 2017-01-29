@@ -22,9 +22,7 @@ public class Main {
 			System.out.println("[Error] invalid bot token.");
 		} catch (IllegalArgumentException e) {
 			System.out.println("[Error] no bot token found.");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (RateLimitedException e) {
+		} catch (InterruptedException | RateLimitedException e) {
 			e.printStackTrace();
 		}
 	}

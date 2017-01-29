@@ -26,13 +26,13 @@ import provider.Connections;
 import provider.DiscordInfo;
 import provider.Statistics;
 
-public class Listener extends ListenerAdapter {
+class Listener extends ListenerAdapter {
 	private Commands commands;
-	public static long startupTime;
-	public static SimpleDateFormat sdf;
-	public static final String VERSION_NUMBER = "2.4.0_31";
+	static long startupTime;
+	private static SimpleDateFormat sdf;
+	static final String VERSION_NUMBER = "2.4.0_31";
 	
-	public Listener() {
+	Listener() {
 		this.commands = new Commands();
 		sdf = new SimpleDateFormat("HH:mm:ss");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));

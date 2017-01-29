@@ -24,7 +24,7 @@ public class BGS {
 	}
 	private static SimpleDateFormat sqlSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	public static int getTotalAmmount(Activity activity) {
+	public static int getTotalAmount(Activity activity) {
 		int total = 0;
 
 		Connection connect = new Connections().getConnection();
@@ -41,7 +41,7 @@ public class BGS {
 		return total;
 	}
 
-	public static int getTotalAmmount(Activity activity, String userid) {
+	public static int getTotalAmount(Activity activity, String userid) {
 		int total = 0;
 
 		Connection connect = new Connections().getConnection();
@@ -59,8 +59,8 @@ public class BGS {
 		return total;
 	}
 
-	public static Map<Activity, Double> getTotalAmmount(String userid) {
-		Map<Activity, Double> totals = new LinkedHashMap<Activity, Double>();
+	public static Map<Activity, Double> getTotalAmount(String userid) {
+		Map<Activity, Double> totals = new LinkedHashMap<>();
 
 		Connection connect = new Connections().getConnection();
 		try {
@@ -76,8 +76,8 @@ public class BGS {
 		return totals;
 	}
 	
-	public static Map<Activity, Double> getTotalAmmount() {
-		Map<Activity, Double> totals = new LinkedHashMap<Activity, Double>();
+	public static Map<Activity, Double> getTotalAmount() {
+		Map<Activity, Double> totals = new LinkedHashMap<>();
 
 		Connection connect = new Connections().getConnection();
 		try {
@@ -92,8 +92,8 @@ public class BGS {
 		return totals;
 	}
 	
-	public static Map<Activity, Double> getTotalAmmount(Date start, int ticks) {
-		Map<Activity, Double> totals = new LinkedHashMap<Activity, Double>();
+	public static Map<Activity, Double> getTotalAmount(Date start, int ticks) {
+		Map<Activity, Double> totals = new LinkedHashMap<>();
 		Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
 		
 		Connection connect = new Connections().getConnection();
@@ -144,7 +144,7 @@ public class BGS {
 	}
 
 	public static List<String> getCSVData(Date start, int ticks) {
-		List<String> lines = new ArrayList<String>();
+		List<String> lines = new ArrayList<>();
 		Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
 		
 		Connection connect = new Connections().getConnection();
@@ -186,7 +186,7 @@ public class BGS {
 			while (rs.next()) {
 				String rowValues = "";
 				for (int i = 0; i < columnCount; i++) {
-					String rowValue = "";
+					String rowValue;
 					if (i == columnCMDRName)
 						rowValue = rs.getString(i+1);
 					else if (i == columnDateTime)

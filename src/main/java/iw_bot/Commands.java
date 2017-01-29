@@ -73,7 +73,7 @@ class Commands {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("mystats")) {
                     String output = "```";
-                    for (Map.Entry<Activity, Double> entry : BGS.getTotalAmmount(event.getAuthor().getId()).entrySet()) {
+                    for (Map.Entry<Activity, Double> entry : BGS.getTotalAmount(event.getAuthor().getId()).entrySet()) {
                         output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                     }
                     output += "```";
@@ -239,6 +239,7 @@ class Commands {
 						e.printStackTrace();
 					}
 					event.getChannel().sendMessage("[Success] Avatar changed.").queue();
+					//noinspection ResultOfMethodCallIgnored
 					avatarFile.delete();
 				}
 				else {
@@ -642,6 +643,7 @@ class Commands {
 							image = ImageIO.read(uRl);
 							ImageIO.write((RenderedImage) image, "png", file = new File("./temp/" + iRandom + ".png"));
 							event.getChannel().sendFile(file, null);
+							//noinspection ResultOfMethodCallIgnored
 							file.delete();
 						}
 					}
@@ -826,14 +828,14 @@ class Commands {
 				} else if (args.length == 1) {
 					if (args[0].equalsIgnoreCase("mystats")) {
 						String output = "```";
-						for (Map.Entry<Activity, Double> entry : BGS.getTotalAmmount(event.getAuthor().getId()).entrySet()) {
+						for (Map.Entry<Activity, Double> entry : BGS.getTotalAmount(event.getAuthor().getId()).entrySet()) {
 							output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
 						}
 						output += "```";
 						event.getAuthor().getPrivateChannel().sendMessage(output).queue();
 					} else if (args[0].equalsIgnoreCase("total")) {
 						String output = "```";
-						for (Map.Entry<Activity, Double> entry : BGS.getTotalAmmount().entrySet()) {
+						for (Map.Entry<Activity, Double> entry : BGS.getTotalAmount().entrySet()) {
 							output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
 						}
 						output += "```";
@@ -870,7 +872,7 @@ class Commands {
 						try {
 							time = sdf.parse(args[2]);
 							String output = "Data for " + args[1] + " ticks after " + args[2] + " UTC:\n```";
-							Map<Activity, Double> entries = BGS.getTotalAmmount(time, Integer.parseInt(args[1]));
+							Map<Activity, Double> entries = BGS.getTotalAmount(time, Integer.parseInt(args[1]));
 							for (Map.Entry<Activity, Double> entry : entries.entrySet()) {
 								output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
 							}

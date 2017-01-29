@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -15,7 +16,6 @@ import com.google.gson.stream.JsonWriter;
 
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import structs.Meme;
 
@@ -32,9 +32,7 @@ public class DankMemes {
 			return;
 		if (!event.getMessage().getMentionedUsers().isEmpty()) {
 			Guild guild = event.getGuild();
-			for (User user : event.getMessage().getMentionedUsers()) {
-					mentionedUsers.add(guild.getMember(user).getEffectiveName());
-			}
+			mentionedUsers.addAll(event.getMessage().getMentionedUsers().stream().map(user -> guild.getMember(user).getEffectiveName()).collect(Collectors.toList()));
 		}
 
 		for (Meme meme : memes) {

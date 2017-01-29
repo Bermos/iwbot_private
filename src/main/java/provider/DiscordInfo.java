@@ -53,7 +53,6 @@ public class DiscordInfo {
 	 * Returns the token necessary to login to Discord
 	 * 
 	 * @return the token to login to Discord
-	 * @throws FileNotFoundException
 	 */
 	public static String getToken() {
 		if (info == null)
@@ -66,9 +65,8 @@ public class DiscordInfo {
 	 * to perform critical changes
 	 * 
 	 * @return list of ID strings
-	 * @throws FileNotFoundException
 	 */
-	public static List<String> getOwnerIDs() {
+	private static List<String> getOwnerIDs() {
 		if (info == null)
 			getInfo();
 		return info.idOwner;
@@ -77,7 +75,6 @@ public class DiscordInfo {
 	/**
 	 * 
 	 * @param id of the owner to add
-	 * @throws IOException
 	 */
 	public static void addOwner(String id) {
 		if (info == null)
@@ -89,7 +86,6 @@ public class DiscordInfo {
 	/**
 	 * 
 	 * @param id of the owner to remove
-	 * @throws IOException
 	 */
 	public static void removeOwner(String id) {
 		if (info == null)
@@ -102,7 +98,6 @@ public class DiscordInfo {
 	 * Get the saved message for new members.
 	 * 
 	 * @return message as string
-	 * @throws FileNotFoundException
 	 */
 	public static String getNewMemberInfo() {
 		if (info == null)
@@ -114,7 +109,6 @@ public class DiscordInfo {
 	 * Save a new message for the new members.
 	 * 
 	 * @param message as string
-	 * @throws IOException
 	 */
 	public static void setNewMemberInfo(String message) {
 		if (info == null)
@@ -127,7 +121,6 @@ public class DiscordInfo {
 	/**
 	 * 
 	 * @return the admin channel id as string
-	 * @throws FileNotFoundException
 	 */
 	public static String getAdminChanID() {
 		if (info == null)
@@ -137,8 +130,7 @@ public class DiscordInfo {
 	
 	/**
 	 * 
-	 * @param id of the channel used for admins
-	 * @throws IOException
+	 * @param id of the channel used for admin
 	 */
 	public static void setAdminChanID(String id) {
 		if (info == null)
@@ -149,8 +141,7 @@ public class DiscordInfo {
 	
 	/**
 	 * 
-	 * @return
-	 * @throws FileNotFoundException
+	 * @return the ids of all admin roles
 	 */
 	public static List<String> getAdminRoleIDs() {
 		if (info == null)
@@ -161,7 +152,6 @@ public class DiscordInfo {
 	/**
 	 * 
 	 * @param id of the admin role
-	 * @throws IOException
 	 */
 	public static void addAdminRoleID(String id) {
 		if (info == null)

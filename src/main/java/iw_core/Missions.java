@@ -11,9 +11,7 @@ import java.util.List;
 import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.managers.ChannelManager;
 import net.dv8tion.jda.core.managers.GuildManager;
-import net.dv8tion.jda.core.managers.PermOverrideManager;
 import net.dv8tion.jda.core.managers.PermOverrideManagerUpdatable;
 import provider.DiscordInfo;
 
@@ -40,10 +38,12 @@ public class Missions {
 	}
 	
 	public static void nextListEntry(String textChanID) {
+		//noinspection ConstantConditions
 		getChannel(textChanID).next();
 	}
 	
 	public static void getList(String textChanID) {
+		//noinspection ConstantConditions
 		getChannel(textChanID).print(true);
 	}
 	
@@ -56,7 +56,7 @@ public class Missions {
 		Role moderatorRole = guild.getRoleById(DiscordInfo.getAdminRoleIDs().get(0));
 		
 		String channelName = "mission_" + name;
-		String explName = "*edit*";
+		String explorerName = "*edit*";
 
 		missionChannel = guild.getController().createTextChannel(channelName).complete();
 
@@ -97,11 +97,11 @@ public class Missions {
 			// Give the explorer role to the explorer
 			guildManager.getGuild().getController().addRolesToMember(explorer, explorerRole).queue();
 
-			explName = explorer.getEffectiveName();
+			explorerName = explorer.getEffectiveName();
 		}
 		
 		String topic = "__**Explorer:**__\n"
-							+ "CMDR " + explName + "\n"
+							+ "CMDR " + explorerName + "\n"
 							+ "Status: *edit*\n"
 							+ "PP affiliation: *edit*\n"
 							+ "\n"
@@ -129,10 +129,10 @@ public class Missions {
 		if (!mChannel.isPrimed(id))
 			return;
 		
-		Role assoRole = null;
+		Role associatedRole = null;
 		for (Role role : channel.getGuild().getRoles()) {
 			if (role.getName().equalsIgnoreCase(channel.getName()))
-				assoRole = role;
+				associatedRole = role;
 		}
 		
 		List<String> lines = new ArrayList<>();
@@ -167,8 +167,8 @@ public class Missions {
 
 		channel.delete().queue();
 		
-		if (assoRole != null)
-			assoRole.delete().queue();
+		if (associatedRole != null)
+			associatedRole.delete().queue();
 	}
 
 	public static void archiveRequest(TextChannel channel, String id) {
