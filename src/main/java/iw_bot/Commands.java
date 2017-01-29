@@ -190,12 +190,13 @@ class Commands {
 		
 		pmCommands.put("restart", (event, args) -> {
             //Permission check
-            if (!DiscordInfo.isOwner(event.getAuthor().getId())) {
-                event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-                return;
-            }
+			Member author = event.getJDA().getGuildById("142749481530556416").getMember(event.getAuthor());
+			if ( !( DiscordInfo.isOwner(event.getAuthor().getId()) || (author != null && DiscordInfo.isAdmin(author.getRoles())) ) ) {
+				event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+				return;
+			}
 
-            event.getChannel().sendMessage("Trying to restart...");
+            event.getChannel().sendMessage("Trying to restart...").complete();
             System.exit(1);
         });
 		
@@ -320,21 +321,24 @@ class Commands {
 				} else {
 					if (args[0].equalsIgnoreCase("add")) {
 						event.getGuild().getController().createRole().setName(args[1]).queue();
+						event.getChannel().sendMessage("[Success] role '" + args[1] + "' created").queue();
 					}
 					if (args[0].equalsIgnoreCase("del")) {
-						for (Role role : event.getGuild().getRoles()) {
-							if (role.getName().equalsIgnoreCase(args[1]))
-								role.delete().queue();
+						for (Role role : event.getGuild().getRolesByName(args[1], true)) {
+							String oldName = role.getName();
+							role.delete().queue();
+							event.getChannel().sendMessage("[Success] role '" + oldName + "' deleted").queue();
 						}
 					}
-					if (args[0].equalsIgnoreCase("color")) {
+					if (args[0].equalsIgnoreCase("color") || args[0].equalsIgnoreCase("colour")) {
 						if (args.length < 5) {
 							event.getChannel().sendMessage("[Error] you need to specify the RGB values for the new color. '0, 0, 0' for example").queue();
 							return;
 						}
-						for (Role role : event.getGuild().getRoles()) {
-							if (role.getName().equalsIgnoreCase(args[1]))
-								role.getManager().setColor(new Color(Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]))).queue();
+
+						for (Role role : event.getGuild().getRolesByName(args[1], true)) {
+							role.getManager().setColor(new Color(Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]))).queue();
+							event.getChannel().sendMessage("[Success] colour of role '" + args[1] + "' changed").queue();
 						}
 					}
 					if (args[0].equalsIgnoreCase("rename")) {
@@ -342,9 +346,10 @@ class Commands {
 							event.getChannel().sendMessage("[Error] no new name set").queue();
 							return;
 						}
-						for (Role role : event.getGuild().getRoles()) {
-							if (role.getName().equalsIgnoreCase(args[1]))
-								role.getManager().setName(args[2]).queue();
+						for (Role role : event.getGuild().getRolesByName(args[1], true)) {
+							String oldName = role.getName();
+							role.getManager().setName(args[2]).queue();
+							event.getChannel().sendMessage("[Success] role '" + oldName + "' renamed to '" + args[2] + "'").queue();
 						}
 					}
 				}
@@ -354,7 +359,7 @@ class Commands {
 				//Permission check
 				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
 					return "";
-				return "<name>, <add|del|rename|color>, <newname|#color> - Edits the role in the specified way.";
+				return "<add|del|rename|color|colour>, <name>, <newname|#color> - Edits the role in the specified way.";
 			}
 		});
 
@@ -630,7 +635,7 @@ class Commands {
 				Image image;
 				File file;
 				Random RNJesus = new Random();
-				int iRandom = RNJesus.nextInt(1662);
+				int iRandom = RNJesus.nextInt(1791);
 				String url = "http://xkcd.com/" + iRandom + "/";
 				
 				try {
@@ -642,7 +647,7 @@ class Commands {
 							URL uRl = new URL("http:" + eImage.attr("src"));
 							image = ImageIO.read(uRl);
 							ImageIO.write((RenderedImage) image, "png", file = new File("./temp/" + iRandom + ".png"));
-							event.getChannel().sendFile(file, null);
+							event.getChannel().sendFile(file, null).queue();
 							//noinspection ResultOfMethodCallIgnored
 							file.delete();
 						}

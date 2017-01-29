@@ -46,8 +46,9 @@ public class Users {
 					us.setLong	 (4, rs.getLong("iduser"));
 					us.addBatch();
 					delUsers++;
+					continue;
 				}
-				else if (memberListDS.contains(user)) {
+				else if (memberListDS.contains(guild.getMember(user))) {
 					String role = "No membership"; if (!guild.getMember(user).getRoles().isEmpty()) { role = guild.getMember(user).getRoles().get(0).getName();}
 					us.setInt	 (1, guild.getMember(user).getOnlineStatus().ordinal());
 					us.setString (2, user.getAvatarUrl());
@@ -64,7 +65,7 @@ public class Users {
 					us.addBatch();
 					leftUsers++;
 				}
-				memberListDS.remove(user);
+				memberListDS.remove(guild.getMember(user));
 			}
 			for (Member member : memberListDS) {
 				User user = member.getUser();

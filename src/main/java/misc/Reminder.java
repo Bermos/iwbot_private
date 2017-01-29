@@ -42,9 +42,9 @@ public class Reminder {
             this.connect = new Connections().getConnection();
             boolean initialised = jda != null && connect != null;
             if (initialised)
-                System.out.print("reminder initialised");
+                System.out.println("[Info] reminder initialised");
             else
-                System.out.print("Error while initialising reminder check");
+                System.out.println("[Error] could not initialise reminder check");
         }
 
         @Override

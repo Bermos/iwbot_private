@@ -96,7 +96,7 @@ public class CMDRLookup {
 
     private static String loggers(String username, boolean force_update)
     {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm zz");
         String info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
         String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DiscordInfo.getGoogleToken();
 
@@ -106,6 +106,7 @@ public class CMDRLookup {
             {
                 String doc = Jsoup.connect(url).get().body().text();
                 last_lookup = System.currentTimeMillis();
+                info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
                 String[] rows = doc.split(", ");
                 combat_loggers.clear();
 
