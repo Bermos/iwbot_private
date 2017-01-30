@@ -1072,30 +1072,33 @@ class Commands {
 				if (args.length == 0) {
 					event.getChannel().sendMessage("[Error] Please specify the number of messages you want to delete").queue();
 				} else if (args[0].contains("h") || args[0].contains("m")){
+					int deleted = 0;
 					long diff = Integer.parseInt(args[1].toLowerCase().replace("m", "").replace("h", ""));
 					if (args[1].toLowerCase().contains("h"))
 						diff *= 60;
 
 					OffsetDateTime upTo = OffsetDateTime.now().minusMinutes(diff);
 
-					List<Message> toDelete = new ArrayList<>();
-
 					outer: while (true) {
 						for (Message message : new MessageHistory(event.getChannel()).retrievePast(100).complete()) {
+							List<Message> toDelete = new ArrayList<>();
 							if (message.getCreationTime().isAfter(upTo))
 								toDelete.add(message);
 							else {
 								event.getChannel().deleteMessages(toDelete).queue();
+								deleted += toDelete.size();
+								event.getChannel().deleteMessages(toDelete).queue();
 								break outer;
 							}
+							deleted += toDelete.size();
+							event.getChannel().deleteMessages(toDelete).queue();
 						}
-						event.getChannel().deleteMessages(toDelete).queue();
 					}
 
-					event.getChannel().sendMessage("Last " + toDelete.size() + " messages deleted").queue();
+					event.getChannel().sendMessage("Last " + deleted + " messages deleted").queue();
 				} else {
 					int number = Integer.parseInt(args[0]);
-					int secondNum = (int) Math.floor(number/100);
+					int secondNum = (int) Math.floor(number/100.0);
 					int rest = number % 100;
 
 					for (int i = 0; i < secondNum; i++) {
