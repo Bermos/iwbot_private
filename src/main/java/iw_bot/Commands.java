@@ -787,22 +787,7 @@ class Commands {
 			}
 		});
 
-		guildCommands.put("whois", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				if (args.length == 1) {
-					String info = CMDRLookup.whois(args[0], false);
-					event.getChannel().sendMessage(info).queue();
-				}
-				else if (args.length == 2) {
-					String info = CMDRLookup.whois(args[0], args[1].equalsIgnoreCase("update"));
-					event.getChannel().sendMessage(info).queue();
-				}
-			}
-
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "Finds all the information available on inara.cz and r/EliteCombatLoggers";
-			}
-		});
+		guildCommands.put("whois", new commands.ed_commands.CMDRLookup()); //
 
 		guildCommands.put("clear", new BulkDelete()); //done
 
