@@ -12,6 +12,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 public class DiscordInfo {
 	private static Info info;
@@ -166,11 +168,28 @@ public class DiscordInfo {
 		info.idRoles.remove(id);
 		setInfo();
 	}
-	
+
+	public static boolean isOwner(GuildMessageReceivedEvent event) {
+		return getOwnerIDs().contains(event.getAuthor().getId());
+	}
+
+	public static boolean isOwner(PrivateMessageReceivedEvent event) {
+		return getOwnerIDs().contains(event.getAuthor().getId());
+	}
+
 	public static boolean isOwner(String id) {
 		return getOwnerIDs().contains(id);
 	}
-	
+
+	public static boolean isAdmin(GuildMessageReceivedEvent event) {
+		boolean isAdmin = false;
+		for (Role role : event.getMember().getRoles()) {
+			if (getAdminRoleIDs().contains(role.getId()))
+				isAdmin = true;
+		}
+		return isAdmin;
+	}
+
 	public static boolean isAdmin(List<Role> roles) {
 		boolean isAdmin = false;
 		for (Role role : roles) {

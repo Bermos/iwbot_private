@@ -6,7 +6,6 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +13,6 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -27,16 +25,17 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
+import commands.GuildCommand;
+import commands.PMCommand;
+import commands.core_commands.*;
+import commands.ed_commands.Distance;
+import commands.iw_commands.Auth;
 import misc.CMDRLookup;
-import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.entities.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 import iw_core.BGS;
 import iw_core.BGS.Activity;
@@ -47,19 +46,8 @@ import misc.Reminder;
 import misc.DankMemes;
 import net.dv8tion.jda.core.entities.Message.Attachment;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
 import provider.DiscordInfo;
-import structs.EDSystem;
-
-interface PMCommand {
-	void runCommand(PrivateMessageReceivedEvent event, String[] args);
-}
-
-interface GuildCommand {
-	void runCommand(GuildMessageReceivedEvent event, String[] args);
-	String getHelp(GuildMessageReceivedEvent event);
-}
 
 class Commands {
 	Map<String, PMCommand> pmCommands = new LinkedHashMap<>();
@@ -84,111 +72,11 @@ class Commands {
             }
         });
 		
-		pmCommands.put("time", (event, args) -> {
-            Date date = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-            event.getChannel().sendMessage("UTC time:\n" + sdf.format(date)).queue();
-        });
+		pmCommands.put("time", new UTCTime());
 		
-		pmCommands.put("dist", (event, args) -> {
-            if (args.length < 2) {
-                event.getChannel().sendMessage("Sorry, I need 2 systems, separated by a ',' to give you what you want.").queue();
-                return;
-            }
-            boolean failed = false;
-            Gson gson = new Gson();
-            EDSystem sys1;
-            EDSystem sys2;
-            String jsonSys1 = "";
-            String jsonSys2 = "";
-            String urlSys1 = "http://www.edsm.net/api-v1/system?sysname=" + args[0].trim().replaceAll(" ", "+") + "&coords=1";
-            String urlSys2 = "http://www.edsm.net/api-v1/system?sysname=" + args[1].trim().replaceAll(" ", "+") + "&coords=1";
-
-            try {
-                Document docSys1 = Jsoup.connect(urlSys1).ignoreContentType(true).get();
-                Document docSys2 = Jsoup.connect(urlSys2).ignoreContentType(true).get();
-
-                jsonSys1 = docSys1.body().text();
-                jsonSys2 = docSys2.body().text();
-
-                if (jsonSys1.contains("[]")) {
-                    event.getChannel().sendMessage(args[0].trim().toUpperCase() + " not found.").queue();
-                    failed = true;
-                }
-                if (jsonSys2.contains("[]")) {
-                    event.getChannel().sendMessage(args[1].trim().toUpperCase() + " not found.").queue();
-                    failed = true;
-                }
-                if (failed)
-                    return;
-
-                sys1 = gson.fromJson(jsonSys1, EDSystem.class);
-                sys2 = gson.fromJson(jsonSys2, EDSystem.class);
-
-                if (sys1.coords == null) {
-                    event.getChannel().sendMessage(args[0].trim().toUpperCase() + " found but coordinates not in db.").queue();
-                    failed = true;
-                }
-                if (sys2.coords == null) {
-                    event.getChannel().sendMessage(args[1].trim().toUpperCase() + " found but coordinates not in db.").queue();
-                    failed = true;
-                }
-                if (failed)
-                    return;
-
-                float x = sys2.coords.x - sys1.coords.x;
-                float y = sys2.coords.y - sys1.coords.y;
-                float z = sys2.coords.z - sys1.coords.z;
-
-                double dist = Math.sqrt(x*x + y*y + z*z);
-
-                event.getChannel().sendMessage(String.format("Distance: %.1f ly", dist)).queue();
-            } catch (JsonSyntaxException e) {
-                event.getChannel().sendMessage("[Error] Processing edsm result failed. Please contact Bermos.").queue();
-            } catch (SocketException e) {
-                event.getChannel().sendMessage("[Error] Failed connecting to edsm. You might want to retry in a few").queue();
-            } catch (IOException e) {
-                event.getChannel().sendMessage("[Error] Processing data failed").queue();
-            }
-        });
+		pmCommands.put("dist", new Distance());
 		
-		pmCommands.put("status", (event, args) -> {
-            Long diff 			 = (new Date().getTime() - Listener.startupTime);
-            int days			 = (int) TimeUnit.MILLISECONDS.toDays(diff);
-            int hours			 = (int) TimeUnit.MILLISECONDS.toHours(diff) % 24;
-            int minutes			 = (int) TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
-            int seconds			 = (int) TimeUnit.MILLISECONDS.toSeconds(diff) % 60;
-            NumberFormat nForm	 = NumberFormat.getInstance(Locale.GERMANY);
-            int noThreads		 = Thread.getAllStackTraces().keySet().size();
-            String uniqueSets	 = "";
-            String totalSets	 = "";
-            String totalMemory	 = String.format("%.2f",(double) Runtime.getRuntime().maxMemory() / 1024 / 1024);
-            String usedMemory	 = String.format("%.2f",(double)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024);
-
-            try {
-                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT COUNT(idmarkov) AS unique_sets, sum(prob) AS total_sets FROM iwmembers.markov");
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                uniqueSets = nForm.format(rs.getInt("unique_sets")).replace('.', '\'');
-                totalSets = nForm.format(rs.getInt("total_sets")).replace('.', '\'');
-                rs.close();
-                ps.close();
-            } catch (SQLException e) {
-                event.getChannel().sendMessage("Hmm, looks like I fucked up the number of datasets. Here's the rest of the result:").queue();
-                e.printStackTrace();
-            }
-
-            String contOut = "```"
-                    + "Uptime              | " + String.format("%dd %02d:%02d:%02d\n", days, hours, minutes, seconds)
-                    + "# Threads           | " + noThreads						+ "\n"
-                    + "Memory usage        | " + usedMemory + "/" + totalMemory	+ " MB\n"
-                    + "Unique AI Datasets  | " + uniqueSets						+ "\n"
-                    + "Total AI Datasets   | " + totalSets						+ "\n"
-                    + "Version             | " + Listener.VERSION_NUMBER		+ "```";
-
-            event.getChannel().sendMessage(contOut).queue();
-        });
+		pmCommands.put("status", new Status());
 		
 		pmCommands.put("restart", (event, args) -> {
             //Permission check
@@ -201,6 +89,9 @@ class Commands {
             event.getChannel().sendMessage("Trying to restart...").complete();
             System.exit(1);
         });
+
+		//TODO That's how it should be done from now on...
+		pmCommands.put("account", new Auth()); //done
 		
 		//Guild message commands
 		guildCommands.put("help", new GuildCommand() {
@@ -218,94 +109,13 @@ class Commands {
 			public String getHelp(GuildMessageReceivedEvent event) {
 				return "< ?> variables are optional, <a>|<b> either var a OR b";
 			}
-		});
+		}); //done
 
-		guildCommands.put("setavatar", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendTyping();
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-				
-				if (!event.getMessage().getAttachments().isEmpty()) {
-					File avatarFile;
-					Attachment attachment = event.getMessage().getAttachments().get(0);
-					attachment.download(avatarFile = new File("./temp/newavatar.jpg"));
-					try {
-						Icon avatar = Icon.from(avatarFile);
-						event.getJDA().getSelfUser().getManager().setAvatar(avatar).queue();
-					} catch (UnsupportedEncodingException e) {
-						event.getChannel().sendMessage("[Error] Filetype").queue();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					event.getChannel().sendMessage("[Success] Avatar changed.").queue();
-					//noinspection ResultOfMethodCallIgnored
-					avatarFile.delete();
-				}
-				else {
-					event.getChannel().sendMessage("[Error] No image attached").queue();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "Upload desired pic to discord and enter command in the description prompt";
-			}
-		});
+		guildCommands.put("setavatar", new Setavatar()); //done
 
-		guildCommands.put("setname", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendTyping();
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-				
-				if (args.length == 0) {
-					event.getChannel().sendMessage("[Error] No name stated").queue();
-				} else {
-					event.getJDA().getSelfUser().getManager().setName(args[0]).queue();
-					event.getChannel().sendMessage("[Success] Name changed").queue();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "<name>";
-			}
-		});
+		guildCommands.put("setname", new Setname()); //done
 
-		guildCommands.put("setgame", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendTyping();
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-				
-				if (args.length == 0)
-					event.getJDA().getPresence().setGame(null);
-				else
-					event.getJDA().getPresence().setGame(Game.of(args[0]));
-				event.getChannel().sendMessage("[Success] Game changed").queue();
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "<game?> - To set the Playing: ...";
-			}
-		});
+		guildCommands.put("setgame", new Setgame()); //done
 
 		guildCommands.put("role", new GuildCommand() {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -365,73 +175,7 @@ class Commands {
 			}
 		});
 
-		guildCommands.put("dist", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				if (args.length < 2) {
-					event.getChannel().sendMessage("[Error] Not enough systems specified").queue();
-					return;
-				}
-				boolean failed = false;
-				Gson gson = new Gson();
-				EDSystem sys1;
-				EDSystem sys2;
-				String jsonSys1;
-				String jsonSys2;
-				String urlSys1 = "http://www.edsm.net/api-v1/system?sysname=" + args[0].trim().replaceAll(" ", "+") + "&coords=1";
-				String urlSys2 = "http://www.edsm.net/api-v1/system?sysname=" + args[1].trim().replaceAll(" ", "+") + "&coords=1";
-				
-				try {
-					Document docSys1 = Jsoup.connect(urlSys1).ignoreContentType(true).get();
-					Document docSys2 = Jsoup.connect(urlSys2).ignoreContentType(true).get();
-					
-					jsonSys1 = docSys1.body().text();
-					jsonSys2 = docSys2.body().text();
-					
-					if (jsonSys1.contains("[]")) {
-						event.getChannel().sendMessage(args[0].trim().toUpperCase() + " not found.").queue();
-						failed = true;
-					}
-					if (jsonSys2.contains("[]")) {
-						event.getChannel().sendMessage(args[1].trim().toUpperCase() + " not found.").queue();
-						failed = true;
-					}
-					if (failed)
-						return;
-					
-					sys1 = gson.fromJson(jsonSys1, EDSystem.class);
-					sys2 = gson.fromJson(jsonSys2, EDSystem.class);
-					
-					if (sys1.coords == null) {
-						event.getChannel().sendMessage(args[0].trim().toUpperCase() + " found but coordinates not in db.").queue();
-						failed = true;
-					}
-					if (sys2.coords == null) {
-						event.getChannel().sendMessage(args[1].trim().toUpperCase() + " found but coordinates not in db.").queue();
-						failed = true;
-					}
-					if (failed)
-						return;
-					
-					float x = sys2.coords.x - sys1.coords.x;
-					float y = sys2.coords.y - sys1.coords.y;
-					float z = sys2.coords.z - sys1.coords.z;
-					
-					double dist = Math.sqrt(x*x + y*y + z*z);
-
-					event.getChannel().sendMessage(String.format("Distance: %.1f ly", dist)).queue();
-				} catch (JsonSyntaxException e) {
-					event.getChannel().sendMessage("[Error] Processing edsm result failed").queue();
-				} catch (SocketException e) {
-					event.getChannel().sendMessage("[Error] Failed connecting to edsm. You might want to retry in a few").queue();
-				} catch (IOException e) {
-					event.getChannel().sendMessage("[Error] Processing data failed").queue();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "<system1>, <system2> - Gives the distance between those systems.";
-			}
-		});
+		guildCommands.put("dist", new Distance()); //done
 
 		guildCommands.put("new", new GuildCommand() {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -1060,72 +804,7 @@ class Commands {
 			}
 		});
 
-		guildCommands.put("clear", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendTyping();
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-
-				if (args.length == 0) {
-					event.getChannel().sendMessage("[Error] Please specify the number of messages you want to delete").queue();
-				} else if (args[0].contains("h") || args[0].contains("m")){
-					int deleted = 0;
-					long diff = Integer.parseInt(args[1].toLowerCase().replace("m", "").replace("h", ""));
-					if (args[1].toLowerCase().contains("h"))
-						diff *= 60;
-
-					OffsetDateTime upTo = OffsetDateTime.now().minusMinutes(diff);
-
-					outer: while (true) {
-						for (Message message : new MessageHistory(event.getChannel()).retrievePast(100).complete()) {
-							List<Message> toDelete = new ArrayList<>();
-							if (message.getCreationTime().isAfter(upTo))
-								toDelete.add(message);
-							else {
-								event.getChannel().deleteMessages(toDelete).queue();
-								deleted += toDelete.size();
-								event.getChannel().deleteMessages(toDelete).queue();
-								break outer;
-							}
-							deleted += toDelete.size();
-							event.getChannel().deleteMessages(toDelete).queue();
-						}
-					}
-
-					event.getChannel().sendMessage("Last " + deleted + " messages deleted").queue();
-				} else {
-					int number = Integer.parseInt(args[0]);
-					int secondNum = (int) Math.floor(number/100.0);
-					int rest = number % 100;
-
-					for (int i = 0; i < secondNum; i++) {
-						List<Message> hist = new MessageHistory(event.getChannel()).retrievePast(100).complete();
-						event.getChannel().deleteMessages(hist).queue();
-						System.out.println("del " + hist.size());
-					}
-					if (rest != 0) {
-						List<Message> hist = new MessageHistory(event.getChannel()).retrievePast(rest).complete();
-						event.getChannel().deleteMessages(hist).queue();
-						System.out.println("del " + hist.size());
-					}
-
-					if (number == 1)
-						event.getChannel().sendMessage("Last message deleted. But why use me for that you lazy son of a @&?%!\nbtw, that was only the command you typed. Jeez, people...").queue();
-					else
-						event.getChannel().sendMessage("Last " + number + " messages deleted").queue();
-				}
-			}
-
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "<###|##t> - deletes either the last ## messages or the last ##h/##m of messages";
-			}
-		});
+		guildCommands.put("clear", new BulkDelete()); //done
 
 		//end of commands
 	}

@@ -26,11 +26,11 @@ import provider.Connections;
 import provider.DiscordInfo;
 import provider.Statistics;
 
-class Listener extends ListenerAdapter {
+public class Listener extends ListenerAdapter {
 	private Commands commands;
-	static long startupTime;
+	public static long startupTime;
 	private static SimpleDateFormat sdf;
-	static final String VERSION_NUMBER = "2.4.1_32";
+	public static final String VERSION_NUMBER = "2.4.1_32";
 	
 	Listener() {
 		this.commands = new Commands();
@@ -79,9 +79,9 @@ class Listener extends ListenerAdapter {
 						for (int i = 0; i < args.length; i++)
 							args[i] = args[i].trim();
 					}
-					
-					event.getChannel().sendTyping();
+
 					if (commands.pmCommands.containsKey(commandName)) {
+						event.getChannel().sendTyping();
 						commands.pmCommands.get(commandName).runCommand(event, args);
 					}
 				}
