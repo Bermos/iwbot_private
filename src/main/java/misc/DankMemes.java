@@ -17,9 +17,19 @@ import com.google.gson.stream.JsonWriter;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import structs.Meme;
 
 public class DankMemes {
+	class Meme {
+		public List<String> keys;
+		public List<String> outputs;
+		public boolean exact;
+		public boolean randomOut;
+		public boolean tts;
+		public List<String> chanIDs;
+		public long cd;
+		public long lastUsed;
+	}
+
 	private static List<Meme> memes;
 	
 	public DankMemes() {

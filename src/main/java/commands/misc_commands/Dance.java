@@ -1,9 +1,22 @@
-package misc;
+package commands.misc_commands;
 
+import commands.GuildCommand;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
-public class Dance extends Thread{
+public class Dance extends Thread implements GuildCommand {
+	@Override
+	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+		Dance dance = new Dance(event);
+		dance.setDance(Dance.ASCII.DANCE);
+		dance.start();
+	}
+
+	@Override
+	public String getHelp(GuildMessageReceivedEvent event) {
+		return "Makes the bot dance";
+	}
+
 	public enum ASCII {
 		DANCE
 	}
@@ -11,7 +24,11 @@ public class Dance extends Thread{
 	private GuildMessageReceivedEvent event;
 	private Message message;
 	private ASCII iAnimation;
-	
+
+	public Dance() {
+		this.event = null;
+	}
+
 	public Dance(GuildMessageReceivedEvent event) {
 		this.event = event;
 	}

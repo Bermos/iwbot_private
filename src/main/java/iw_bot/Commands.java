@@ -1,46 +1,21 @@
 package iw_bot;
 
-import java.awt.Color;
-import java.awt.Image;
-import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
-import javax.imageio.ImageIO;
-
 import commands.GuildCommand;
 import commands.PMCommand;
+import commands.Welcome;
 import commands.core_commands.*;
 import commands.ed_commands.Distance;
 import commands.iw_commands.Auth;
 import commands.iw_commands.BGS;
 import commands.misc_commands.*;
-import net.dv8tion.jda.core.entities.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import iw_core.Missions;
-import misc.Dance;
+import commands.misc_commands.Dance;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import provider.Connections;
 import provider.DiscordInfo;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 class Commands {
 	Map<String, PMCommand> pmCommands = new LinkedHashMap<>();
@@ -90,210 +65,19 @@ class Commands {
 
 		guildCommands.put("setgame", new Setgame()); //done
 
-		guildCommands.put("role", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendTyping();
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-				
-				if (args.length == 0) {
-					event.getChannel().sendMessage("[Error] No name stated").queue();
-				} else if (args.length == 1) {
-					event.getChannel().sendMessage("[Error] No action selected").queue();
-				} else {
-					if (args[0].equalsIgnoreCase("add")) {
-						event.getGuild().getController().createRole().setName(args[1]).queue();
-						event.getChannel().sendMessage("[Success] role '" + args[1] + "' created").queue();
-					}
-					if (args[0].equalsIgnoreCase("del")) {
-						for (Role role : event.getGuild().getRolesByName(args[1], true)) {
-							String oldName = role.getName();
-							role.delete().queue();
-							event.getChannel().sendMessage("[Success] role '" + oldName + "' deleted").queue();
-						}
-					}
-					if (args[0].equalsIgnoreCase("color") || args[0].equalsIgnoreCase("colour")) {
-						if (args.length < 5) {
-							event.getChannel().sendMessage("[Error] you need to specify the RGB values for the new color. '0, 0, 0' for example").queue();
-							return;
-						}
-
-						for (Role role : event.getGuild().getRolesByName(args[1], true)) {
-							role.getManager().setColor(new Color(Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]))).queue();
-							event.getChannel().sendMessage("[Success] colour of role '" + args[1] + "' changed").queue();
-						}
-					}
-					if (args[0].equalsIgnoreCase("rename")) {
-						if (args.length < 3) {
-							event.getChannel().sendMessage("[Error] no new name set").queue();
-							return;
-						}
-						for (Role role : event.getGuild().getRolesByName(args[1], true)) {
-							String oldName = role.getName();
-							role.getManager().setName(args[2]).queue();
-							event.getChannel().sendMessage("[Success] role '" + oldName + "' renamed to '" + args[2] + "'").queue();
-						}
-					}
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "<add|del|rename|color|colour>, <name>, <newname|#color> - Edits the role in the specified way.";
-			}
-		});
+		guildCommands.put("role", new commands.core_commands.Role()); //done
 
 		guildCommands.put("dist", new Distance()); //done
 
-		guildCommands.put("new", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-				
-				if (args.length == 0) {
-					event.getChannel().sendMessage(DiscordInfo.getNewMemberInfo().replaceAll("<user>", event.getMember().getEffectiveName())).queue();
-				}
-				else {
-					
-					DiscordInfo.setNewMemberInfo(event.getMessage().getRawContent().replaceFirst("/new", "").trim());
-					event.getChannel().sendMessage("[Success] New member message changed").queue();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "<information?> - sets information for new players or shows it";
-			}
-		});
+		guildCommands.put("welcome", new Welcome()); //done
 
-		guildCommands.put("adminchannel", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-				
-				if (args.length == 0){
-					event.getChannel().sendMessage("Admin channel is: <#" + DiscordInfo.getAdminChanID() + ">").queue();
-				}
-				else if (!event.getMessage().getMentionedChannels().isEmpty()) {
-					DiscordInfo.setAdminChanID(event.getMessage().getMentionedChannels().get(0).getId());
-					event.getChannel().sendMessage("[Success] Admin channel saved").queue();
-				}
-				else {
-					TextChannel chan = event.getGuild().getTextChannels().stream().filter(vChan -> vChan.getName().equalsIgnoreCase(args[0].trim()))
-							.findFirst().orElse(null);
-					if (chan == null) {
-						event.getChannel().sendMessage("Channel not found").queue();
-						return;
-					} else
-						DiscordInfo.setAdminChanID(chan.getId());
-					event.getChannel().sendMessage("[Success] Admin channel saved").queue();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "<channel> - sets admin channel";
-			}
-		});
+		guildCommands.put("adminchannel", new AdminChannel()); //done
 
-		guildCommands.put("admin", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-					event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-					return;
-				}
-				
-				if (args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("view"))) {
-					String message = "";
-					for (String id : DiscordInfo.getAdminRoleIDs())
-						message += ( "-" + event.getGuild().getRoleById(id).getName() + "\n" );
-					
-					if (!message.isEmpty())
-						event.getChannel().sendMessage("Roles with admin privileges:\n" + message).queue();
-					else
-						event.getChannel().sendMessage("No admin roles defined").queue();
-				}
-				else if (args[0].equalsIgnoreCase("add")) {
-					if (!event.getMessage().getMentionedRoles().isEmpty()) {
-						DiscordInfo.addAdminRoleID(event.getMessage().getMentionedRoles().get(0).getId());
-					} else if (args.length == 2) {
-						Role role = event.getGuild().getRoles().stream().filter(vrole -> vrole.getName().equalsIgnoreCase(args[1].trim())).findFirst().orElse(null);
-						if (role != null) {
-							DiscordInfo.addAdminRoleID(role.getId());
-						} else {
-							event.getChannel().sendMessage("[Error] No role with this name found").queue();
-							return;
-						}
-					} else {
-						event.getChannel().sendMessage("[Error] No role specified").queue();
-						return;
-					}
-					event.getChannel().sendMessage("[Success] Admin role saved").queue();
-				}
-				else if (args[0].equalsIgnoreCase("del")) {
-					if (!event.getMessage().getMentionedRoles().isEmpty()) {
-						DiscordInfo.removeAdminRoleID(event.getMessage().getMentionedRoles().get(0).getId());
-					} else if (args.length == 2) {
-						Role role = event.getGuild().getRoles().stream().filter(vrole -> vrole.getName().equalsIgnoreCase(args[1].trim())).findFirst().orElse(null);
-						if (role != null) {
-							DiscordInfo.removeAdminRoleID(role.getId());
-						} else {
-							event.getChannel().sendMessage("[Error] No role with this name found").queue();
-							return;
-						}
-					} else {
-						event.getChannel().sendMessage("[Error] No role specified").queue();
-						return;
-					}
-					event.getChannel().sendMessage("[Success] Admin role removed").queue();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				//Permission check
-				if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
-					return "";
-				return "<add?>|<del?>, <role?> - shows, adds or delets a role in/to/from admins";
-			}
-		});
+		guildCommands.put("adminrole", new AdminRole()); //done
 
-		guildCommands.put("dance", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				Dance dance = new Dance(event);
-				dance.setDance(Dance.ASCII.DANCE);
-				dance.start();
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "Makes the bot dance";
-			}
-		});
+		guildCommands.put("dance", new Dance()); //done
 
-		guildCommands.put("topic", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendMessage(event.getChannel().getTopic()).queue();
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "Shows the channel details";
-			}
-		});
+		guildCommands.put("topic", new Topic()); //done
 
 		guildCommands.put("time", new UTCTime()); //done
 
