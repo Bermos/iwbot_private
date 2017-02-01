@@ -19,15 +19,15 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 public class DankMemes {
-	class Meme {
-		public List<String> keys;
-		public List<String> outputs;
-		public boolean exact;
-		public boolean randomOut;
-		public boolean tts;
-		public List<String> chanIDs;
-		public long cd;
-		public long lastUsed;
+	private class Meme {
+		List<String> keys;
+		List<String> outputs;
+		boolean exact;
+		boolean randomOut;
+		boolean tts;
+		List<String> chanIDs;
+		long cd;
+		long lastUsed;
 	}
 
 	private static List<Meme> memes;

@@ -46,7 +46,7 @@ public class Reminder implements PMCommand, GuildCommand {
             for (int i = 1; i < args.length; i++)
                 reason = reason + ", " + args[i];
         }
-        reason.replace(", ", "");
+        reason = reason.replace(", ", "");
 
         add(userid, reason, time);
     }

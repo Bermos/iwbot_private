@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
 
-/**
- * Created by Bermos on 01.02.2017.
- */
 public class XKCD implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {

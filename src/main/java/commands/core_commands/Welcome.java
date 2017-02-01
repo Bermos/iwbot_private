@@ -1,5 +1,6 @@
-package commands;
+package commands.core_commands;
 
+import commands.GuildCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DiscordInfo;
 

@@ -7,9 +7,6 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 import java.util.Random;
 
-/**
- * Created by Bermos on 01.02.2017.
- */
 public class RollDice implements PMCommand, GuildCommand{
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {

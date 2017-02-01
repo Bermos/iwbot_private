@@ -17,7 +17,7 @@ public class Dance extends Thread implements GuildCommand {
 		return "Makes the bot dance";
 	}
 
-	public enum ASCII {
+	private enum ASCII {
 		DANCE
 	}
 	
@@ -29,7 +29,7 @@ public class Dance extends Thread implements GuildCommand {
 		this.event = null;
 	}
 
-	public Dance(GuildMessageReceivedEvent event) {
+	private Dance(GuildMessageReceivedEvent event) {
 		this.event = event;
 	}
 
@@ -56,7 +56,7 @@ public class Dance extends Thread implements GuildCommand {
 		}
 	}
 
-	public void setDance(ASCII iAnimation) {
+	private void setDance(ASCII iAnimation) {
 		this.iAnimation = iAnimation;
 	}
 }
