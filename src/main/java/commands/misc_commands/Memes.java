@@ -1,49 +1,50 @@
-package commands.core_commands;
+package commands.misc_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Game;
+import misc.DankMemes;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DiscordInfo;
 
-public class Setgame implements PMCommand, GuildCommand {
+public class Memes implements PMCommand, GuildCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event))) {
+        if (!(DiscordInfo.isOwner(event.getAuthor().getId()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
-        event.getChannel().sendMessage(setgame(event.getJDA(), args));
+        event.getChannel().sendMessage(memes(args)).queue();
     }
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event) || DiscordInfo.isAdmin(event))) {
+        if (!(DiscordInfo.isOwner(event.getAuthor().getId()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
-        event.getChannel().sendMessage(setgame(event.getJDA(), args));
+        event.getChannel().sendMessage(memes(args)).queue();
     }
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+        if (!(DiscordInfo.isOwner(event.getAuthor().getId()))) {
             return "";
-        return "<game?> - To set the Playing: ...";
+        }
+        return "Interacts with the maymays";
     }
 
-    private String setgame(JDA jda, String[] args) {
-        if (args.length == 0)
-            jda.getPresence().setGame(null);
-        else
-            jda.getPresence().setGame(Game.of(args[0]));
-        return "[Success] Game changed";
+    private String memes(String[] args) {
+        if (args.length == 1 && args[0].equalsIgnoreCase("update")) {
+            DankMemes.update();
+            return "Memes updated from file.";
+        }
+
+        return "[Error] Wrong arguments";
     }
 }

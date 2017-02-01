@@ -7,7 +7,7 @@ import java.util.TimeZone;
 import iw_core.Users;
 import misc.CMDRLookup;
 import misc.DankMemes;
-import misc.Reminder;
+import commands.misc_commands.Reminder;
 import misc.StatusGenerator;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;

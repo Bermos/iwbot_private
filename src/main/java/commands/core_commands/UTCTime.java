@@ -25,7 +25,7 @@ public class UTCTime implements PMCommand, GuildCommand {
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        return null;
+        return "UTC date & time now";
     }
 
     private String time() {

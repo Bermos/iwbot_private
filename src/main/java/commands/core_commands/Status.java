@@ -31,7 +31,7 @@ public class Status implements PMCommand, GuildCommand {
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        return null;
+        return "Shows information about the bot";
     }
 
     private String status() {
