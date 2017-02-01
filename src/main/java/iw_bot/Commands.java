@@ -4,15 +4,11 @@ import commands.GuildCommand;
 import commands.PMCommand;
 import commands.Welcome;
 import commands.core_commands.*;
+import commands.ed_commands.CMDRLookup;
 import commands.ed_commands.Distance;
-import commands.iw_commands.Auth;
-import commands.iw_commands.BGS;
+import commands.iw_commands.*;
 import commands.misc_commands.*;
-import iw_core.Missions;
-import commands.misc_commands.Dance;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import provider.DiscordInfo;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -89,64 +85,11 @@ class Commands {
 
 		guildCommands.put("note", new Notes()); //done
 		
-		guildCommands.put("list", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				if (args.length < 1) {
-					Missions.getList(event.getChannel().getId());
-				}
-				else if ((args[0].equalsIgnoreCase("new") || args[0].equalsIgnoreCase("add")) && args.length > 1) {
-					String list = "";
-					for (int i = 1; i < args.length; i++) {
-						list = String.join(", ", list, args[i]);
-					}
-					list = list.replaceFirst(", ", "");
-					Missions.newList(event.getChannel(), list);
-				}
-				else if (args[0].equalsIgnoreCase("next")) {
-					Missions.nextListEntry(event.getChannel().getId());
-					event.getMessage().deleteMessage();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "Nav list for missions";
-			}
-		});
+		guildCommands.put("list", new MissionsList()); //done
 		
-		guildCommands.put("next", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				if (args.length < 1) {
-					Missions.nextListEntry(event.getChannel().getId());
-					event.getMessage().deleteMessage();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "Nav list for missions";
-			}
-		});
+		guildCommands.put("next", new MissionsNext()); //done
 		
-		guildCommands.put("mission", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				if (args.length > 1 && args[0].equalsIgnoreCase("new")) {
-					User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
-					Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
-					event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
-				}
-				else if (args.length == 1 && args[0].equalsIgnoreCase("close")) {
-					Missions.archiveRequest(event.getChannel(), event.getAuthor().getId());
-					event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. You cannot undo this!").queue();
-				}
-				else if (args.length == 1 && args[0].equalsIgnoreCase("yes")) {
-					Missions.archive(event.getChannel(), event.getAuthor().getId());
-					event.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel and role deleted.").queue();
-				}
-			}
-			
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "";
-			}
-		});
+		guildCommands.put("mission", new Missions()); //done
 		
 		guildCommands.put("bgs", new BGS()); //done
 
@@ -156,7 +99,7 @@ class Commands {
 
 		guildCommands.put("reminder", new Reminder()); //done
 
-		guildCommands.put("whois", new commands.ed_commands.CMDRLookup()); //partly done
+		guildCommands.put("whois", new CMDRLookup()); //done
 
 		guildCommands.put("clear", new BulkDelete()); //done
 

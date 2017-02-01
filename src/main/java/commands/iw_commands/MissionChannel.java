@@ -1,4 +1,4 @@
-package iw_core;
+package commands.iw_commands;
 
 import java.util.ArrayList;
 import java.util.List;

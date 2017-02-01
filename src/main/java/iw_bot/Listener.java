@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import iw_core.Users;
-import misc.CMDRLookup;
+import commands.ed_commands.CMDRLookup;
 import misc.DankMemes;
 import commands.misc_commands.Reminder;
 import misc.StatusGenerator;

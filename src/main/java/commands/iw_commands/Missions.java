@@ -1,4 +1,4 @@
-package iw_core;
+package commands.iw_commands;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,14 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import commands.GuildCommand;
+import commands.iw_commands.MissionChannel;
 import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.managers.GuildManager;
 import net.dv8tion.jda.core.managers.PermOverrideManagerUpdatable;
 import provider.DiscordInfo;
 
-public class Missions {
+public class Missions implements GuildCommand {
 	private static List<MissionChannel> missionChannels = new ArrayList<>();
 
 	private static MissionChannel getChannel(String textChanID) {
@@ -186,5 +189,26 @@ public class Missions {
 		}
 		mChannel.primeForDelete(id);
 	}
-	
+
+	@Override
+	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+		if (args.length > 1 && args[0].equalsIgnoreCase("new")) {
+			User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
+			Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
+			event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
+		}
+		else if (args.length == 1 && args[0].equalsIgnoreCase("close")) {
+			Missions.archiveRequest(event.getChannel(), event.getAuthor().getId());
+			event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. You cannot undo this!").queue();
+		}
+		else if (args.length == 1 && args[0].equalsIgnoreCase("yes")) {
+			Missions.archive(event.getChannel(), event.getAuthor().getId());
+			event.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel and role deleted.").queue();
+		}
+	}
+
+	@Override
+	public String getHelp(GuildMessageReceivedEvent event) {
+		return "";
+	}
 }
