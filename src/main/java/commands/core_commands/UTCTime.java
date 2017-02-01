@@ -9,9 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-/**
- * Created by Bermos on 31.01.2017.
- */
 public class UTCTime implements PMCommand, GuildCommand {
     @Override //PM part
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {

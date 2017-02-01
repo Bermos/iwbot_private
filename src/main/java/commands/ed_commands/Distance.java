@@ -12,14 +12,11 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.net.SocketException;
 
-/**
- * Created by Bermos on 31.01.2017.
- */
 public class Distance implements PMCommand, GuildCommand {
-    class EDSystem {
+    private class EDSystem {
         public String name;
-        public Coords coords;
-        public class Coords {
+        Coords coords;
+        class Coords {
             public float x;
             public float y;
             public float z;
@@ -48,8 +45,8 @@ public class Distance implements PMCommand, GuildCommand {
         Gson gson = new Gson();
         EDSystem sys1;
         EDSystem sys2;
-        String jsonSys1 = "";
-        String jsonSys2 = "";
+        String jsonSys1;
+        String jsonSys2;
         String urlSys1 = "http://www.edsm.net/api-v1/system?sysname=" + args[0].trim().replaceAll(" ", "+") + "&coords=1";
         String urlSys2 = "http://www.edsm.net/api-v1/system?sysname=" + args[1].trim().replaceAll(" ", "+") + "&coords=1";
 

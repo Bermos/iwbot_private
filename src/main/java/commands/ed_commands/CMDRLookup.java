@@ -16,12 +16,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class CombatLogger {
     public String name;
-    public String no_of_logs;
-    public String type_of_log;
-    public String platform;
+    String no_of_logs;
+    String type_of_log;
+    String platform;
 }
 
 public class CMDRLookup implements PMCommand, GuildCommand {
@@ -60,7 +61,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
         combat_loggers = new ArrayList<>();
     }
 
-    public static String whois(String username, boolean force_update) {
+    private static String whois(String username, boolean force_update) {
         String info;
         String inara   = inara(username);
         String loggers = loggers(username, force_update);
@@ -94,12 +95,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
             Document doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
             Elements links = doc.getElementsByTag("a");
-            Elements cmdrLinks = new Elements();
-
-            for (Element link : links) {
-                if (link.attr("href").contains("cmdr/") && !link.text().equals("CMDR's log"))
-                    cmdrLinks.add(link);
-            }
+            Elements cmdrLinks = links.stream().filter(link -> link.attr("href").contains("cmdr/") && !link.text().equals("CMDR's log")).collect(Collectors.toCollection(Elements::new));
 
             if (cmdrLinks.size() > 0)
                 info = "__INARA__\n";

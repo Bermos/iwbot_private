@@ -17,7 +17,7 @@ public class Auth implements PMCommand {
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         SecureRandom sRandom = new SecureRandom();
         final char[] hexArray = "0123456789abcdef".toCharArray();
-        byte [] bytehash = null;
+        byte [] bytehash;
         String password;
         String hashedpw;
         String salt;
@@ -29,20 +29,14 @@ public class Auth implements PMCommand {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             bytehash = digest.digest((password + salt).getBytes("UTF-8"));
 
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+            char[] hexChars = new char[bytehash.length * 2];
+            for ( int j = 0; j < bytehash.length; j++ ) {
+                int v = bytehash[j] & 0xFF;
+                hexChars[j * 2] = hexArray[v >>> 4];
+                hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+            }
 
-        char[] hexChars = new char[bytehash.length * 2];
-        for ( int j = 0; j < bytehash.length; j++ ) {
-            int v = bytehash[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        hashedpw = new String(hexChars);
-        try {
+            hashedpw = new String(hexChars);
             PreparedStatement ps = new Connections().getConnection()
                     .prepareStatement("UPDATE iwmembers.user SET sessionkey = ?, salt = ?, password = ? WHERE iduser = ?");
             ps.setString		(1, new BigInteger(40, sRandom).toString(32));
@@ -50,7 +44,7 @@ public class Auth implements PMCommand {
             ps.setString		(3, hashedpw);
             ps.setLong		(4, Long.parseLong(event.getAuthor().getId()));
             ps.executeUpdate();
-        } catch (SQLException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | SQLException e) {
             e.printStackTrace();
         }
 

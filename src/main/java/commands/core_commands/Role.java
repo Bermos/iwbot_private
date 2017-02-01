@@ -6,9 +6,6 @@ import provider.DiscordInfo;
 
 import java.awt.*;
 
-/**
- * Created by Bermos on 01.02.2017.
- */
 public class Role implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {

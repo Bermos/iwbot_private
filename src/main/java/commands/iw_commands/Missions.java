@@ -1,15 +1,6 @@
 package commands.iw_commands;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import commands.GuildCommand;
-import commands.iw_commands.MissionChannel;
 import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -17,6 +8,14 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.managers.GuildManager;
 import net.dv8tion.jda.core.managers.PermOverrideManagerUpdatable;
 import provider.DiscordInfo;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Missions implements GuildCommand {
 	private static List<MissionChannel> missionChannels = new ArrayList<>();
@@ -30,7 +29,7 @@ public class Missions implements GuildCommand {
 		return null;
 	}
 	
-	public static void newList(TextChannel channel, String list) {
+	static void newList(TextChannel channel, String list) {
 		MissionChannel missionChannel = getChannel(channel.getId());
 		if (missionChannel == null) {
 			missionChannel = new MissionChannel(channel.getId(), channel.getGuild());
@@ -40,17 +39,17 @@ public class Missions implements GuildCommand {
 		missionChannel.add(list);
 	}
 	
-	public static void nextListEntry(String textChanID) {
+	static void nextListEntry(String textChanID) {
 		//noinspection ConstantConditions
 		getChannel(textChanID).next();
 	}
 	
-	public static void getList(String textChanID) {
+	static void getList(String textChanID) {
 		//noinspection ConstantConditions
 		getChannel(textChanID).print(true);
 	}
 	
-	public static void create(String name, GuildManager guildManager, Member explorer) {
+	private static void create(String name, GuildManager guildManager, Member explorer) {
 		Channel missionChannel;
 		Guild guild = guildManager.getGuild();
 		Role iwRole = guild.getRoleById("143171790225670145");
@@ -123,7 +122,7 @@ public class Missions implements GuildCommand {
 		missionChannel.getManager().setTopic(topic).queue();
 	}
 
-	public static void archive(TextChannel channel, String id) {
+	private static void archive(TextChannel channel, String id) {
 		MissionChannel mChannel = getChannel(channel.getId());
 		if (mChannel == null) {
 			mChannel = new MissionChannel(channel.getId(), channel.getGuild());
@@ -181,7 +180,7 @@ public class Missions implements GuildCommand {
 			associatedRole.delete().queue();
 	}
 
-	public static void archiveRequest(TextChannel channel, String id) {
+	private static void archiveRequest(TextChannel channel, String id) {
 		MissionChannel mChannel = getChannel(channel.getId());
 		if (mChannel == null) {
 			mChannel = new MissionChannel(channel.getId(), channel.getGuild());

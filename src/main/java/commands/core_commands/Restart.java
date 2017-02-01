@@ -2,9 +2,7 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DiscordInfo;

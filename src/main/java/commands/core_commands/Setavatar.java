@@ -13,9 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-/**
- * Created by Bermos on 31.01.2017.
- */
 public class Setavatar implements PMCommand, GuildCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
@@ -25,7 +22,7 @@ public class Setavatar implements PMCommand, GuildCommand {
             return;
         }
 
-        event.getChannel().sendMessage(setavatar(event.getJDA(), event.getMessage(), args)).queue();
+        event.getChannel().sendMessage(setavatar(event.getJDA(), event.getMessage())).queue();
     }
 
     @Override
@@ -36,7 +33,7 @@ public class Setavatar implements PMCommand, GuildCommand {
             return;
         }
 
-        event.getChannel().sendMessage(setavatar(event.getJDA(), event.getMessage(), args)).queue();
+        event.getChannel().sendMessage(setavatar(event.getJDA(), event.getMessage())).queue();
     }
 
     @Override
@@ -47,7 +44,7 @@ public class Setavatar implements PMCommand, GuildCommand {
         return "Upload desired pic to discord and enter command in the description prompt";
     }
 
-    private String setavatar(JDA jda, Message message, String[] args) {
+    private String setavatar(JDA jda, Message message) {
         if (!message.getAttachments().isEmpty()) {
             File avatarFile;
             Message.Attachment attachment = message.getAttachments().get(0);
