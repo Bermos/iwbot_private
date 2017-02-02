@@ -123,7 +123,7 @@ public class Notes implements PMCommand, GuildCommand{
 				event.getChannel().sendMessage(response).queue();
 		}
 		else if (args.length > 1) {
-			boolean hasRights = (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())));
+			boolean hasRights = (DiscordInfo.isOwner(event) || DiscordInfo.isAdmin(event));
 
 			if (args[0].equalsIgnoreCase("add")) {
 				boolean isPublic = false;
@@ -152,7 +152,7 @@ public class Notes implements PMCommand, GuildCommand{
 				}
 
 				if (Notes.edit(args[1], event.getAuthor().getId(), args[2], hasRights))
-					event.getChannel().sendMessage("Saved").queue();
+					event.getChannel().sendMessage("Edited").queue();
 				else
 					event.getChannel().sendMessage("No note with that name found or you aren't allowed to edit the ones I did find").queue();
 			} else if (args[0].equalsIgnoreCase("del")) {
@@ -162,7 +162,7 @@ public class Notes implements PMCommand, GuildCommand{
 				}
 
 				if (Notes.delete(args[1], event.getAuthor().getId(), hasRights))
-					event.getChannel().sendMessage("Saved").queue();
+					event.getChannel().sendMessage("Deleted").queue();
 				else
 					event.getChannel().sendMessage("No note with that name found or you aren't allowed to edit the ones I did find").queue();
 			}
