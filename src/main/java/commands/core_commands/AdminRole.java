@@ -4,6 +4,8 @@ import commands.GuildCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DiscordInfo;
 
+import java.util.Arrays;
+
 public class AdminRole implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -13,7 +15,9 @@ public class AdminRole implements GuildCommand {
             return;
         }
 
-        if (args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("view"))) {
+        Arrays.sort(args);
+
+        if ((Arrays.binarySearch(args, "view") > -1) || args.length == 0) {
             String message = "";
             for (String id : DiscordInfo.getAdminRoleIDs())
                 message += ( "-" + event.getGuild().getRoleById(id).getName() + "\n" );

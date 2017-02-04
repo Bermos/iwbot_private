@@ -1,4 +1,4 @@
-package iw_core;
+package commands.iw_commands;
 
 import commands.GuildCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -18,27 +18,27 @@ public class Applicant implements GuildCommand {
             return;
         }
 
-        if (Arrays.binarySearch(args, "new") == -1) {
-            event.getChannel().sendMessage("Hey, this works");
-        }
-
-        if (args[0].equals("new"))
+        Arrays.sort(args);
+        if (Arrays.binarySearch(args, "new") > -1)
             newApplicant(event, args);
 
-        if (args[0].equals("combat"))
+        if (Arrays.binarySearch(args, "combat") > -1)
             combat(event, args);
 
-        if (args[0].equals("mission"))
+        if (Arrays.binarySearch(args, "mission") > -1)
             mission(event, args);
     }
 
     private void mission(GuildMessageReceivedEvent event, String[] args) {
+        event.getChannel().sendMessage("Added mission done").queue();
     }
 
     private void combat(GuildMessageReceivedEvent event, String[] args) {
+        event.getChannel().sendMessage("Added combat eval done").queue();
     }
 
     private void newApplicant(GuildMessageReceivedEvent event, String[] args) {
+        event.getChannel().sendMessage("Added new applicant").queue();
     }
 
     @Override

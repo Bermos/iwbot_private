@@ -1,6 +1,7 @@
 package commands.misc_commands;
 
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +9,8 @@ import java.sql.SQLException;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
@@ -119,8 +122,16 @@ public class Notes implements PMCommand, GuildCommand{
 			String response = Notes.get(args[0], event.getAuthor().getId());
 			if (response == null)
 				event.getChannel().sendMessage("Sorry, couldn't find that note for you").queue();
-			else
-				event.getChannel().sendMessage(response).queue();
+			else {
+				String name = event.getMember().getEffectiveName();
+				name = name.lastIndexOf("s") == name.length() ? name : name + "'s";
+				System.out.println(name.lastIndexOf("s") + " " + name.length());
+				EmbedBuilder eb = new EmbedBuilder()
+						.setColor(event.getMember().getRoles().get(0).getColor())
+						.addField(name + " note: ", response, true);
+				MessageEmbed embed = eb.build();
+				event.getChannel().sendMessage(embed).queue();
+			}
 		}
 		else if (args.length > 1) {
 			boolean hasRights = (DiscordInfo.isOwner(event) || DiscordInfo.isAdmin(event));

@@ -32,12 +32,12 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(lookup(args));
+        event.getChannel().sendMessage(lookup(args)).queue();
     }
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(lookup(args));
+        event.getChannel().sendMessage(lookup(args)).queue();
     }
 
     @Override
@@ -94,29 +94,36 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .execute();
 
             Document doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
-            Elements links = doc.getElementsByTag("a");
-            Elements cmdrLinks = links.stream().filter(link -> link.attr("href").contains("cmdr/") && !link.text().equals("CMDR's log")).collect(Collectors.toCollection(Elements::new));
 
-            if (cmdrLinks.size() > 0)
-                info = "__INARA__\n";
-            for (Element link : cmdrLinks) {
-                if (StringUtils.getJaroWinklerDistance(username, link.text()) > 0.90) {
-                    url = "http://inara.cz" + link.attr("href");
-                    doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
+            double closestScore = 0.0;
+            Element closest = null;
 
-                    info += "**" + doc.select("span.pflheadersmall").get(0).parent().text() + "**\n";
-                    for (Element image : doc.select("img")) {
-                        if (image.parent().hasClass("profileimage"))
-                            info += image.absUrl("src") + "\n";
+            for (Element link : doc.getElementsByTag("a")) {
+                if (link.attr("href").contains("cmdr/") && !link.text().equals("CMDR's log")) {
+                    double score = StringUtils.getJaroWinklerDistance(username, link.text());
+                    if (score > closestScore && score > 0.8) {
+                        closest = link;
                     }
-
-                    Elements cells = doc.select("span.pflcellname");
-                    for (Element cell : cells) {
-                        if (!(cell.parent().text().replaceFirst(cell.text(), "").trim().length() < 3))
-                            info += ( cell.text() + ": " + cell.parent().text().replaceFirst(cell.text(), "").trim() + "\n");
-                    }
-                    info += "This information was obtained using Inara.";
                 }
+            }
+
+            if (closest != null) {
+                info = "__INARA__\n";
+                url = "http://inara.cz" + closest.attr("href");
+                doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
+
+                info += "**" + doc.select("span.pflheadersmall").get(0).parent().text() + "**\n";
+                for (Element image : doc.select("img")) {
+                    if (image.parent().hasClass("profileimage"))
+                        info += image.absUrl("src") + "\n";
+                }
+
+                Elements cells = doc.select("span.pflcellname");
+                for (Element cell : cells) {
+                    if (!(cell.parent().text().replaceFirst(cell.text(), "").trim().length() < 3))
+                        info += ( cell.text() + ": " + cell.parent().text().replaceFirst(cell.text(), "").trim() + "\n");
+                }
+                info += "This information was obtained using Inara.";
             }
 
 

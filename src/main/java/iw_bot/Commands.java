@@ -53,55 +53,59 @@ class Commands {
 			public String getHelp(GuildMessageReceivedEvent event) {
 				return "< ?> variables are optional, <a>|<b> either var a OR b";
 			}
-		}); //done
+		});
 
-		guildCommands.put("setavatar", new Setavatar()); //done
+		guildCommands.put("setavatar", new Setavatar());
 
-		guildCommands.put("setname", new Setname()); //done
+		guildCommands.put("setname", new Setname());
 
-		guildCommands.put("setgame", new Setgame()); //done
+		guildCommands.put("setgame", new Setgame());
 
-		guildCommands.put("role", new commands.core_commands.Role()); //done
+		guildCommands.put("role", new commands.core_commands.Role());
 
-		guildCommands.put("dist", new Distance()); //done
+		guildCommands.put("dist", new Distance());
 
-		guildCommands.put("welcome", new Welcome()); //done
+		guildCommands.put("welcome", new Welcome());
 
-		guildCommands.put("adminchannel", new AdminChannel()); //done
+		guildCommands.put("adminchannel", new AdminChannel());
 
-		guildCommands.put("adminrole", new AdminRole()); //done
+		guildCommands.put("adminrole", new AdminRole());
 
-		guildCommands.put("dance", new Dance()); //done
+		guildCommands.put("dance", new Dance());
 
-		guildCommands.put("topic", new Topic()); //done
+		guildCommands.put("topic", new Topic());
 
-		guildCommands.put("time", new UTCTime()); //done
+		guildCommands.put("time", new UTCTime());
 
-		guildCommands.put("status", new Status()); //done
+		guildCommands.put("status", new Status());
 
-		guildCommands.put("xkcd", new XKCD()); //done
+		guildCommands.put("xkcd", new XKCD());
 		
-		guildCommands.put("stripme", new Stripme()); //done
+		guildCommands.put("stripme", new Stripme());
 
-		guildCommands.put("note", new Notes()); //done
+		guildCommands.put("note", new Notes());
 		
-		guildCommands.put("list", new MissionsList()); //done
+		guildCommands.put("list", new MissionsList());
 		
-		guildCommands.put("next", new MissionsNext()); //done
+		guildCommands.put("next", new MissionsNext());
 		
-		guildCommands.put("mission", new Missions()); //done
+		guildCommands.put("mission", new Missions());
 		
-		guildCommands.put("bgs", new BGS()); //done
+		guildCommands.put("bgs", new BGS());
 
-		guildCommands.put("roll", new RollDice()); //done
+		guildCommands.put("roll", new RollDice());
 		
-		guildCommands.put("memes", new Memes()); //done
+		guildCommands.put("memes", new Memes());
 
-		guildCommands.put("reminder", new Reminder()); //done
+		guildCommands.put("reminder", new Reminder());
 
-		guildCommands.put("whois", new CMDRLookup()); //done
+		guildCommands.put("whois", new CMDRLookup());
 
-		guildCommands.put("clear", new BulkDelete()); //done
+		guildCommands.put("clear", new BulkDelete());
+
+		guildCommands.put("applicant-test", new Applicant());
+
+		guildCommands.put("restart", new Restart());
 
 		//end of commands
 	}
