@@ -9,6 +9,17 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.10.2" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.0" level="project" />
+    <orderEntry type="library" name="Maven: org.influxdb:influxdb-java:2.5" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:20.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.retrofit2:retrofit:2.1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.retrofit2:converter-moshi:2.1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.moshi:moshi:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.5.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.11.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okhttp3:logging-interceptor:3.5.0" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.40" level="project" />
     <orderEntry type="library" name="Maven: net.dv8tion:JDA:3.0.BETA2_122" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.commons:commons-collections4:4.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.json:json:20160810" level="project" />
