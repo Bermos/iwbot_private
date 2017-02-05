@@ -36,6 +36,8 @@ class Commands {
 		pmCommands.put("restart", new Restart());
 
 		pmCommands.put("account", new Auth());
+
+		pmCommands.put("owner", new EditOwner());
 		
 		//Guild message commands
 		guildCommands.put("help", new GuildCommand() {

@@ -3,22 +3,22 @@ package commands.core_commands;
 import commands.GuildCommand;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import provider.DiscordInfo;
+import provider.DataProvider;
 
 public class AdminChannel implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
         if (args.length == 0){
-            event.getChannel().sendMessage("Admin channel is: <#" + DiscordInfo.getAdminChanID() + ">").queue();
+            event.getChannel().sendMessage("Admin channel is: <#" + DataProvider.getAdminChanID() + ">").queue();
         }
         else if (!event.getMessage().getMentionedChannels().isEmpty()) {
-            DiscordInfo.setAdminChanID(event.getMessage().getMentionedChannels().get(0).getId());
+            DataProvider.setAdminChanID(event.getMessage().getMentionedChannels().get(0).getId());
             event.getChannel().sendMessage("[Success] Admin channel saved").queue();
         }
         else {
@@ -28,7 +28,7 @@ public class AdminChannel implements GuildCommand {
                 event.getChannel().sendMessage("Channel not found").queue();
                 return;
             } else
-                DiscordInfo.setAdminChanID(chan.getId());
+                DataProvider.setAdminChanID(chan.getId());
             event.getChannel().sendMessage("[Success] Admin channel saved").queue();
         }
     }
@@ -36,7 +36,7 @@ public class AdminChannel implements GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
             return "";
         return "<channel> - sets admin channel";
     }
