@@ -5,13 +5,13 @@ import commands.PMCommand;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-import provider.DataProvider;
+import provider.DiscordInfo;
 
 public class Setname implements PMCommand, GuildCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
+        if (!(DiscordInfo.isOwner(event))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -22,7 +22,7 @@ public class Setname implements PMCommand, GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+        if (!(DiscordInfo.isOwner(event) || DiscordInfo.isAdmin(event))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -33,7 +33,7 @@ public class Setname implements PMCommand, GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event)))
+        if (!(DiscordInfo.isOwner(event) || DiscordInfo.isAdmin(event)))
             return "";
         return "<name>";
     }
