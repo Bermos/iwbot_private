@@ -21,6 +21,7 @@ public class DiscordInfo {
 		String token;
 		String inaraPW;
 		String googleToken;
+		boolean dev;
 		List<String> idOwner;
 		List<String> idRoles;
 		String newMember;
@@ -222,5 +223,15 @@ public class DiscordInfo {
 		if (info == null)
 			getInfo();
 		return info.googleToken;
+	}
+
+	/**
+	 *
+	 * @return if the bot runs in development
+	 */
+	public static boolean isDev () {
+		if (info == null)
+			getInfo();
+		return info.dev;
 	}
 }
