@@ -22,6 +22,12 @@ public class Statistics extends Thread {
 	private static String dbName = "iw_monitor";
 	private static JDA jda;
 
+	private class InfluxInfo {
+		String IP;
+		String US;
+		String PW;
+	}
+
 	private Statistics() {
 		
 	}
@@ -35,29 +41,35 @@ public class Statistics extends Thread {
 	}
 	
 	public void connect(JDA jda) {
-		DataProvider.Info.ConData info = DataProvider.getConData("influx");
+		Gson gson = new Gson();
+		try {
+			JsonReader jReader = new JsonReader(new FileReader("./influxinfo.json"));
+			InfluxInfo info = gson.fromJson(jReader, InfluxInfo.class);
+			
+			Statistics.influxDB = InfluxDBFactory.connect(info.IP, info.US, info.PW);
+			Statistics.jda = jda;
+			
+			boolean connected = false;
+			do {
+				Pong response;
+				try {
+					response = influxDB.ping();
+					if (!response.getVersion().equalsIgnoreCase("unknown")) {
+						connected = true;
+					}
 
-		Statistics.influxDB = InfluxDBFactory.connect(info.IP, info.US, info.PW);
-		Statistics.jda = jda;
-
-		boolean connected = false;
-		do {
-			Pong response;
-			try {
-				response = influxDB.ping();
-				if (!response.getVersion().equalsIgnoreCase("unknown")) {
-					connected = true;
+					Thread.sleep(10L);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-
-				Thread.sleep(10L);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} while (!connected);
-		influxDB.enableBatch(2000, 1000, TimeUnit.MILLISECONDS);
-		System.out.println("[InfluxDB] connected. Version: " + influxDB.version());
-
-		this.start();
+			} while (!connected);
+			influxDB.enableBatch(2000, 1000, TimeUnit.MILLISECONDS);
+			System.out.println("[InfluxDB] connected. Version: " + influxDB.version());
+			
+			this.start();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void run() {

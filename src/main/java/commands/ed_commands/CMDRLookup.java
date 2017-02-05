@@ -10,12 +10,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import provider.DataProvider;
+import provider.DiscordInfo;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class CombatLogger {
     public String name;
@@ -27,7 +28,7 @@ class CombatLogger {
 public class CMDRLookup implements PMCommand, GuildCommand {
 
     private static long last_lookup;
-    private static List<CombatLogger> combat_loggers = new ArrayList<>();
+    private static List<CombatLogger> combat_loggers;
 
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
@@ -52,8 +53,12 @@ public class CMDRLookup implements PMCommand, GuildCommand {
             return whois(args[0], args[1].equalsIgnoreCase("update"));
         }
 
-        //Should not happen but just in case
-        return "[Error] Something went really, really wrong. Try again later or something";
+        return "";
+    }
+
+    public static void setup()
+    {
+        combat_loggers = new ArrayList<>();
     }
 
     private static String whois(String username, boolean force_update) {
@@ -81,17 +86,15 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .header("Origin", "http://inara.cz")
                     .header("Upgrade-Insecure-Requests", "1")
                     .data("loginid", "Bermos")
-                    .data("loginpass", DataProvider.getInaraPW())
+                    .data("loginpass", DiscordInfo.getInaraPW())
                     .data("formact", "ENT_LOGIN")
                     .data("location", "intro")
                     .followRedirects(false)
                     .method(Connection.Method.POST)
                     .execute();
 
-            //Use the inara search function to get candidates
             Document doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
 
-            //Find closest match from search results
             double closestScore = 0.0;
             Element closest = null;
 
@@ -104,7 +107,6 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 }
             }
 
-            //If there is a closest (maybe noone was found) format the findings for output
             if (closest != null) {
                 info = "__INARA__\n";
                 url = "http://inara.cz" + closest.attr("href");
@@ -136,31 +138,22 @@ public class CMDRLookup implements PMCommand, GuildCommand {
     {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm zz");
         String info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
-        String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DataProvider.getGoogleToken();
+        String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DiscordInfo.getGoogleToken();
 
-        //If the last lookup was done over 3h ago or the user forces it we update
-        //This is to increase performance and don't hit google api rate limits
         if ((last_lookup + (3*60*60*1000) < System.currentTimeMillis()) || force_update)
         {
             try
             {
-                //Get doc from google
                 String doc = Jsoup.connect(url).get().body().text();
-
-                //Refresh new last lookup time
                 last_lookup = System.currentTimeMillis();
                 info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
-
-                //Update local data to new readings from google doc
                 String[] rows = doc.split(", ");
                 combat_loggers.clear();
 
                 for (String row : rows) {
                     String[] values = row.split(",");
 
-                    //There are some broken/empty entries, we don't want 'em
                     if (values.length == 4) {
-                        //Here we found our candidate, output him
                         if (values[0].equalsIgnoreCase(username)) {
                             info = "__r/EliteCombatLoggers__" + "\n"
                                     + "Exact CMDR name: " + values[0] + "\n"
@@ -170,7 +163,6 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                                     + "This information was updated on: " + sdf.format(last_lookup);
                         }
 
-                        //Save all the loggers internally for later reuse
                         CombatLogger new_logger = new CombatLogger();
                         new_logger.name = values[0];
                         new_logger.no_of_logs = values[1];

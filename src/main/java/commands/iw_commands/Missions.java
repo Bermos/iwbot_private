@@ -7,7 +7,7 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.managers.GuildManager;
 import net.dv8tion.jda.core.managers.PermOverrideManagerUpdatable;
-import provider.DataProvider;
+import provider.DiscordInfo;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -55,7 +55,7 @@ public class Missions implements GuildCommand {
 		Role iwRole = guild.getRoleById("143171790225670145");
 		Role explorerRole = guild.getRoleById("143403360081543168");
 		Role everyoneRole = guild.getPublicRole();
-		Role moderatorRole = guild.getRoleById(DataProvider.getAdminRoleIDs().get(0));
+		Role moderatorRole = guild.getRoleById(DiscordInfo.getAdminRoleIDs().get(0));
 		
 		String channelName = "mission_" + name;
 		String explorerName = "*edit*";
@@ -167,9 +167,9 @@ public class Missions implements GuildCommand {
 		}
 
 		File file = new File ("./ChannelLogs/" + channel.getName() + ".txt");
-		channel.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(channel.getName() + " archived.");
+		channel.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendMessage(channel.getName() + " archived.");
 		try {
-			channel.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendFile(file, null);
+			channel.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendFile(file, null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -202,7 +202,7 @@ public class Missions implements GuildCommand {
 		}
 		else if (args.length == 1 && args[0].equalsIgnoreCase("yes")) {
 			Missions.archive(event.getChannel(), event.getAuthor().getId());
-			event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel and role deleted.").queue();
+			event.getJDA().getTextChannelById(DiscordInfo.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel and role deleted.").queue();
 		}
 	}
 

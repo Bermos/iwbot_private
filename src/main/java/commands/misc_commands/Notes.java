@@ -1,6 +1,7 @@
 package commands.misc_commands;
 
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +14,7 @@ import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
-import provider.DataProvider;
+import provider.DiscordInfo;
 
 public class Notes implements PMCommand, GuildCommand{
 	private static Connection connect;
@@ -133,7 +134,7 @@ public class Notes implements PMCommand, GuildCommand{
 			}
 		}
 		else if (args.length > 1) {
-			boolean hasRights = (DataProvider.isOwner(event) || DataProvider.isAdmin(event));
+			boolean hasRights = (DiscordInfo.isOwner(event) || DiscordInfo.isAdmin(event));
 
 			if (args[0].equalsIgnoreCase("add")) {
 				boolean isPublic = false;

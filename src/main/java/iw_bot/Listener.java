@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import iw_core.Users;
+import commands.ed_commands.CMDRLookup;
 import misc.DankMemes;
 import commands.misc_commands.Reminder;
 import misc.StatusGenerator;
@@ -22,76 +23,59 @@ import net.dv8tion.jda.core.events.user.UserNameUpdateEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import provider.Connections;
-import provider.DataProvider;
+import provider.DiscordInfo;
 import provider.Statistics;
 
 public class Listener extends ListenerAdapter {
 	private Commands commands;
-	private AutoUpdate updater;
-	private static SimpleDateFormat sdf;
-	private static final String prefix = DataProvider.isDev() ? "<<" : "/";
-
-	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
+	private static SimpleDateFormat sdf;
 	public static final String VERSION_NUMBER = "3.0.1_38";
 	
 	Listener() {
 		this.commands = new Commands();
-		this.updater = new AutoUpdate();
-		Listener.startupTime = new Date().getTime();
-		Listener.sdf = new SimpleDateFormat("HH:mm:ss");
-		Listener.sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-		//Initial parsing of the memes.json file
+		sdf = new SimpleDateFormat("HH:mm:ss");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		DankMemes.update();
 	}
 	
 	@Override
 	public void onReady(ReadyEvent event) {
-		//Print out startup info
 		System.out.println("[" + sdf.format(new Date()) + "][Info] Listener v" + VERSION_NUMBER + " ready!");
 		System.out.println("[" + sdf.format(new Date()) + "][Info] Connected to:");
 		for (Guild guild : event.getJDA().getGuilds()) {
 			System.out.println("	" + guild.getName());
 		}
 
-		//I'm not sure this is actually needed but it's here so whatever
 		new Connections().getConnection();
 
-		if (!DataProvider.isDev()) {
-			//Start metadata statistics logging
-			Statistics stats = Statistics.getInstance();
-			stats.connect(event.getJDA());
+		Statistics stats = Statistics.getInstance();
+		stats.connect(event.getJDA());
+		
+		Listener.startupTime = new Date().getTime();
+		new StatusGenerator(event.getJDA().getPresence());
+		
+		new Users();
+		Users.sync(event);
 
-			//Start random Playing... generator
-			new StatusGenerator(event.getJDA().getPresence());
-
-			//Setup and synchronise users and online status with MySQL db
-			new Users();
-			Users.sync(event);
-
-			//Start checks for any set reminders from users
-			new Reminder().startChecks(event.getJDA());
-		}
+		new Reminder().startChecks(event.getJDA());
+		CMDRLookup.setup();
 	}
 	
 	@Override
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
-		//Print out message to console if debug
-		if (isDebug) {
-			System.out.printf("[" + sdf.format(new Date()) + "][PM][%s] %s: %s\n",
-					event.getChannel().getUser().getName(),
-					event.getAuthor().getName(),
-					event.getMessage().getContent());
-		}
+		System.out.printf("[" + sdf.format(new Date()) + "][PM][%s] %s: %s\n",
+											event.getChannel().getUser().getName(),
+											event.getAuthor().getName(),
+											event.getMessage().getContent());
 		
 		//Check for command
-				if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
+				if (event.getMessage().getContent().startsWith("/") && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
 					String content = event.getMessage().getContent();
-					String commandName = content.replaceFirst(prefix, "").split(" ")[0];
+					String commandName = content.replaceFirst("/", "").split(" ")[0];
 					String[] args = {};
-					if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
-						args = content.replaceFirst(prefix + commandName, "").trim().split(",");
+					if (content.replaceFirst("/" + commandName, "").trim().length() > 0) {
+						args = content.replaceFirst("/" + commandName, "").trim().split(",");
 						for (int i = 0; i < args.length; i++)
 							args[i] = args[i].trim();
 					}
@@ -105,20 +89,18 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent  event) {
-		if (isDebug) {
-			System.out.printf("[" + sdf.format(new Date()) + "][%s][%s] %s: %s\n", event.getGuild().getName(),
-					event.getChannel().getName(),
-					event.getMember().getEffectiveName(),
-					event.getMessage().getContent());
-		}
+		System.out.printf("[" + sdf.format(new Date()) + "][%s][%s] %s: %s\n", 	event.getGuild().getName(),
+												event.getChannel().getName(),
+												event.getMember().getEffectiveName(),
+												event.getMessage().getContent());
 		
 		//Check for command
-		if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
+		if (event.getMessage().getContent().startsWith("/") && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
 			String content = event.getMessage().getContent();
-			String commandName = content.replaceFirst(prefix, "").split(" ")[0];
+			String commandName = content.replaceFirst("/", "").split(" ")[0];
 			String[] args = {};
-			if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
-				args = content.replaceFirst(prefix + commandName, "").trim().split(",");
+			if (content.replaceFirst("/" + commandName, "").trim().length() > 0) {
+				args = content.replaceFirst("/" + commandName, "").trim().split(",");
 				for (int i = 0; i < args.length; i++)
 					args[i] = args[i].trim();
 			}
@@ -137,10 +119,11 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		TextChannel channel = event.getGuild().getPublicChannel();
-
-		channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
-		event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
+		TextChannel channel = event.getGuild().getPublicChannel(); 
+		channel.sendTyping();
+		
+		channel.sendMessage(DiscordInfo.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
+		event.getJDA().getTextChannelById(DiscordInfo.getAdminChanID())
 			.sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
 		
 		Users.joined(event);

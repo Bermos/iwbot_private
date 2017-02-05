@@ -5,7 +5,7 @@ import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import provider.DataProvider;
+import provider.DiscordInfo;
 
 public class Main {
 
@@ -14,7 +14,7 @@ public class Main {
 		try {
 			
 			new JDABuilder(AccountType.BOT)
-			.setToken(DataProvider.getToken())
+			.setToken(DiscordInfo.getToken())
 			.addListener(new Listener())
 			.buildBlocking();
 			
