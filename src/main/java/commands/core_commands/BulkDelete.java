@@ -4,7 +4,7 @@ import commands.GuildCommand;
 import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import provider.DiscordInfo;
+import provider.DataProvider;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class BulkDelete implements GuildCommand {
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         event.getChannel().sendTyping();
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -73,7 +73,7 @@ public class BulkDelete implements GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()) || DiscordInfo.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
             return "";
         return "<###|##t> - deletes either the last ## messages or the last ##h/##m of messages";
     }
