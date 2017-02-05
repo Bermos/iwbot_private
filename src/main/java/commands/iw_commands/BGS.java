@@ -6,7 +6,7 @@ import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
-import provider.DataProvider;
+import provider.DiscordInfo;
 import provider.Statistics;
 
 import java.sql.Connection;
@@ -67,7 +67,7 @@ public class BGS implements PMCommand, GuildCommand {
                     output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```";
-                if (DataProvider.isAdmin(event.getMember().getRoles()))
+                if (DiscordInfo.isAdmin(event.getMember().getRoles()))
                     event.getChannel().sendMessage(output).queue();
                 else
                     event.getAuthor().getPrivateChannel().sendMessage(output).queue();
@@ -94,7 +94,7 @@ public class BGS implements PMCommand, GuildCommand {
             }
 
         } else if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("gettick") && DataProvider.isAdmin(event.getMember().getRoles())) {
+            if (args[0].equalsIgnoreCase("gettick") && DiscordInfo.isAdmin(event.getMember().getRoles())) {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
                 Date time;
                 try {
@@ -113,7 +113,7 @@ public class BGS implements PMCommand, GuildCommand {
                     event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
                 }
 
-            } else if (args[0].equalsIgnoreCase("gettickfull") && DataProvider.isAdmin(event.getMember().getRoles())) {
+            } else if (args[0].equalsIgnoreCase("gettickfull") && DiscordInfo.isAdmin(event.getMember().getRoles())) {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
                 Date time;
                 try {
