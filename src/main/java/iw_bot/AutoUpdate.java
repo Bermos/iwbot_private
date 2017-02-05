@@ -39,7 +39,7 @@ public class AutoUpdate {
             Gson gson = new Gson();
             JsonReader jReader = new JsonReader(new InputStreamReader(t.getRequestBody()));
 
-            gson.fromJson(jReader, )
+            gson.fromJson(jReader, Push.class);
 
             String response = "This is the response";
             t.sendResponseHeaders(200, response.length());

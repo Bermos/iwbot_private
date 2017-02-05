@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import iw_core.Users;
-import commands.ed_commands.CMDRLookup;
 import misc.DankMemes;
 import commands.misc_commands.Reminder;
 import misc.StatusGenerator;
@@ -23,18 +22,18 @@ import net.dv8tion.jda.core.events.user.UserNameUpdateEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import provider.Connections;
-import provider.DiscordInfo;
+import provider.DataProvider;
 import provider.Statistics;
 
 public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private AutoUpdate updater;
 	private static SimpleDateFormat sdf;
-	private static final String prefix = DiscordInfo.isDev() ? "<<" : "/";
+	private static final String prefix = DataProvider.isDev() ? "<<" : "/";
 
-	public static boolean isDebug = DiscordInfo.isDev(); //Default setting but can be changed on runtime if need be
+	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.0.0_35";
+	public static final String VERSION_NUMBER = "3.0.1_37";
 	
 	Listener() {
 		this.commands = new Commands();
@@ -59,7 +58,7 @@ public class Listener extends ListenerAdapter {
 		//I'm not sure this is actually needed but it's here so whatever
 		new Connections().getConnection();
 
-		if (!DiscordInfo.isDev()) {
+		if (!DataProvider.isDev()) {
 			//Start metadata statistics logging
 			Statistics stats = Statistics.getInstance();
 			stats.connect(event.getJDA());
@@ -140,8 +139,8 @@ public class Listener extends ListenerAdapter {
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		TextChannel channel = event.getGuild().getPublicChannel();
 
-		channel.sendMessage(DiscordInfo.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
-		event.getJDA().getTextChannelById(DiscordInfo.getAdminChanID())
+		channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
+		event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
 			.sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
 		
 		Users.joined(event);

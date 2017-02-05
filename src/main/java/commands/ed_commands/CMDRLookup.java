@@ -10,13 +10,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import provider.DiscordInfo;
+import provider.DataProvider;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class CombatLogger {
     public String name;
@@ -82,7 +81,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .header("Origin", "http://inara.cz")
                     .header("Upgrade-Insecure-Requests", "1")
                     .data("loginid", "Bermos")
-                    .data("loginpass", DiscordInfo.getInaraPW())
+                    .data("loginpass", DataProvider.getInaraPW())
                     .data("formact", "ENT_LOGIN")
                     .data("location", "intro")
                     .followRedirects(false)
@@ -137,7 +136,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
     {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm zz");
         String info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
-        String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DiscordInfo.getGoogleToken();
+        String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DataProvider.getGoogleToken();
 
         //If the last lookup was done over 3h ago or the user forces it we update
         //This is to increase performance and don't hit google api rate limits
