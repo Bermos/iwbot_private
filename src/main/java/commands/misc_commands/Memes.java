@@ -5,13 +5,13 @@ import commands.PMCommand;
 import misc.DankMemes;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-import provider.DiscordInfo;
+import provider.DataProvider;
 
 public class Memes implements PMCommand, GuildCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()))) {
+        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -22,7 +22,7 @@ public class Memes implements PMCommand, GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()))) {
+        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -33,7 +33,7 @@ public class Memes implements PMCommand, GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DiscordInfo.isOwner(event.getAuthor().getId()))) {
+        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
             return "";
         }
         return "Interacts with the maymays";
