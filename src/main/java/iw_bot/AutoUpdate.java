@@ -13,19 +13,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.Scanner;
 
 class AutoUpdate {
+    class Author {
+        String username;
+    }
+    class Commit {
+        Author author;
+        String message;
+    }
     class Push {
-        class Author {
-            String username;
-        }
-        class Commit {
-            Author author;
-            String message;
-        }
 
         String ref;
-        int size;
         Commit commits[];
     }
 
@@ -49,18 +49,19 @@ class AutoUpdate {
             JsonReader jReader = new JsonReader(new InputStreamReader(t.getRequestBody()));
 
             Push push = gson.fromJson(jReader, Push.class);
+
             String commits = "";
-            for (Push.Commit commit : push.commits) {
+            for (Commit commit : push.commits) {
                 commits += "Author: " + commit.author.username + "\n";
                 commits += "Message: " + commit.message + "\n\n";
             }
+            System.out.println(commits);
 
             EmbedBuilder eb = new EmbedBuilder()
-                    .setTitle("New push repository")
+                    .setTitle("New push to repository")
                     .setColor(jda.getGuildById("142749481530556416").getMember(jda.getSelfUser()).getRoles().get(0).getColor())
-                    .addField("Push", "ref: " + push.ref + "\n"
-                            + "size: " + push.size + "\n\n"
-                            + commits, false);
+                    .addField("Reference", push.ref, true)
+                    .addField("Commits", commits, false);
             MessageEmbed embed = eb.build();
 
             jda.getGuildById("142749481530556416").getTextChannelById("217344072111620096").sendMessage(embed).queue();

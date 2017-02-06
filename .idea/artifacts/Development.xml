@@ -2,7 +2,7 @@
   <artifact name="Development">
     <output-path>$PROJECT_DIR$/out/development</output-path>
     <root id="root">
-      <element id="archive" name="iwbot.jar">
+      <element id="archive" name="discordbot.jar">
         <element id="directory" name="META-INF">
           <element id="file-copy" path="$PROJECT_DIR$/out/development/META-INF/MANIFEST.MF" />
         </element>
