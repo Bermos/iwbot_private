@@ -85,7 +85,7 @@ class AutoUpdate {
                     con.setRequestProperty("Authorization", "token " + DataProvider.getGithubToken());
                     con.setRequestProperty("Accept", "application/vnd.github.v3.raw");
                     ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
-                    FileOutputStream fos = new FileOutputStream("./discordbot.jar");
+                    FileOutputStream fos = new FileOutputStream("./discordbot_new.jar");
                     fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 } catch (Exception e) {
                     e.printStackTrace();
