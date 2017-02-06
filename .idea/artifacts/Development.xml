@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact name="Development">
-    <output-path>$PROJECT_DIR$/classes/artifacts/Development</output-path>
+    <output-path>$PROJECT_DIR$/out/development</output-path>
     <root id="root">
       <element id="archive" name="iwbot.jar">
         <element id="directory" name="META-INF">
