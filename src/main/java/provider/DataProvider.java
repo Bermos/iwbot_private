@@ -39,6 +39,7 @@ public class DataProvider {
 		String inaraPW;
 		String googleToken;
 		String githubToken;
+		String githubBranch;
 		boolean dev;
 	}
 	
@@ -245,5 +246,11 @@ public class DataProvider {
 	    if (info == null)
 	        getInfo();
 	    return info.githubToken;
+    }
+
+    public static String getGithubBranch() {
+        if (info == null)
+            getInfo();
+        return info.githubBranch;
     }
 }
