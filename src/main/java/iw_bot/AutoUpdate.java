@@ -7,7 +7,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
 import provider.DataProvider;
@@ -79,7 +78,7 @@ class AutoUpdate {
             os.write("".getBytes());
             os.close();
 
-            if (push.ref.equalsIgnoreCase("development")) {
+            if (push.ref.contains("development")) {
                 try {
                     URL jarurl = new URL("https://api.github.com/repos/Bermos/iwbot_private/contents/out/production/discordbot.jar?ref=" + DataProvider.getGithubBranch());
                     URLConnection con = jarurl.openConnection();
