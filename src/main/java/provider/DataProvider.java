@@ -38,6 +38,7 @@ public class DataProvider {
 		Map<String, ConData> connections;
 		String inaraPW;
 		String googleToken;
+		String githubToken;
 		boolean dev;
 	}
 	
@@ -239,4 +240,10 @@ public class DataProvider {
 			getInfo();
 		return info.connections.get(conName);
 	}
+
+	public static String getGithubToken() {
+	    if (info == null)
+	        getInfo();
+	    return info.githubToken;
+    }
 }

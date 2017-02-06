@@ -8,11 +8,17 @@ import com.sun.net.httpserver.HttpServer;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.MessageEmbed;
+import provider.DataProvider;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Scanner;
 
 class AutoUpdate {
@@ -70,6 +76,13 @@ class AutoUpdate {
             OutputStream os = t.getResponseBody();
             os.write("".getBytes());
             os.close();
+
+
+            URL jarurl = new URL("https://github.com/Bermos/iwbot_private/blob/feature_autoupdate/out/production/discordbot.jar?client_id=5e80efc3ed12cf8c1515&client_secret=" + DataProvider.getGithubToken());
+            ReadableByteChannel rbc = Channels.newChannel(jarurl.openStream());
+            FileOutputStream fos = new FileOutputStream("discordbot_new.jar");
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+
         }
     }
 }
