@@ -38,7 +38,9 @@ class Commands {
 		pmCommands.put("account", new Auth());
 
 		pmCommands.put("owner", new EditOwner());
-		
+
+		pmCommands.put("send", new SendMessage());
+
 		//Guild message commands
 		guildCommands.put("help", new GuildCommand() {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {

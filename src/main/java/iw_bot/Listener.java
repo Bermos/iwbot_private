@@ -8,6 +8,7 @@ import iw_core.Users;
 import misc.DankMemes;
 import commands.misc_commands.Reminder;
 import misc.StatusGenerator;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
@@ -33,11 +34,12 @@ public class Listener extends ListenerAdapter {
 	private static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.0.1_38";
+	public static final String VERSION_NUMBER = "3.0.2_40";
+	public static JDA jda;
 	
 	Listener() {
 		this.commands = new Commands();
-		this.updater = new AutoUpdate();
+        this.updater = new AutoUpdate();
 		Listener.startupTime = new Date().getTime();
 		Listener.sdf = new SimpleDateFormat("HH:mm:ss");
 		Listener.sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -57,6 +59,8 @@ public class Listener extends ListenerAdapter {
 
 		//I'm not sure this is actually needed but it's here so whatever
 		new Connections().getConnection();
+
+		this.jda = event.getJDA();
 
 		if (!DataProvider.isDev()) {
 			//Start metadata statistics logging
@@ -137,13 +141,17 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		TextChannel channel = event.getGuild().getPublicChannel();
+	    if (!isDebug) {
+            if (!DataProvider.isDev()) {
+                TextChannel channel = event.getGuild().getPublicChannel();
+                channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
 
-		channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
-		event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
-			.sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
-		
-		Users.joined(event);
+                event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
+                        .sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
+            }
+
+            Users.joined(event);
+        }
 	}
 	
 	@Override
@@ -163,8 +171,10 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
-		System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
-		Users.setOnlineStatus(event);
+	    if (!isDebug) {
+            System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
+            Users.setOnlineStatus(event);
+        }
 	}
 	
 	@Override
