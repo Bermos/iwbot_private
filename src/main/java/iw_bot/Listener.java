@@ -34,7 +34,7 @@ public class Listener extends ListenerAdapter {
 	private static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.1.0_43";
+	public static final String VERSION_NUMBER = "3.1.1_44";
 	public static JDA jda;
 	
 	Listener() {
@@ -60,7 +60,7 @@ public class Listener extends ListenerAdapter {
 		//I'm not sure this is actually needed but it's here so whatever
 		new Connections().getConnection();
 
-		this.jda = event.getJDA();
+		jda = event.getJDA();
 
 		if (!DataProvider.isDev()) {
 			//Start metadata statistics logging
