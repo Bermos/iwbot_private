@@ -21,7 +21,7 @@ import java.util.Arrays;
  * TODO
  */
 public class Applicant implements GuildCommand {
-    private Connection connection = new Connections().getConnection();
+    private final Connection connection = new Connections().getConnection();
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -159,7 +159,7 @@ public class Applicant implements GuildCommand {
                 }
                 event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
 
-                event.getChannel().sendMessage("Added new applicant").queue();
+                event.getChannel().sendMessage("Added new applicant " + Arrays.toString(args)).queue();
             } else {
                 event.getChannel().sendMessage("This applicant is already registered").queue();
             }
