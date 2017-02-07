@@ -159,7 +159,7 @@ public class Applicant implements GuildCommand {
                 }
                 event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
 
-                event.getChannel().sendMessage("Added new applicant " + Arrays.toString(args)).queue();
+                event.getChannel().sendMessage("Added new applicant " + xbox.getId() + " " + pc.getId()).queue();
             } else {
                 event.getChannel().sendMessage("This applicant is already registered").queue();
             }
