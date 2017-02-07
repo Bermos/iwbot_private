@@ -59,6 +59,18 @@ class Commands {
 			}
 		});
 
+		guildCommands.put("version", new GuildCommand() {
+			@Override
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue();
+			}
+
+			@Override
+			public String getHelp(GuildMessageReceivedEvent event) {
+				return "Returns the current version";
+			}
+		});
+
 		guildCommands.put("setavatar", new Setavatar());
 
 		guildCommands.put("setname", new Setname());
