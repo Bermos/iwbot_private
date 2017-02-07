@@ -5,6 +5,19 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Arrays;
 
+/*TODO
+SparticA5S (PC/XB) - 01/28/2017
+in regards to applicants, evaluations, and mock runs. I was wondering is it possible to have bot start "profiles" on people to keep track of these things?
+My idea was /add applicant, [pc or xbox], [applicant's name](edited)
+and it would add the tags we want and create this profile
+we need one eval and two mock escorts. Could we have a command for keeping track of those too?
+Beu "whalecum" mer - 01/28/2017
+can always manually create some tags (combat eval done; mock escort 1/2 done; mock escort 2/2 done)
+SparticA5S (PC/XB) - 01/28/2017
+then we could do something like /applicant status, [name] to get those figures
+I know I'm asking a lot probably
+ */
+
 public class Applicant implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
