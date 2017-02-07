@@ -30,7 +30,6 @@ class AutoUpdate {
         String message;
     }
     class Push {
-
         String ref;
         Commit commits[];
     }
@@ -57,28 +56,30 @@ class AutoUpdate {
 
             Push push = gson.fromJson(jReader, Push.class);
 
-            String commits = "";
-            for (Commit commit : push.commits) {
-                commits += "Author: " + commit.author.username + "\n";
-                commits += "Message: " + commit.message + "\n\n";
+            if (push.ref.contains("development") || push.ref.contains("master")) {
+                String commits = "";
+                for (Commit commit : push.commits) {
+                    commits += "Author: " + commit.author.username + "\n";
+                    commits += "Message: " + commit.message + "\n\n";
+                }
+                System.out.println(commits);
+
+                EmbedBuilder eb = new EmbedBuilder()
+                        .setTitle("New push to repository")
+                        .setColor(jda.getGuildById("142749481530556416").getMember(jda.getSelfUser()).getRoles().get(0).getColor())
+                        .addField("Reference", push.ref, true)
+                        .addField("Commits", commits, false);
+                MessageEmbed embed = eb.build();
+
+                chan.sendMessage(embed).queue();
             }
-            System.out.println(commits);
-
-            EmbedBuilder eb = new EmbedBuilder()
-                    .setTitle("New push to repository")
-                    .setColor(jda.getGuildById("142749481530556416").getMember(jda.getSelfUser()).getRoles().get(0).getColor())
-                    .addField("Reference", push.ref, true)
-                    .addField("Commits", commits, false);
-            MessageEmbed embed = eb.build();
-
-            chan.sendMessage(embed).queue();
 
             t.sendResponseHeaders(200, 0);
             OutputStream os = t.getResponseBody();
             os.write("".getBytes());
             os.close();
 
-            if (push.ref.contains("development")) {
+            if (push.ref.contains("development") || push.ref.contains("master")) {
                 try {
                     URL jarurl = new URL("https://api.github.com/repos/Bermos/iwbot_private/contents/out/production/discordbot.jar?ref=" + DataProvider.getGithubBranch());
                     URLConnection con = jarurl.openConnection();
