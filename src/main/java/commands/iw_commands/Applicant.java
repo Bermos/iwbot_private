@@ -1,26 +1,36 @@
 package commands.iw_commands;
 
 import commands.GuildCommand;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import provider.Connections;
+import provider.DataProvider;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 
-/*TODO
-SparticA5S (PC/XB) - 01/28/2017
-in regards to applicants, evaluations, and mock runs. I was wondering is it possible to have bot start "profiles" on people to keep track of these things?
-My idea was /add applicant, [pc or xbox], [applicant's name](edited)
-and it would add the tags we want and create this profile
-we need one eval and two mock escorts. Could we have a command for keeping track of those too?
-Beu "whalecum" mer - 01/28/2017
-can always manually create some tags (combat eval done; mock escort 1/2 done; mock escort 2/2 done)
-SparticA5S (PC/XB) - 01/28/2017
-then we could do something like /applicant status, [name] to get those figures
-I know I'm asking a lot probably
+/**
+ * This command class is for keeping track of
+ * applicants
+ *
+ * TODO
  */
-
 public class Applicant implements GuildCommand {
+    private Connection connection = new Connections().getConnection();
+
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+        //Permission check
+        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            return;
+        }
+
         if (args.length == 0) {
             event.getChannel().sendMessage("[Error] Please use at least one argument for this command").queue();
             return;
@@ -40,18 +50,102 @@ public class Applicant implements GuildCommand {
 
         if (Arrays.binarySearch(args, "mission") > -1)
             mission(event, args);
+
+        if (Arrays.binarySearch(args, "status") > -1)
+            status(event, args);
+    }
+
+    private void status(GuildMessageReceivedEvent event, String[] args) {
+        User uApplicant = event.getMessage().getMentionedUsers().get(0);
+
+        try {
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM applicants WHERE id = ?");
+            ps.setString(1, uApplicant.getId());
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String out = uApplicant.getAsMention() + " progress:\n";
+                out += "Eval: " + rs.getInt("eval") + "\n";
+                out += "Missions: " + rs.getInt("missions") + "\n";
+
+                event.getChannel().sendMessage(out).queue();
+            } else {
+                event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
+            }
+
+        } catch (SQLException e) {
+            event.getChannel().sendMessage("Something went wrong. Couldn't get status of applicant").queue();
+            e.printStackTrace();
+        }
     }
 
     private void mission(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage("Added mission done").queue();
+        User uApplicant = event.getMessage().getMentionedUsers().get(0);
+        Member mApplicant = event.getGuild().getMember(uApplicant);
+
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE applicants SET missions = missions + 1 WHERE id = ? AND missions < 2");
+            ps.setString(1, uApplicant.getId());
+
+            if (ps.executeUpdate() == 1) {
+                event.getChannel().sendMessage("Added mission done").queue();
+            } else {
+                event.getChannel().sendMessage("No mission added. Either applicant is already at 2 or he wasn't found.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void combat(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage("Added combat eval done").queue();
+        User uApplicant = event.getMessage().getMentionedUsers().get(0);
+        Member mApplicant = event.getGuild().getMember(uApplicant);
+
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE applicants SET eval = eval + 1 WHERE id = ? AND eval < 1");
+            ps.setString(1, uApplicant.getId());
+
+            if (ps.executeUpdate() == 1) {
+                event.getChannel().sendMessage("Added combat eval done").queue();
+            } else {
+                event.getChannel().sendMessage("No combat eval added. Either applicant is already at 2 or he wasn't found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void newApplicant(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage("Added new applicant").queue();
+        User applicant = event.getMessage().getMentionedUsers().get(0);
+
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO applicants (id) VALUES (?)");
+            ps.setString(1, applicant.getId());
+
+            if (ps.executeUpdate() == 1) {
+                Role pc = event.getGuild().getRolesByName("PC_applicant", true).get(0);
+                Role xbox = event.getGuild().getRolesByName("XBOX_applicant", true).get(0);
+                Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
+                Member applicantMem = event.getGuild().getMember(applicant);
+
+                if (Arrays.binarySearch(args, "pc") > -1) {
+                    event.getGuild().getController().addRolesToMember(applicantMem, pc).queue();
+                }
+                if (Arrays.binarySearch(args, "xbox") > -1) {
+                    event.getGuild().getController().addRolesToMember(applicantMem, xbox).queue();
+                }
+                event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
+
+                event.getChannel().sendMessage("Added new applicant").queue();
+            } else {
+                event.getChannel().sendMessage("This applicant is already registered").queue();
+            }
+
+        } catch (SQLException e) {
+            event.getChannel().sendMessage("Something went wrong. No new applicant saved.").queue();
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -77,7 +77,7 @@ class Commands {
 
 		guildCommands.put("setgame", new Setgame());
 
-		guildCommands.put("role", new commands.core_commands.Role());
+		guildCommands.put("role", new Role());
 
 		guildCommands.put("dist", new Distance());
 
@@ -119,7 +119,7 @@ class Commands {
 
 		guildCommands.put("clear", new BulkDelete());
 
-		guildCommands.put("applicant-test", new Applicant());
+		guildCommands.put("applicant", new Applicant());
 
 		guildCommands.put("restart", new Restart());
 
