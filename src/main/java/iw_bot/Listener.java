@@ -34,7 +34,7 @@ public class Listener extends ListenerAdapter {
 	private static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.1.2_45";
+	public static final String VERSION_NUMBER = "3.1.2_46";
 	public static JDA jda;
 	
 	Listener() {
@@ -171,7 +171,7 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
-	    if (!isDebug) {
+	    if (isDebug) {
             System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
             Users.setOnlineStatus(event);
         }

@@ -57,6 +57,7 @@ public class Applicant implements GuildCommand {
 
     private void status(GuildMessageReceivedEvent event, String[] args) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
+        Member mApplicant = event.getGuild().getMember(uApplicant);
 
         try {
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM applicants WHERE id = ?");
@@ -64,7 +65,7 @@ public class Applicant implements GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                String out = uApplicant.getAsMention() + " progress:\n";
+                String out = mApplicant.getEffectiveName() + " progress:\n";
                 out += "Eval: " + rs.getInt("eval") + "\n";
                 out += "Missions: " + rs.getInt("missions") + "\n";
 
@@ -81,7 +82,6 @@ public class Applicant implements GuildCommand {
 
     private void mission(GuildMessageReceivedEvent event, String[] args) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
-        Member mApplicant = event.getGuild().getMember(uApplicant);
 
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE applicants SET missions = missions + 1 WHERE id = ? AND missions < 2");
@@ -90,7 +90,7 @@ public class Applicant implements GuildCommand {
             if (ps.executeUpdate() == 1) {
                 event.getChannel().sendMessage("Added mission done").queue();
             } else {
-                event.getChannel().sendMessage("No mission added. Either applicant is already at 2 or he wasn't found.");
+                event.getChannel().sendMessage("No mission added. Either applicant is already at 2 or he wasn't found.").queue();
             }
 
         } catch (SQLException e) {
@@ -100,7 +100,6 @@ public class Applicant implements GuildCommand {
 
     private void combat(GuildMessageReceivedEvent event, String[] args) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
-        Member mApplicant = event.getGuild().getMember(uApplicant);
 
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE applicants SET eval = eval + 1 WHERE id = ? AND eval < 1");
@@ -109,7 +108,7 @@ public class Applicant implements GuildCommand {
             if (ps.executeUpdate() == 1) {
                 event.getChannel().sendMessage("Added combat eval done").queue();
             } else {
-                event.getChannel().sendMessage("No combat eval added. Either applicant is already at 2 or he wasn't found.");
+                event.getChannel().sendMessage("No combat eval added. Either applicant is already at 2 or he wasn't found.").queue();
             }
         } catch (SQLException e) {
             e.printStackTrace();
