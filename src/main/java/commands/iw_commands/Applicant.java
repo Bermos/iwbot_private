@@ -144,6 +144,7 @@ public class Applicant implements GuildCommand {
         try {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO applicants (id) VALUES (?)");
             ps.setString(1, applicant.getId());
+            ps.executeUpdate();
 
             Role pc = event.getGuild().getRoleById("268146248404566026");
             Role xbox = event.getGuild().getRoleById("268146417883807746");
