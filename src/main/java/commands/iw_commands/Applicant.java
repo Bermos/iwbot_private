@@ -46,16 +46,38 @@ public class Applicant implements GuildCommand {
             newApplicant(event, args);
 
         if (Arrays.binarySearch(args, "combat") > -1)
-            combat(event, args);
+            combat(event);
 
         if (Arrays.binarySearch(args, "mission") > -1)
-            mission(event, args);
+            mission(event);
 
         if (Arrays.binarySearch(args, "status") > -1)
-            status(event, args);
+            status(event);
+
+        if (Arrays.binarySearch(args, "del") > -1)
+            delete(event);
     }
 
-    private void status(GuildMessageReceivedEvent event, String[] args) {
+    private void delete(GuildMessageReceivedEvent event) {
+        User uApplicant = event.getMessage().getMentionedUsers().get(0);
+
+        try {
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM applicants WHERE id = ?");
+            ps.setString(1, uApplicant.getId());
+
+            if (ps.executeUpdate() == 1) {
+                event.getChannel().sendMessage("Applicant removed").queue();
+            } else {
+                event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
+            }
+
+        } catch (SQLException e) {
+            event.getChannel().sendMessage("Something went wrong. Couldn't find applicant to delete").queue();
+            e.printStackTrace();
+        }
+    }
+
+    private void status(GuildMessageReceivedEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
         Member mApplicant = event.getGuild().getMember(uApplicant);
 
@@ -80,7 +102,7 @@ public class Applicant implements GuildCommand {
         }
     }
 
-    private void mission(GuildMessageReceivedEvent event, String[] args) {
+    private void mission(GuildMessageReceivedEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
@@ -98,7 +120,7 @@ public class Applicant implements GuildCommand {
         }
     }
 
-    private void combat(GuildMessageReceivedEvent event, String[] args) {
+    private void combat(GuildMessageReceivedEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
@@ -108,7 +130,7 @@ public class Applicant implements GuildCommand {
             if (ps.executeUpdate() == 1) {
                 event.getChannel().sendMessage("Added combat eval done").queue();
             } else {
-                event.getChannel().sendMessage("No combat eval added. Either applicant is already at 2 or he wasn't found.").queue();
+                event.getChannel().sendMessage("No combat eval added. Either applicant already had his or he wasn't found.").queue();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -128,6 +150,7 @@ public class Applicant implements GuildCommand {
                 Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
                 Member applicantMem = event.getGuild().getMember(applicant);
 
+                Arrays.sort(args);
                 if (Arrays.binarySearch(args, "pc") > -1) {
                     event.getGuild().getController().addRolesToMember(applicantMem, pc).queue();
                 }
