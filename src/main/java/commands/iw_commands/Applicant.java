@@ -145,21 +145,23 @@ public class Applicant implements GuildCommand {
             ps.setString(1, applicant.getId());
 
             if (ps.executeUpdate() == 1) {
-                Role pc = event.getGuild().getRolesByName("PC_applicant", true).get(0);
-                Role xbox = event.getGuild().getRolesByName("XBOX_applicant", true).get(0);
+                Role pc = event.getGuild().getRoleById("268146248404566026");
+                Role xbox = event.getGuild().getRoleById("268146417883807746");
                 Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
                 Member applicantMem = event.getGuild().getMember(applicant);
 
                 Arrays.sort(args);
                 if (Arrays.binarySearch(args, "pc") > -1) {
+                    System.out.println("here");
                     event.getGuild().getController().addRolesToMember(applicantMem, pc).queue();
                 }
                 if (Arrays.binarySearch(args, "xbox") > -1) {
+                    System.out.println("and here");
                     event.getGuild().getController().addRolesToMember(applicantMem, xbox).queue();
                 }
                 event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
 
-                event.getChannel().sendMessage("Added new applicant " + xbox.getId() + " " + pc.getId()).queue();
+                event.getChannel().sendMessage("Added new applicant").queue();
             } else {
                 event.getChannel().sendMessage("This applicant is already registered").queue();
             }
