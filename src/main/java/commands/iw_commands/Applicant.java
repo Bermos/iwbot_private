@@ -1,5 +1,6 @@
 package commands.iw_commands;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import commands.GuildCommand;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
@@ -144,28 +145,24 @@ public class Applicant implements GuildCommand {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO applicants (id) VALUES (?)");
             ps.setString(1, applicant.getId());
 
-            if (ps.executeUpdate() == 1) {
-                Role pc = event.getGuild().getRoleById("268146248404566026");
-                Role xbox = event.getGuild().getRoleById("268146417883807746");
-                Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
-                Member applicantMem = event.getGuild().getMember(applicant);
+            Role pc = event.getGuild().getRoleById("268146248404566026");
+            Role xbox = event.getGuild().getRoleById("268146417883807746");
+            Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
+            Member applicantMem = event.getGuild().getMember(applicant);
 
-                Arrays.sort(args);
-                if (Arrays.binarySearch(args, "pc") > -1) {
-                    System.out.println("here");
-                    event.getGuild().getController().addRolesToMember(applicantMem, pc).queue();
-                }
-                if (Arrays.binarySearch(args, "xbox") > -1) {
-                    System.out.println("and here");
-                    event.getGuild().getController().addRolesToMember(applicantMem, xbox).queue();
-                }
-                event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
-
-                event.getChannel().sendMessage("Added new applicant").queue();
-            } else {
-                event.getChannel().sendMessage("This applicant is already registered").queue();
+            Arrays.sort(args);
+            if (Arrays.binarySearch(args, "pc") > -1) {
+                event.getGuild().getController().addRolesToMember(applicantMem, pc).queue();
             }
+            if (Arrays.binarySearch(args, "xbox") > -1) {
+                event.getGuild().getController().addRolesToMember(applicantMem, xbox).queue();
+            }
+            event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
 
+            event.getChannel().sendMessage("Added new applicant").queue();
+
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            event.getChannel().sendMessage("This applicant is already registered").queue();
         } catch (SQLException e) {
             event.getChannel().sendMessage("Something went wrong. No new applicant saved.").queue();
             e.printStackTrace();
