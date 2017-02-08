@@ -153,12 +153,13 @@ public class CMDRLookup implements PMCommand, GuildCommand {
             try
             {
                 //Get doc from google
-                URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D1000?key=" + DataProvider.getGoogleToken());
+                URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D10?key=" + DataProvider.getGoogleToken());
                 Scanner scanner = new Scanner( new InputStreamReader( url.openConnection().getInputStream() ) ) ;
                 String json = "";
                 while (scanner.hasNext()) {
                     json += scanner.nextLine();
                 }
+                System.out.println(json);
 
                 Gson gson = new Gson();
                 LoggerSheet sheet = gson.fromJson(json, LoggerSheet.class);
