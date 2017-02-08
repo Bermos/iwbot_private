@@ -1,5 +1,6 @@
 package commands.ed_commands;
 
+import com.google.gson.Gson;
 import commands.GuildCommand;
 import commands.PMCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -18,10 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 class CombatLogger {
-    public String name;
-    String no_of_logs;
+    String name;
+    int no_of_logs;
     String type_of_log;
     String platform;
+}
+
+class LoggerSheet {
+    List<CombatLogger> values;
 }
 
 public class CMDRLookup implements PMCommand, GuildCommand {
@@ -136,7 +141,8 @@ public class CMDRLookup implements PMCommand, GuildCommand {
     {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm zz");
         String info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
-        String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DataProvider.getGoogleToken();
+        //String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DataProvider.getGoogleToken();
+        String url = "https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D500?key=" + DataProvider.getGoogleToken();
 
         //If the last lookup was done over 3h ago or the user forces it we update
         //This is to increase performance and don't hit google api rate limits
@@ -152,33 +158,11 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
 
                 //Update local data to new readings from google doc
-                String[] rows = doc.split(", ");
                 combat_loggers.clear();
 
-                for (String row : rows) {
-                    String[] values = row.split(",");
-
-                    //There are some broken/empty entries, we don't want 'em
-                    if (values.length == 4) {
-                        //Here we found our candidate, output him
-                        if (values[0].equalsIgnoreCase(username)) {
-                            info = "__r/EliteCombatLoggers__" + "\n"
-                                    + "Exact CMDR name: " + values[0] + "\n"
-                                    + "No of logs: " + values[1] + "\n"
-                                    + "Method: " + values[2] + "\n"
-                                    + "Platform: " + values[3] + "\n"
-                                    + "This information was updated on: " + sdf.format(last_lookup);
-                        }
-
-                        //Save all the loggers internally for later reuse
-                        CombatLogger new_logger = new CombatLogger();
-                        new_logger.name = values[0];
-                        new_logger.no_of_logs = values[1];
-                        new_logger.type_of_log = values[2];
-                        new_logger.platform = values[3];
-                        combat_loggers.add(new_logger);
-                    }
-                }
+                Gson gson = new Gson();
+                LoggerSheet sheet = gson.fromJson(doc, LoggerSheet.class);
+                combat_loggers = sheet.values;
             }
             catch (IOException e)
             {
