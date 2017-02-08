@@ -1,0 +1,22 @@
+{
+  "discord": {
+    "token": "",
+    "idOwner": [],
+    "idRoles": [],
+    "newMember": "",
+    "adminChanID": ""
+  },
+  "connections": {
+    "mysql": {
+      "IP": "localhost:3306",
+      "DB": "",
+      "US": "",
+      "PW": ""
+    }
+  },
+  "inaraPW": "",
+  "googleToken": "",
+  "githubToken": "",
+  "githubBranch": "",
+  "dev": false
+}
