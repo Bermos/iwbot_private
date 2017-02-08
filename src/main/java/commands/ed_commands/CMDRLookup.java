@@ -19,6 +19,7 @@ import provider.DataProvider;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -30,7 +31,7 @@ class CombatLogger {
 }
 
 class LoggerSheet {
-    List<CombatLogger> values;
+    CombatLogger[] values;
 }
 
 public class CMDRLookup implements PMCommand, GuildCommand {
@@ -171,7 +172,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 //Update local data to new readings from google doc
                 combat_loggers.clear();
 
-                combat_loggers = sheet.values;
+                combat_loggers = Arrays.asList(sheet.values);
             }
             catch (IOException e)
             {
