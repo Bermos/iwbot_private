@@ -1,12 +1,8 @@
 package iw_bot;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
+import commands.misc_commands.Reminder;
 import iw_core.Users;
 import misc.DankMemes;
-import commands.misc_commands.Reminder;
 import misc.StatusGenerator;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
@@ -26,7 +22,9 @@ import provider.Connections;
 import provider.DataProvider;
 import provider.Statistics;
 
-import javax.xml.crypto.Data;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class Listener extends ListenerAdapter {
 	private Commands commands;
@@ -35,7 +33,7 @@ public class Listener extends ListenerAdapter {
 
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.1.6_54";
+	public static final String VERSION_NUMBER = "3.1.7_57";
 	public static JDA jda;
 	
 	Listener() {

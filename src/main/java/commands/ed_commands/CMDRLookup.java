@@ -1,5 +1,6 @@
 package commands.ed_commands;
 
+import com.google.gson.Gson;
 import commands.GuildCommand;
 import commands.PMCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -10,18 +11,32 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import java.io.InputStreamReader;
+import java.net.URL;
 import provider.DataProvider;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 class CombatLogger {
-    public String name;
+    CombatLogger (String a, String b, String c, String d) {
+        this.name = a;
+        this.no_of_logs = b;
+        this.type_of_log = c;
+        this.platform = d;
+    }
+    String name;
     String no_of_logs;
     String type_of_log;
     String platform;
+}
+
+class LoggerSheet {
+    List<List<String>> values;
 }
 
 public class CMDRLookup implements PMCommand, GuildCommand {
@@ -136,60 +151,51 @@ public class CMDRLookup implements PMCommand, GuildCommand {
     {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm zz");
         String info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
-        String url = "https://www.googleapis.com/drive/v3/files/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/export?mimeType=text%2Fcsv&key=" + DataProvider.getGoogleToken();
 
         //If the last lookup was done over 3h ago or the user forces it we update
         //This is to increase performance and don't hit google api rate limits
-        if ((last_lookup + (3*60*60*1000) < System.currentTimeMillis()) || force_update)
-        {
-            try
-            {
+        if ((last_lookup + (3*60*60*1000) < System.currentTimeMillis()) || force_update) {
+            try {
                 //Get doc from google
-                String doc = Jsoup.connect(url).get().body().text();
+                URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D600?key=" + DataProvider.getGoogleToken());
+                Scanner scanner = new Scanner( new InputStreamReader( url.openConnection().getInputStream() ) ) ;
+                String json = "";
+                while (scanner.hasNext()) {
+                    json += scanner.nextLine();
+                }
+
+                Gson gson = new Gson();
+                LoggerSheet sheet = gson.fromJson(json, LoggerSheet.class);
 
                 //Refresh new last lookup time
                 last_lookup = System.currentTimeMillis();
                 info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
 
                 //Update local data to new readings from google doc
-                String[] rows = doc.split(", ");
                 combat_loggers.clear();
 
-                for (String row : rows) {
-                    String[] values = row.split(",");
+                for (List<String> row : sheet.values) {
+                    if (row.get(0).isEmpty())
+                        break;
 
-                    //There are some broken/empty entries, we don't want 'em
-                    if (values.length == 4) {
-                        //Here we found our candidate, output him
-                        if (values[0].equalsIgnoreCase(username)) {
-                            info = "__r/EliteCombatLoggers__" + "\n"
-                                    + "Exact CMDR name: " + values[0] + "\n"
-                                    + "No of logs: " + values[1] + "\n"
-                                    + "Method: " + values[2] + "\n"
-                                    + "Platform: " + values[3] + "\n"
-                                    + "This information was updated on: " + sdf.format(last_lookup);
-                        }
-
-                        //Save all the loggers internally for later reuse
-                        CombatLogger new_logger = new CombatLogger();
-                        new_logger.name = values[0];
-                        new_logger.no_of_logs = values[1];
-                        new_logger.type_of_log = values[2];
-                        new_logger.platform = values[3];
-                        combat_loggers.add(new_logger);
+                    if (row.get(0).equalsIgnoreCase(username)) {
+                        info = "__r/EliteCombatLoggers__" + "\n"
+                                + "Exact CMDR name: " + row.get(0) + "\n"
+                                + "No of logs: " + row.get(1) + "\n"
+                                + "Method: " + row.get(2) + "\n"
+                                + "Platform: " + row.get(3) + "\n"
+                                + "This information was updated on: " + sdf.format(last_lookup);
                     }
+                    combat_loggers.add(new CombatLogger(row.get(0), row.get(1), row.get(2), row.get(3)));
                 }
             }
             catch (IOException e)
             {
                 e.printStackTrace();
             }
-
         }
-        else
-        {
-            for (CombatLogger logger : combat_loggers)
-            {
+        else {
+            for (CombatLogger logger : combat_loggers) {
                 if (logger.name.equalsIgnoreCase(username)) {
                     info = "__r/EliteCombatLoggers__" + "\n"
                             + "Exact CMDR name: " + logger.name + "\n"
