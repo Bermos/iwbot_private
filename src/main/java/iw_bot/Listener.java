@@ -31,10 +31,10 @@ public class Listener extends ListenerAdapter {
 	private AutoUpdate updater;
 	private static SimpleDateFormat sdf;
 	private static final String prefix = DataProvider.isDev() ? "<<" : "/";
-	private static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 
+	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.1.3_49";
+	public static final String VERSION_NUMBER = "3.1.4_50";
 	public static JDA jda;
 	
 	Listener() {

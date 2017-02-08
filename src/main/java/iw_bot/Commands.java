@@ -71,6 +71,8 @@ class Commands {
 			}
 		});
 
+		guildCommands.put("debug", new DebugMode());
+
 		guildCommands.put("setavatar", new Setavatar());
 
 		guildCommands.put("setname", new Setname());
