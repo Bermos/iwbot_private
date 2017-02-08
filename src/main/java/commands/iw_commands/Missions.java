@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -146,6 +147,7 @@ public class Missions implements GuildCommand {
 			if (tempHist.size() < 100)
 				break;
 		}
+
 		Collections.reverse(history);
 		lines.add("*****************START OF CHANNEL '" + channel.getName() + "' LOG*****************");
 		for (Message message : history) {
@@ -191,23 +193,47 @@ public class Missions implements GuildCommand {
 
 	@Override
 	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-		if (args.length > 1 && args[0].equalsIgnoreCase("new")) {
+		Arrays.sort(args);
+
+		//Create new mission channel and assign role to mentioned explorer
+		if (Arrays.binarySearch(args, "new") > -1) {
 			User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
 			Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
 			event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
 		}
-		else if (args.length == 1 && args[0].equalsIgnoreCase("close")) {
+
+        //If 'tag', remove all explorers roles in that channel
+        else if (Arrays.binarySearch(args, "tag") > -1) {
+
+            //Find explorers in the channel
+            Role explorerRole = event.getGuild().getRoleById("143403360081543168");
+            for (PermissionOverride override : event.getChannel().getPermissionOverrides()) {
+                if (override.isMemberOverride()) {
+                    event.getGuild().getController().removeRolesFromMember(override.getMember(), explorerRole).queue();
+                }
+            }
+
+            event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage("Explorer tags removed.").queue();
+        }
+
+        //State the intent of deleting that channel. Ask if they are for sure
+		if (Arrays.binarySearch(args, "close") > -1) {
 			Missions.archiveRequest(event.getChannel(), event.getAuthor().getId());
-			event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. You cannot undo this!").queue();
+			event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. " +
+					"If you would like to strip the explorer of his role confirm with '/mission tag, yes'. You cannot undo this!").queue();
 		}
-		else if (args.length == 1 && args[0].equalsIgnoreCase("yes")) {
+		
+		//If confirmed, delete the channel. Tied to close to prevent '/mission close, yes' abuse of the safety function
+		else if (Arrays.binarySearch(args, "yes") > -1) {
 			Missions.archive(event.getChannel(), event.getAuthor().getId());
-			event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel and role deleted.").queue();
-		}
+      
+			event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel deleted.").queue();
+      	}
 	}
 
 	@Override
 	public String getHelp(GuildMessageReceivedEvent event) {
+		//TODO add correct help sting
 		return "";
 	}
 }
