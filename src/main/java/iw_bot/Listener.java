@@ -33,7 +33,7 @@ public class Listener extends ListenerAdapter {
 
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.0.1_38";
+	public static final String VERSION_NUMBER = "3.1.5_52";
 	
 	Listener() {
 		this.commands = new Commands();
