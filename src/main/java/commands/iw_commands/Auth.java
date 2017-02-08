@@ -38,7 +38,7 @@ public class Auth implements PMCommand {
 
             hashedpw = new String(hexChars);
             PreparedStatement ps = new Connections().getConnection()
-                    .prepareStatement("UPDATE iwmembers.user SET sessionkey = ?, salt = ?, password = ? WHERE iduser = ?");
+                    .prepareStatement("UPDATE user SET sessionkey = ?, salt = ?, password = ? WHERE iduser = ?");
             ps.setString		(1, new BigInteger(40, sRandom).toString(32));
             ps.setString		(2, salt);
             ps.setString		(3, hashedpw);

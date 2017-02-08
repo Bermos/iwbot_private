@@ -34,6 +34,9 @@ public class Restart implements PMCommand, GuildCommand {
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        return null;
+        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+            return "";
+        }
+        return "Restarts the bot. Use when he behaves strangely or throws a fit";
     }
 }
