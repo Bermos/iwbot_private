@@ -117,7 +117,7 @@ public class Users {
 		System.out.printf("[%s] %s has left the guild.\n", event.getGuild().getName(), event.getMember().getNickname());
 		
 		try {
-			PreparedStatement ps = connect.prepareStatement("UPDATE iwmembers.user SET onlinestatus = ?, role = ?, password = default, sessionkey = default, salt = default WHERE iduser = ?");
+			PreparedStatement ps = connect.prepareStatement("UPDATE user SET onlinestatus = ?, role = ?, password = default, sessionkey = default, salt = default WHERE iduser = ?");
 			ps.setInt	(1, 3);
 			ps.setString (2, "none");
 			ps.setLong	(3, Long.parseLong(event.getMember().getUser().getId().replaceAll("[^0-9]", "")));
@@ -143,7 +143,7 @@ public class Users {
 		System.out.printf("[Role Display] %s: %s\n", member.getNickname(), rName);
 		
 		try {
-			PreparedStatement ps = connect.prepareStatement("UPDATE iwmembers.user SET role = ? WHERE iduser = ?");
+			PreparedStatement ps = connect.prepareStatement("UPDATE user SET role = ? WHERE iduser = ?");
 			ps.setString	(1, rName);
 			ps.setLong		(2, Long.parseLong(member.getUser().getId().replaceAll("[^0-9]", "")));
 			ps.executeUpdate();
@@ -155,12 +155,12 @@ public class Users {
 	public static void setOnlineStatus(UserOnlineStatusUpdateEvent event) {
 		try {
 			if(event.getGuild().getMember(event.getUser()).getOnlineStatus().name().equals("AWAY")) {
-				PreparedStatement ps = connect.prepareStatement("UPDATE iwmembers.user SET onlinestatus = ? WHERE iduser = ?");
+				PreparedStatement ps = connect.prepareStatement("UPDATE user SET onlinestatus = ? WHERE iduser = ?");
 				ps.setInt	(1, event.getGuild().getMember(event.getUser()).getOnlineStatus().ordinal());
 				ps.setLong	(2, Long.parseLong(event.getUser().getId().replaceAll("[^0-9]", "")));
 				ps.executeUpdate();
 			} else {
-				PreparedStatement ps = connect.prepareStatement("UPDATE iwmembers.user SET onlinestatus = ?, lastonline = ? WHERE iduser = ?");
+				PreparedStatement ps = connect.prepareStatement("UPDATE user SET onlinestatus = ?, lastonline = ? WHERE iduser = ?");
 				ps.setInt		(1, event.getGuild().getMember(event.getUser()).getOnlineStatus().ordinal());
 				ps.setTimestamp	(2, new Timestamp(System.currentTimeMillis()));
 				ps.setLong		(3, Long.parseLong(event.getUser().getId().replaceAll("[^0-9]", "")));
@@ -173,7 +173,7 @@ public class Users {
 	
 	public static void avatarUpdate(UserAvatarUpdateEvent event) {
 		try {
-			PreparedStatement ps = connect.prepareStatement("UPDATE iwmembers.user SET ppurl = ? WHERE iduser = ?");
+			PreparedStatement ps = connect.prepareStatement("UPDATE user SET ppurl = ? WHERE iduser = ?");
 			ps.setString	(1, event.getUser().getAvatarUrl());
 			ps.setLong	(2, Long.parseLong(event.getUser().getId().replaceAll("[^0-9]", "")));
 			ps.executeUpdate();
@@ -186,7 +186,7 @@ public class Users {
 		System.out.printf("[Name Update] %s changed to %s\n", event.getOldName(), event.getUser().getName());
 		
 		try {
-			PreparedStatement ps = connect.prepareStatement("UPDATE iwmembers.user SET username = ? WHERE iduser = ?");
+			PreparedStatement ps = connect.prepareStatement("UPDATE user SET username = ? WHERE iduser = ?");
 			ps.setString	(1, event.getUser().getName());
 			ps.setLong	(2, Long.parseLong(event.getUser().getId().replaceAll("[^0-9]", "")));
 			ps.executeUpdate();

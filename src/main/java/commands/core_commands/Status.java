@@ -15,9 +15,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by Bermos on 31.01.2017.
- */
 public class Status implements PMCommand, GuildCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
@@ -48,7 +45,7 @@ public class Status implements PMCommand, GuildCommand {
         String usedMemory	 = String.format("%.2f",(double)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024);
 
         try {
-            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT COUNT(idmarkov) AS unique_sets, sum(prob) AS total_sets FROM iwmembers.markov");
+            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT COUNT(idmarkov) AS unique_sets, sum(prob) AS total_sets FROM markov");
             ResultSet rs = ps.executeQuery();
             rs.next();
             uniqueSets = nForm.format(rs.getInt("unique_sets")).replace('.', '\'');
