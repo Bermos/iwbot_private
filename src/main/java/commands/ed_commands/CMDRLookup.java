@@ -19,19 +19,24 @@ import provider.DataProvider;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 class CombatLogger {
+    CombatLogger (String a, String b, String c, String d) {
+        this.name = a;
+        this.no_of_logs = b;
+        this.type_of_log = c;
+        this.platform = d;
+    }
     String name;
-    int no_of_logs;
+    String no_of_logs;
     String type_of_log;
     String platform;
 }
 
 class LoggerSheet {
-    CombatLogger[] values;
+    List<List<String>> values;
 }
 
 public class CMDRLookup implements PMCommand, GuildCommand {
@@ -149,18 +154,15 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
         //If the last lookup was done over 3h ago or the user forces it we update
         //This is to increase performance and don't hit google api rate limits
-        if ((last_lookup + (3*60*60*1000) < System.currentTimeMillis()) || force_update)
-        {
-            try
-            {
+        if ((last_lookup + (3*60*60*1000) < System.currentTimeMillis()) || force_update) {
+            try {
                 //Get doc from google
-                URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D10?key=" + DataProvider.getGoogleToken());
+                URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D600?key=" + DataProvider.getGoogleToken());
                 Scanner scanner = new Scanner( new InputStreamReader( url.openConnection().getInputStream() ) ) ;
                 String json = "";
                 while (scanner.hasNext()) {
                     json += scanner.nextLine();
                 }
-                System.out.println(json);
 
                 Gson gson = new Gson();
                 LoggerSheet sheet = gson.fromJson(json, LoggerSheet.class);
@@ -172,18 +174,28 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 //Update local data to new readings from google doc
                 combat_loggers.clear();
 
-                combat_loggers = Arrays.asList(sheet.values);
+                for (List<String> row : sheet.values) {
+                    if (row.get(0).isEmpty())
+                        break;
+
+                    if (row.get(0).equalsIgnoreCase(username)) {
+                        info = "__r/EliteCombatLoggers__" + "\n"
+                                + "Exact CMDR name: " + row.get(0) + "\n"
+                                + "No of logs: " + row.get(1) + "\n"
+                                + "Method: " + row.get(2) + "\n"
+                                + "Platform: " + row.get(3) + "\n"
+                                + "This information was updated on: " + sdf.format(last_lookup);
+                    }
+                    combat_loggers.add(new CombatLogger(row.get(0), row.get(1), row.get(2), row.get(3)));
+                }
             }
             catch (IOException e)
             {
                 e.printStackTrace();
             }
-
         }
-        else
-        {
-            for (CombatLogger logger : combat_loggers)
-            {
+        else {
+            for (CombatLogger logger : combat_loggers) {
                 if (logger.name.equalsIgnoreCase(username)) {
                     info = "__r/EliteCombatLoggers__" + "\n"
                             + "Exact CMDR name: " + logger.name + "\n"

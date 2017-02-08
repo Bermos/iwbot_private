@@ -33,7 +33,7 @@ public class Listener extends ListenerAdapter {
 
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.1.7_56";
+	public static final String VERSION_NUMBER = "3.1.7_57";
 	public static JDA jda;
 	
 	Listener() {
