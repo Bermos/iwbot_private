@@ -198,11 +198,22 @@ public class Missions implements GuildCommand {
 		}
 		else if (args.length == 1 && args[0].equalsIgnoreCase("close")) {
 			Missions.archiveRequest(event.getChannel(), event.getAuthor().getId());
-			event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. You cannot undo this!").queue();
+			event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. If you would like to strip the explorer of his role confirm with '/mission tag yes'. You cannot undo this!").queue();
 		}
+		
+//If just 'yes', preform this function.
 		else if (args.length == 1 && args[0].equalsIgnoreCase("yes")) {
 			Missions.archive(event.getChannel(), event.getAuthor().getId());
-			event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel and role deleted.").queue();
+      
+event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel deleted, explorer tag kept.").queue();
+      }
+		
+//If 'role yes', preform this function.
+    else if (args.length == 1 && args[0].equalsIgnoreCase("tag yes")) {          
+    			Missions.archive(event.getChannel(), event.getAuthor().getId());
+          guildManager.getGuild().getController().removeRolesFromMember(explorer, explorerRole).queue();
+			
+event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel and explorer tag deleted.").queue();
 		}
 	}
 
