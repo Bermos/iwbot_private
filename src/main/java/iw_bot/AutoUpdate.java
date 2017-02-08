@@ -36,7 +36,9 @@ class AutoUpdate {
 
     AutoUpdate() {
         try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(1701), 0);
+            int port = DataProvider.isDev() ? 1702 : 1701;
+
+            HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/update", new GitHookHandler());
             server.setExecutor(null); // creates a default executor
             server.start();
@@ -49,6 +51,7 @@ class AutoUpdate {
         @Override
         public void handle(HttpExchange t) throws IOException {
             JDA jda = Listener.jda;
+            boolean isDev = DataProvider.isDev();
             TextChannel chan = jda.getGuildById("142749481530556416").getTextChannelById("217344072111620096");
 
             Gson gson = new Gson();
@@ -56,7 +59,8 @@ class AutoUpdate {
 
             Push push = gson.fromJson(jReader, Push.class);
 
-            if (push.ref.contains("development") || push.ref.contains("master")) {
+
+            if ((isDev && push.ref.contains("development")) || (!isDev && push.ref.contains("master"))) {
                 String commits = "";
                 for (Commit commit : push.commits) {
                     commits += "Author: " + commit.author.username + "\n";
@@ -79,9 +83,10 @@ class AutoUpdate {
             os.write("".getBytes());
             os.close();
 
+            String folder = isDev ? "development" : "production";
             if (push.ref.contains("development") || push.ref.contains("master")) {
                 try {
-                    URL jarurl = new URL("https://api.github.com/repos/Bermos/iwbot_private/contents/out/production/discordbot.jar?ref=" + DataProvider.getGithubBranch());
+                    URL jarurl = new URL("https://api.github.com/repos/Bermos/iwbot_private/contents/out/" + folder + "/discordbot.jar?ref=" + DataProvider.getGithubBranch());
                     URLConnection con = jarurl.openConnection();
                     con.setRequestProperty("Authorization", "token " + DataProvider.getGithubToken());
                     con.setRequestProperty("Accept", "application/vnd.github.v3.raw");

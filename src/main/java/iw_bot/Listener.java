@@ -26,6 +26,8 @@ import provider.Connections;
 import provider.DataProvider;
 import provider.Statistics;
 
+import javax.xml.crypto.Data;
+
 public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private static SimpleDateFormat sdf;
@@ -33,7 +35,7 @@ public class Listener extends ListenerAdapter {
 
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.1.6_53";
+	public static final String VERSION_NUMBER = "3.1.6_54";
 	public static JDA jda;
 	
 	Listener() {
@@ -66,16 +68,16 @@ public class Listener extends ListenerAdapter {
 			Statistics stats = Statistics.getInstance();
 			stats.connect(event.getJDA());
 
-			//Start random Playing... generator
-			new StatusGenerator(event.getJDA().getPresence());
-
-			//Setup and synchronise users and online status with MySQL db
-			new Users();
-			Users.sync(event);
-
-			//Start checks for any set reminders from users
-			new Reminder().startChecks(event.getJDA());
+            //Start random Playing... generator
+            new StatusGenerator(event.getJDA().getPresence());
 		}
+
+        //Setup and synchronise users and online status with MySQL db
+        new Users();
+        Users.sync(event);
+
+        //Start checks for any set reminders from users
+        new Reminder().startChecks(event.getJDA());
 	}
 	
 	@Override
@@ -89,7 +91,7 @@ public class Listener extends ListenerAdapter {
 		}
 		
 		//Check for command
-        if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
+        if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().isBot()) {
             String content = event.getMessage().getContent();
             String commandName = content.replaceFirst(prefix, "").split(" ")[0];
             String[] args = {};
@@ -116,7 +118,7 @@ public class Listener extends ListenerAdapter {
 		}
 		
 		//Check for command
-		if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
+		if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().isBot()) {
 			String content = event.getMessage().getContent();
 			String commandName = content.replaceFirst(prefix, "").split(" ")[0];
 			String[] args = {};
@@ -127,13 +129,14 @@ public class Listener extends ListenerAdapter {
 			}
 			
 			if (commands.guildCommands.containsKey(commandName)) {
+                if(!DataProvider.isDev())
+                    Statistics.getInstance().logCommandReceived(commandName, event.getMember().getEffectiveName());
+
 				event.getChannel().sendTyping();
-				Statistics.getInstance().logCommandReceived(commandName, event.getMember().getEffectiveName());
 				commands.guildCommands.get(commandName).runCommand(event, args);
 			}
 		}
 		//Check for dankness
-        if (!isDebug || !DataProvider.isDev())
 		 DankMemes.check(event);
 
         if (!DataProvider.isDev())
