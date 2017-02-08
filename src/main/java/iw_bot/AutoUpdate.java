@@ -84,7 +84,7 @@ class AutoUpdate {
             os.close();
 
             String folder = isDev ? "development" : "production";
-            if (push.ref.contains("development") || push.ref.contains("master")) {
+            if ((isDev && push.ref.contains("development")) || (!isDev && push.ref.contains("master"))) {
                 try {
                     URL jarurl = new URL("https://api.github.com/repos/Bermos/iwbot_private/contents/out/" + folder + "/discordbot.jar?ref=" + DataProvider.getGithubBranch());
                     URLConnection con = jarurl.openConnection();
