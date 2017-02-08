@@ -38,7 +38,9 @@ class Commands {
 		pmCommands.put("account", new Auth());
 
 		pmCommands.put("owner", new EditOwner());
-		
+
+		pmCommands.put("send", new SendMessage());
+
 		//Guild message commands
 		guildCommands.put("help", new GuildCommand() {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -57,13 +59,27 @@ class Commands {
 			}
 		});
 
+		guildCommands.put("version", new GuildCommand() {
+			@Override
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue();
+			}
+
+			@Override
+			public String getHelp(GuildMessageReceivedEvent event) {
+				return "Returns the current version";
+			}
+		});
+
+		guildCommands.put("debug", new DebugMode());
+
 		guildCommands.put("setavatar", new Setavatar());
 
 		guildCommands.put("setname", new Setname());
 
 		guildCommands.put("setgame", new Setgame());
 
-		guildCommands.put("role", new commands.core_commands.Role());
+		guildCommands.put("role", new Role());
 
 		guildCommands.put("dist", new Distance());
 
@@ -105,7 +121,7 @@ class Commands {
 
 		guildCommands.put("clear", new BulkDelete());
 
-		guildCommands.put("applicant-test", new Applicant());
+		guildCommands.put("applicant", new Applicant());
 
 		guildCommands.put("restart", new Restart());
 

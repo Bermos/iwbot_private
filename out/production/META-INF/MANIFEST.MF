@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Class-Path: lib/json-20160810.jar lib/guava-20.0.jar lib/commons-lang3
+ -3.5.jar lib/JDA-3.0.BETA2_122.jar lib/httpcore-4.4.4.jar lib/influxd
+ b-java-2.5.jar lib/okhttp-3.5.0.jar lib/unirest-java-1.4.9.jar lib/ht
+ tpmime-4.5.2.jar lib/commons-logging-1.2.jar lib/httpclient-4.5.2.jar
+  lib/converter-moshi-2.1.0.jar lib/httpcore-nio-4.4.4.jar lib/nv-webs
+ ocket-client-1.30.jar lib/logging-interceptor-3.5.0.jar lib/jsoup-1.1
+ 0.2.jar lib/mysql-connector-java-5.1.40.jar lib/moshi-1.2.0.jar lib/r
+ etrofit-2.1.0.jar lib/jna-4.2.2.jar lib/gson-2.8.0.jar lib/commons-co
+ dec-1.9.jar lib/httpasyncclient-4.1.1.jar lib/commons-collections4-4.
+ 1.jar lib/okio-1.11.0.jar
+Main-Class: iw_bot.Main
+

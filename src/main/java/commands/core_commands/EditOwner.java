@@ -6,6 +6,12 @@ import provider.DataProvider;
 public class EditOwner implements commands.PMCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+        //Permission check
+        if (!(DataProvider.isOwner(event))) {
+            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            return;
+        }
+
         if (args.length != 2) {
             event.getChannel().sendMessage("[Error] unexpected/no arguments provided");
         }

@@ -8,6 +8,7 @@ import iw_core.Users;
 import misc.DankMemes;
 import commands.misc_commands.Reminder;
 import misc.StatusGenerator;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
@@ -27,17 +28,17 @@ import provider.Statistics;
 
 public class Listener extends ListenerAdapter {
 	private Commands commands;
-	private AutoUpdate updater;
 	private static SimpleDateFormat sdf;
 	private static final String prefix = DataProvider.isDev() ? "<<" : "/";
 
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
 	public static final String VERSION_NUMBER = "3.1.5_52";
+	public static JDA jda;
 	
 	Listener() {
 		this.commands = new Commands();
-		this.updater = new AutoUpdate();
+        new AutoUpdate();
 		Listener.startupTime = new Date().getTime();
 		Listener.sdf = new SimpleDateFormat("HH:mm:ss");
 		Listener.sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -57,6 +58,8 @@ public class Listener extends ListenerAdapter {
 
 		//I'm not sure this is actually needed but it's here so whatever
 		new Connections().getConnection();
+
+		jda = event.getJDA();
 
 		if (!DataProvider.isDev()) {
 			//Start metadata statistics logging
@@ -86,21 +89,21 @@ public class Listener extends ListenerAdapter {
 		}
 		
 		//Check for command
-				if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
-					String content = event.getMessage().getContent();
-					String commandName = content.replaceFirst(prefix, "").split(" ")[0];
-					String[] args = {};
-					if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
-						args = content.replaceFirst(prefix + commandName, "").trim().split(",");
-						for (int i = 0; i < args.length; i++)
-							args[i] = args[i].trim();
-					}
+        if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().equals(event.getJDA().getSelfUser())) {
+            String content = event.getMessage().getContent();
+            String commandName = content.replaceFirst(prefix, "").split(" ")[0];
+            String[] args = {};
+            if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
+                args = content.replaceFirst(prefix + commandName, "").trim().split(",");
+                for (int i = 0; i < args.length; i++)
+                    args[i] = args[i].trim();
+            }
 
-					if (commands.pmCommands.containsKey(commandName)) {
-						event.getChannel().sendTyping();
-						commands.pmCommands.get(commandName).runCommand(event, args);
-					}
-				}
+            if (commands.pmCommands.containsKey(commandName)) {
+                event.getChannel().sendTyping();
+                commands.pmCommands.get(commandName).runCommand(event, args);
+            }
+        }
 	}
 	
 	@Override
@@ -130,50 +133,57 @@ public class Listener extends ListenerAdapter {
 			}
 		}
 		//Check for dankness
-		DankMemes.check(event);
-		
-		Statistics.getInstance().logMessage(event);
+        if (!isDebug || !DataProvider.isDev())
+		 DankMemes.check(event);
+
+        if (!DataProvider.isDev())
+		    Statistics.getInstance().logMessage(event);
 	}
 	
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		TextChannel channel = event.getGuild().getPublicChannel();
+	    if (!DataProvider.isDev()) {
+            TextChannel channel = event.getGuild().getPublicChannel();
+            channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
 
-		channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
-		event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
-			.sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
-		
-		Users.joined(event);
+            event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
+                    .sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
+
+        }
+
+        Users.joined(event);
 	}
 	
 	@Override
 	public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
-		Users.left(event);
+        Users.left(event);
 	}
 	
 	@Override
 	public void onGuildMemberRoleAdd(GuildMemberRoleAddEvent event) {
-		Users.roleUpdate(event);
+        Users.roleUpdate(event);
 	}
 	
 	@Override
 	public void onGuildMemberRoleRemove(GuildMemberRoleRemoveEvent event) {
-		Users.roleUpdate(event);
+        Users.roleUpdate(event);
 	}
 	
 	@Override
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
-		System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
-		Users.setOnlineStatus(event);
+	    if (isDebug)
+            System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
+
+        Users.setOnlineStatus(event);
 	}
 	
 	@Override
 	public void onUserNameUpdate(UserNameUpdateEvent event) {
-		Users.nameUpdate(event);
+        Users.nameUpdate(event);
 	}
 	
 	@Override
 	public void onUserAvatarUpdate(UserAvatarUpdateEvent event) {
-		Users.avatarUpdate(event);
+        Users.avatarUpdate(event);
 	}
 }
