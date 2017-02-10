@@ -73,11 +73,9 @@ public class BGS implements PMCommand, GuildCommand {
                     event.getAuthor().getPrivateChannel().sendMessage(output).queue();
             }
         } else if (args.length == 2) {
+            event.getChannel().sendMessage("The BGS logging Bot commands now require a system name. Please use '/bgs help' for more info.").queue();
+        } else if (args.length == 3) {
             String activity = null;
-            String username = event.getMember().getEffectiveName();
-            String userid = event.getAuthor().getId();
-            int ammount = Integer.parseInt(args[1]);
-
             args[0] = args[0].toLowerCase();
             switch (args[0]) {
                 case "bonds" 	 : activity = "BOND";	   break;
@@ -87,54 +85,85 @@ public class BGS implements PMCommand, GuildCommand {
                 case "scans"	 : activity = "SCAN";	   break;
                 case "smuggling" : activity = "SMUGGLING"; break;
                 case "trade"	 : activity = "TRADE";	   break;
+                case "murder"	 : activity = "MURDER";	   break;
             }
             if (activity != null) {
-                BGS.logActivity(BGS.Activity.valueOf(activity), userid, username, ammount);
-                event.getChannel().sendMessage("Your engagement has been noticed. Thanks for your service o7").queue();
+                String username = event.getMember().getEffectiveName();
+                String userid = event.getAuthor().getId();
+                int amount = Integer.parseInt(args[1]);
+                String system = args[2];
+                int systemid = 0;
+                Connection connect = new Connections().getConnection();
+                try {
+                    PreparedStatement ps = connect.prepareStatement("SELECT systemid FROM bgs_systems WHERE shortname = ? or fullname = ? LIMIT 1;");
+                    ps.setString(1, system);
+                    ps.setString(2, system);
+                    ResultSet rs = ps.executeQuery();
+
+                    if (rs.next())
+                        systemid = rs.getInt("systemid");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                if(systemid > 0) {
+                    event.getChannel().sendMessage(system + " " + systemid).queue();
+                    BGS.logActivity(BGS.Activity.valueOf(activity), userid, username, amount, systemid);
+                    //TODO nice output for commander
+                    event.getChannel().sendMessage("Your engagement has been noticed. Thanks for your service o7").queue();
+                } else {
+                    String message = "Invalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
+                    message +="Shortname ¦ Fullname\n";
+                    try {
+                        PreparedStatement ps = connect.prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
+                        ResultSet rs = ps.executeQuery();
+                        while (rs.next())
+                            message += rs.getString("shortname") + " ¦ " + rs.getString("fullname");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    message +="```\n";
+                    event.getChannel().sendMessage(message).queue();
+                }
+            }
+        } else if (args[0].equalsIgnoreCase("gettick") && DataProvider.isAdmin(event.getMember().getRoles())) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+            Date time;
+            try {
+                time = sdf.parse(args[2]);
+                String output = "Data for " + args[1] + " ticks after " + args[2] + " UTC:\n```";
+                Map<BGS.Activity, Double> entries = BGS.getTotalAmount(time, Integer.parseInt(args[1]));
+                for (Map.Entry<BGS.Activity, Double> entry : entries.entrySet()) {
+                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+                }
+                output += "```";
+                if (entries.isEmpty())
+                    event.getChannel().sendMessage("No records for the specified period").queue();
+                else
+                    event.getChannel().sendMessage(output).queue();
+            } catch (ParseException e) {
+                event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
             }
 
-        } else if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("gettick") && DataProvider.isAdmin(event.getMember().getRoles())) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
-                Date time;
-                try {
-                    time = sdf.parse(args[2]);
-                    String output = "Data for " + args[1] + " ticks after " + args[2] + " UTC:\n```";
-                    Map<BGS.Activity, Double> entries = BGS.getTotalAmount(time, Integer.parseInt(args[1]));
-                    for (Map.Entry<BGS.Activity, Double> entry : entries.entrySet()) {
-                        output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
-                    }
-                    output += "```";
-                    if (entries.isEmpty())
-                        event.getChannel().sendMessage("No records for the specified period").queue();
-                    else
-                        event.getChannel().sendMessage(output).queue();
-                } catch (ParseException e) {
-                    event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
+        } else if (args[0].equalsIgnoreCase("gettickfull") && DataProvider.isAdmin(event.getMember().getRoles())) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+            Date time;
+            try {
+                time = sdf.parse(args[2]);
+                List<String> lines = BGS.getCSVData(time, Integer.parseInt(args[1]));
+
+                String output = "Data for " + args[1] + " ticks after " + args[2] + ":\n";
+                output += "----------------------------------------------------------------------\n";
+                output += lines.get(0) + "\n```";
+                for (int i = 1; i < lines.size(); i++) {
+                    output += lines.get(i) + "\n";
                 }
+                if (lines.size() < 2)
+                    output += "No records found";
+                output += "```";
 
-            } else if (args[0].equalsIgnoreCase("gettickfull") && DataProvider.isAdmin(event.getMember().getRoles())) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
-                Date time;
-                try {
-                    time = sdf.parse(args[2]);
-                    List<String> lines = BGS.getCSVData(time, Integer.parseInt(args[1]));
-
-                    String output = "Data for " + args[1] + " ticks after " + args[2] + ":\n";
-                    output += "----------------------------------------------------------------------\n";
-                    output += lines.get(0) + "\n```";
-                    for (int i = 1; i < lines.size(); i++) {
-                        output += lines.get(i) + "\n";
-                    }
-                    if (lines.size() < 2)
-                        output += "No records found";
-                    output += "```";
-
-                    event.getChannel().sendMessage(output).queue();
-                } catch (ParseException e) {
-                    event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
-                }
-
+                event.getChannel().sendMessage(output).queue();
+            } catch (ParseException e) {
+                event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
             }
         }
     }
@@ -158,7 +187,7 @@ public class BGS implements PMCommand, GuildCommand {
 
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("SELECT SUM(ammount) AS total FROM bgs_activity WHERE activity = ?");
+            PreparedStatement ps = connect.prepareStatement("SELECT SUM(amount) AS total FROM bgs_activity WHERE activity = ?");
             ps.setString(1, activity.toString());
             ResultSet rs = ps.executeQuery();
 
@@ -175,7 +204,7 @@ public class BGS implements PMCommand, GuildCommand {
 
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("SELECT SUM(ammount) AS total FROM bgs_activity WHERE activity = ? AND userid = ?");
+            PreparedStatement ps = connect.prepareStatement("SELECT SUM(amount) AS total FROM bgs_activity WHERE activity = ? AND userid = ?");
             ps.setString(1, activity.toString());
             ps.setString(2, userid);
             ResultSet rs = ps.executeQuery();
@@ -193,7 +222,7 @@ public class BGS implements PMCommand, GuildCommand {
 
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("SELECT activity, SUM(ammount) AS total FROM bgs_activity WHERE userid = ? GROUP BY activity ORDER BY activity ASC");
+            PreparedStatement ps = connect.prepareStatement("SELECT activity, SUM(amount) AS total FROM bgs_activity WHERE userid = ? GROUP BY activity ORDER BY activity ASC");
             ps.setString(1, userid);
             ResultSet rs = ps.executeQuery();
 
@@ -210,7 +239,7 @@ public class BGS implements PMCommand, GuildCommand {
 
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("SELECT activity, SUM(ammount) AS total FROM bgs_activity GROUP BY activity ORDER BY activity ASC");
+            PreparedStatement ps = connect.prepareStatement("SELECT activity, SUM(amount) AS total FROM bgs_activity GROUP BY activity ORDER BY activity ASC");
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
@@ -227,7 +256,7 @@ public class BGS implements PMCommand, GuildCommand {
 
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("SELECT activity, SUM(ammount) AS total FROM bgs_activity WHERE timestamp > ? AND timestamp < ? GROUP BY activity ORDER BY activity ASC");
+            PreparedStatement ps = connect.prepareStatement("SELECT activity, SUM(amount) AS total FROM bgs_activity WHERE timestamp > ? AND timestamp < ? GROUP BY activity ORDER BY activity ASC");
             ps.setString(1, sqlSdf.format(start));
             ps.setString(2, sqlSdf.format(end));
             ResultSet rs = ps.executeQuery();
@@ -256,14 +285,15 @@ public class BGS implements PMCommand, GuildCommand {
         return total;
     }
 
-    public static void logActivity(BGS.Activity activity, String userid, String username, int amount) {
+    public static void logActivity(BGS.Activity activity, String userid, String username, int amount, int systemid) {
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, ammount, activity) VALUES (?, ?, ?, ?)");
+            PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity) VALUES (?, ?, ?, ?, ?)");
             ps.setString(1, username);
             ps.setString(2, userid);
             ps.setInt	(3, amount);
             ps.setString(4, activity.toString());
+            ps.setInt(5, systemid);
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -282,13 +312,13 @@ public class BGS implements PMCommand, GuildCommand {
                     .prepareStatement("SELECT " +
                             "username AS CMDR, " +
                             "from_unixtime(floor((unix_timestamp(timestamp) - (15*60*60))/(24*60*60)) * (24*60*60) + (15*60*60)) AS tick_start, " +
-                            "SUM( if( activity = 'Bond', ammount, 0 ) ) AS Bonds, " +
-                            "SUM( if( activity = 'Bounty', ammount, 0 ) ) AS Bounties, " +
-                            "SUM( if( activity = 'Mining', ammount, 0 ) ) AS Mining, " +
-                            "SUM( if( activity = 'Mission', ammount, 0 ) ) AS Missions, " +
-                            "SUM( if( activity = 'Scan', ammount, 0 ) ) AS Scans, " +
-                            "SUM( if( activity = 'Smuggling', ammount, 0 ) ) AS Smuggling, " +
-                            "SUM( if( activity = 'Trade', ammount, 0 ) ) AS Trading " +
+                            "SUM( if( activity = 'Bond', amount, 0 ) ) AS Bonds, " +
+                            "SUM( if( activity = 'Bounty', amount, 0 ) ) AS Bounties, " +
+                            "SUM( if( activity = 'Mining', amount, 0 ) ) AS Mining, " +
+                            "SUM( if( activity = 'Mission', amount, 0 ) ) AS Missions, " +
+                            "SUM( if( activity = 'Scan', amount, 0 ) ) AS Scans, " +
+                            "SUM( if( activity = 'Smuggling', amount, 0 ) ) AS Smuggling, " +
+                            "SUM( if( activity = 'Trade', amount, 0 ) ) AS Trading " +
                             "FROM " +
                             "bgs_activity " +
                             "WHERE " +
