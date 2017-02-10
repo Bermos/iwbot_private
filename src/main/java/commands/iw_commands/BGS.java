@@ -71,7 +71,14 @@ public class BGS implements PMCommand, GuildCommand {
                     event.getChannel().sendMessage(output).queue();
                 else
                     event.getAuthor().getPrivateChannel().sendMessage(output).queue();
+            } else if (args[0].equalsIgnoreCase("updatestats") && DataProvider.isAdmin(event.getMember().getRoles())) {
+                //String time = new time();
+                Date date = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("**dd/MM/yyyy HH:mm:ss.**");
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                event.getChannel().sendMessage("**Tick statistics updated as of**" + sdf.format(date)).queue();
             }
+
         } else if (args.length == 2) {
             event.getChannel().sendMessage("The BGS logging Bot commands now require a system name. Please use '/bgs help' for more info.").queue();
         } else if (args.length == 3) {
@@ -174,7 +181,7 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     enum Activity {
-        BOND, BOUNTY, MINING, MISSION, SCAN, SMUGGLING, TRADE;
+        BOND, BOUNTY, MINING, MISSION, SCAN, SMUGGLING, TRADE, MURDER;
 
         public String toString() {
             return name().charAt(0) + name().substring(1).toLowerCase();
