@@ -47,7 +47,7 @@ class Commands {
 				String message = "Commands available:\n```html\n";
 				for (Map.Entry<String, GuildCommand> entry : guildCommands.entrySet()) {
 					if (!entry.getValue().getHelp(event).isEmpty())
-						message += String.format("/%1$-12s | " + entry.getValue().getHelp(event) + "\n", entry.getKey());
+						message += String.format(Listener.prefix + "%-12s | " + entry.getValue().getHelp(event) + "\n", entry.getKey());
 				}
 				message += "```\n";
 				message += "For a detailed help please use this guide: https://drive.google.com/file/d/0B1EHAnlL83qgbnRLV2ktQmVlOXM/view?usp=sharing";

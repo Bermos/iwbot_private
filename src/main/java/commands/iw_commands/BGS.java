@@ -141,7 +141,7 @@ public class BGS implements PMCommand, GuildCommand {
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        return "Add or remove the bgs role to you";
+        return "For help with BGS bot commands use '/bgs help'";
     }
 
     enum Activity {

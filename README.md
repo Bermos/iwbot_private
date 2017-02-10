@@ -1,4 +1,4 @@
-# IW Bot
+# IW Bot  [![Build Status](https://travis-ci.com/Bermos/iwbot_private.svg?token=tSUhQCxKwnkynZpag6CZ&branch=master)](https://travis-ci.com/Bermos/iwbot_private)
 Discord bot for Iridium Wing.
 IW is an Elite Dangerous player group that is escorting explorers through inhabited space.
 I'm not expecing this bot to be useful for anyone else due to it's heavely customisation.
