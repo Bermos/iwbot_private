@@ -112,13 +112,13 @@ public class Statistics extends Thread {
 		influxDB.write(dbName, "default", commands);
 	}
 
-	public void logBGSActivity(long time, String userid, String username, String activity, int ammount) {
+	public void logBGSActivity(long time, String userid, String username, String activity, int amount) {
 		Point bgs = Point.measurement("bgs")
 				.time(time, TimeUnit.MILLISECONDS)
 				.addField("activity", activity)
 				.addField("userid", userid)
 				.addField("username", username)
-				.addField("ammount", ammount)
+				.addField("ammount", amount)
 				.build();
 		influxDB.write(dbName, "default", bgs);
 	}
