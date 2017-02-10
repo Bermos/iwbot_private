@@ -295,12 +295,12 @@ public class BGS implements PMCommand, GuildCommand {
     public static void logActivity(BGS.Activity activity, String userid, String username, int amount, int systemid) {
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity) VALUES (?, ?, ?, ?)");
+            PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) VALUES (?, ?, ?, ?, ?)");
             ps.setString(1, username);
             ps.setString(2, userid);
             ps.setInt	(3, amount);
             ps.setString(4, activity.toString());
-            //ps.setInt(5, systemid);
+            ps.setInt(5, systemid);
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
