@@ -106,11 +106,12 @@ public class BGS implements PMCommand, GuildCommand {
                     e.printStackTrace();
                 }
                 if(systemid > 0) {
+                    event.getChannel().sendMessage(system + " " + systemid).queue();
                     BGS.logActivity(BGS.Activity.valueOf(activity), userid, username, amount, systemid);
                     //TODO nice output for commander
                     event.getChannel().sendMessage("Your engagement has been noticed. Thanks for your service o7").queue();
                 } else {
-                    String message = "Invalid system entered. Please select from:\n```\n";
+                    String message = "Invalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
                     message +="Shortname ¦ Fullname\n";
                     try {
                         PreparedStatement ps = connect.prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
@@ -120,6 +121,7 @@ public class BGS implements PMCommand, GuildCommand {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
+                    message +="```\n";
                     event.getChannel().sendMessage(message).queue();
                 }
             }
