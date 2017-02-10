@@ -26,7 +26,7 @@ public class RollDice implements PMCommand, GuildCommand{
                 max = Integer.parseInt(args[0]);
 
                 if (max == 0) {
-                    event.getChannel().sendMessage("You rolled a 0, surprise dumbass!").queue();
+                    event.getChannel().sendMessage("You rolled a 0. Surprise, dumbass!").queue();
                     return;
                 } else if (max < 0) {
                     negative = true;
@@ -34,12 +34,13 @@ public class RollDice implements PMCommand, GuildCommand{
                 }
             } catch (NumberFormatException e) {
                 event.getChannel().sendMessage("[Error] " + args[0] + " is not a valid number.").queue();
+                return;
             }
         }
 
         int roll = negative ? 0 - roll(max) : roll(max);
 
-        event.getChannel().sendMessage("Your rolled a " + roll).queue();
+        event.getChannel().sendMessage("You rolled a " + roll).queue();
     }
 
     @Override
