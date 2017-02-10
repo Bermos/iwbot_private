@@ -10,6 +10,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="junit" level="project" />
     <orderEntry type="library" name="Maven: net.dv8tion:JDA:3.0.BETA2_122" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.commons:commons-collections4:4.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.json:json:20160810" level="project" />
@@ -35,6 +36,5 @@
     <orderEntry type="library" name="Maven: com.squareup.okhttp3:logging-interceptor:3.5.0" level="project" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.40" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.5" level="project" />
-    <orderEntry type="library" name="junit" level="project" />
   </component>
 </module>
