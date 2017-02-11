@@ -108,7 +108,6 @@ public class BGS implements PMCommand, GuildCommand {
                         "When entering numbers (#) do not use thousand / million seperators.\n" +
                         "e.g. '/bgs trade, 1500000'\n";
                 event.getAuthor().getPrivateChannel().sendMessage(output).queue();
-
             }
 
         } else if (args.length == 2) {
