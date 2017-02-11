@@ -77,6 +77,38 @@ public class BGS implements PMCommand, GuildCommand {
                 SimpleDateFormat sdf = new SimpleDateFormat("**dd/MM/yyyy HH:mm:ss.**");
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 event.getChannel().sendMessage("**Tick statistics updated as of**" + sdf.format(date)).queue();
+            } else if (args[0].equalsIgnoreCase("help")) {
+                String output = " __BGS Bot Commands:__\n" +
+                        "Enter '/bgs' to add or remove BGS role\n" +
+                        "\n" +
+                        "Format for entering bgs commands is:\n"+
+                        "/bgs <activity>, <amount with no punctuation>, <system identifier>\n" +
+                        "\n" +
+                        "\n" +
+                        "**BGS Activities:**\n" +
+                        "Bonds: To log the value of combat bonds (#) claimed in a war or civil war.\n" +
+                        "\n" +
+                        "Bounties: To log the value of bounties (#) cashed in.\n" +
+                        "\n" +
+                        "Mining: To log the profit(#) you've made from selling mined commodities.\n" +
+                        "\n" +
+                        "Missions: To log the number of missions completed (#) successfully.\n" +
+                        "\n" +
+                        "Murder: To log number amount (#) of murders on opposing factions.\n" +
+                        "\n" +
+                        "Mystats: To Receive a direct message detailing your total logged actions.\n" +
+                        "\n" +
+                        "/Scans: To log the value of exploration data (#) made with Universal Cartographics.\n" +
+                        "\n" +
+                        "Smuggling: To log the profit (#) you've made by smuggling into a black market.\n" +
+                        "\n" +
+                        "Trade: To log the profit made (#) when selling at a commodity market.\n" +
+                        "\n" +
+                        "__Important Notes / Caveats:__\n" +
+                        "When entering numbers (#) do not use thousand / million seperators.\n" +
+                        "e.g. '/bgs trade, 1500000'\n";
+                event.getAuthor().getPrivateChannel().sendMessage(output).queue();
+
             }
 
         } else if (args.length == 2) {
