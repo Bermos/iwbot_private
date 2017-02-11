@@ -102,7 +102,7 @@ public class BGS implements PMCommand, GuildCommand {
                         "\n" +
                         "*smuggling*: To log the profit (#) you've made by smuggling into a black market.\n" +
                         "\n" +
-                        "9trade*: To log the profit made (#) when selling at a commodity market.\n" +
+                        "*trade*: To log the profit made (#) when selling at a commodity market.\n" +
                         "\n" +
                         "**Important Notes / Caveats:**\n" +
                         "When entering numbers (#) do not use thousand / million seperators.\n" +
