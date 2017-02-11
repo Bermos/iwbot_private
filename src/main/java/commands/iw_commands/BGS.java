@@ -111,7 +111,7 @@ public class BGS implements PMCommand, GuildCommand {
             }
 
         } else if (args.length == 2) {
-            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\nThe BGS logging Bot commands now require a system name. Please enter '/bgs help' for more info.").queue();
+            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\nThe BGS logging commands require a system name. Please enter '/bgs help' for more info.").queue();
         } else if (args.length == 3) {
             /*TODO Logging Improvements List
             *Split this off into seperate function
@@ -154,7 +154,7 @@ public class BGS implements PMCommand, GuildCommand {
                     //TODO nice output for commander
                     event.getChannel().sendMessage("Your engagement has been noticed. Thanks for your service o7").queue();
                 } else {
-                    String message = "Invalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
+                    String message = "**WARNING ACTION NOT LOGGED**\nInvalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
                     message +="Shortname ¦ Fullname\n";
                     try {
                         PreparedStatement ps = connect.prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
