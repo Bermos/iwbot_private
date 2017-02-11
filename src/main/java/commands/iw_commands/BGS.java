@@ -306,7 +306,8 @@ public class BGS implements PMCommand, GuildCommand {
             e.printStackTrace();
         }
 
-        Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount);
+        if (!DataProvider.isDev())
+            Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount);
     }
 
     public static List<String> getCSVData(Date start, int ticks) {
