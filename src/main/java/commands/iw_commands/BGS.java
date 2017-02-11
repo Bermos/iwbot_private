@@ -210,7 +210,7 @@ public class BGS implements PMCommand, GuildCommand {
             }
         } else if (args.length > 3) {
             // anything more than 3 is likely the user has tried to log data but used a number seperate (1,000,000)
-            event.getChannel().sendMessage("**Action not logged**\n" +
+            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\n" +
                     "Have you used a thousand/million seperator when entering the amount?\n" +
                     "e.g. Enter /bgs trade, 1500000\n" +
                     "Do not enter /bgs trade, 1,500,000").queue();
