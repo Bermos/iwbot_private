@@ -193,17 +193,18 @@ public class Missions implements GuildCommand {
 
 	@Override
 	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-		Arrays.sort(args);
 
-		//Create new mission channel and assign role to mentioned explorer
-		if (Arrays.binarySearch(args, "new") > -1) {
-			User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
-			Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
-			event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
-		}
+        //Create new mission channel and assign role to mentioned explorer
+        if (args.length == 3 && args[0].equalsIgnoreCase("new")) {
+            User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
+            Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
+            event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
+        }
+
+        Arrays.sort(args);
 
         //If 'tag', remove all explorers roles in that channel
-        else if (Arrays.binarySearch(args, "tag") > -1) {
+        if (Arrays.binarySearch(args, "tag") > -1) {
 
             //Find explorers in the channel
             Role explorerRole = event.getGuild().getRoleById("143403360081543168");
