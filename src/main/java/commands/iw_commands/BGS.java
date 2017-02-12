@@ -1,5 +1,6 @@
 package commands.iw_commands;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import commands.GuildCommand;
 import commands.PMCommand;
 import net.dv8tion.jda.core.entities.Role;
@@ -95,17 +96,23 @@ public class BGS implements PMCommand, GuildCommand {
             *Confirmation message that does NOT tag them but is customised per the action logged
             *If goal is already met direct message once per activity with details on what still needs work.
             */
-            String activity = null;
+            Activity activity = null;
             args[0] = args[0].toLowerCase();
             switch (args[0]) {
-                case "bonds" 	 : activity = "BOND";	   break;
-                case "bounties"  : activity = "BOUNTY";	   break;
-                case "mining" 	 : activity = "MINING";	   break;
-                case "missions"  : activity = "MISSION";   break;
-                case "scans"	 : activity = "SCAN";	   break;
-                case "smuggling" : activity = "SMUGGLING"; break;
-                case "trade"	 : activity = "TRADE";	   break;
-                case "murder"	 : activity = "MURDER";	   break;
+                case "bond"      :
+                case "bonds" 	 : activity = Activity.BOND;	  break;
+                case "bounty"    :
+                case "bounties"  : activity = Activity.BOUNTY;	  break;
+                case "mining" 	 : activity = Activity.MINING;	  break;
+                case "mission"   :
+                case "missions"  : activity = Activity.MISSION;   break;
+                case "exploration" :
+                case "scan"      :
+                case "scans"	 : activity = Activity.MURDER;	  break;
+                case "smuggling" : activity = Activity.SMUGGLING; break;
+                case "trading"   :
+                case "trade"	 : activity = Activity.TRADE;	  break;
+                case "murder"	 : activity = Activity.MURDER;	  break;
             }
             if (activity != null) {
                 String username = event.getMember().getEffectiveName();
@@ -113,23 +120,18 @@ public class BGS implements PMCommand, GuildCommand {
                 String system = args[2];
                 int amount = Integer.parseInt(args[1]);
 
-                if(logActivity(Activity.valueOf(activity), userid, username, amount, system)) {
+                if(logActivity(activity, userid, username, amount, system)) {
                     //TODO nice output for commander
                     event.getChannel().sendMessage("Your engagement has been noticed. Thanks for your service o7").queue();
                 } else {
-                    String message = "**WARNING ACTION NOT LOGGED**\nInvalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
-                    message +="Shortname ¦ Fullname\n";
-                    try {
-                        PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
-                        ResultSet rs = ps.executeQuery();
-                        while (rs.next())
-                            message += String.format("%s-3 | %s", rs.getString("shortname"), rs.getString("fullname"));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    message +="```\n";
+                    String message = getSystems();
                     event.getChannel().sendMessage(message).queue();
                 }
+            } else {
+                String actString = "";
+                for (Activity act : Activity.values())
+                    actString += act.toString() + "\n";
+                event.getChannel().sendMessage("This activity does not exist. These do:\n" + actString).queue();
             }
         } else if (args[0].equalsIgnoreCase("gettick") && DataProvider.isAdmin(event.getMember().getRoles())) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
@@ -181,6 +183,21 @@ public class BGS implements PMCommand, GuildCommand {
         }
     }
 
+    private String getSystems() {
+        String message = "**WARNING ACTION NOT LOGGED**\nInvalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
+        message +="Shortname ¦ Fullname\n";
+        try {
+            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                message += String.format("%s-3 | %s\n", rs.getString("shortname"), rs.getString("fullname"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        message +="```\n";
+        return message;
+    }
+
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         return "For help with BGS bot commands use '/bgs help'";
@@ -230,7 +247,7 @@ public class BGS implements PMCommand, GuildCommand {
         return total;
     }
 
-    public static Map<BGS.Activity, Double> getTotalAmount(String userid) {
+    private static Map<BGS.Activity, Double> getTotalAmount(String userid) {
         Map<BGS.Activity, Double> totals = new LinkedHashMap<>();
 
         Connection connect = new Connections().getConnection();
@@ -247,7 +264,7 @@ public class BGS implements PMCommand, GuildCommand {
         return totals;
     }
 
-    public static Map<BGS.Activity, Double> getTotalAmount() {
+    private static Map<BGS.Activity, Double> getTotalAmount() {
         Map<BGS.Activity, Double> totals = new LinkedHashMap<>();
 
         Connection connect = new Connections().getConnection();
@@ -263,7 +280,7 @@ public class BGS implements PMCommand, GuildCommand {
         return totals;
     }
 
-    public static Map<BGS.Activity, Double> getTotalAmount(Date start, int ticks) {
+    private static Map<BGS.Activity, Double> getTotalAmount(Date start, int ticks) {
         Map<BGS.Activity, Double> totals = new LinkedHashMap<>();
         Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
 
@@ -298,7 +315,7 @@ public class BGS implements PMCommand, GuildCommand {
         return total;
     }
 
-    public static boolean logActivity(BGS.Activity activity, String userid, String username, int amount, String system) {
+    private static boolean logActivity(BGS.Activity activity, String userid, String username, int amount, String system) {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) " +
@@ -306,13 +323,16 @@ public class BGS implements PMCommand, GuildCommand {
                     "(SELECT systemid FROM bgs_systems WHERE shortname = ? OR fullname = ? LIMIT 1))");
             ps.setString(1, username);
             ps.setString(2, userid);
-            ps.setInt	(3, amount);
+            ps.setInt(3, amount);
             ps.setString(4, activity.toString());
             ps.setString(5, system);
             ps.setString(6, system);
             ps.executeUpdate();
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            //This happens when the system was not found.
+            //Return false to tell the calling method to give the user appropriate feedback
+            return false;
         } catch (SQLException e) {
-            System.out.println(e.getSQLState());
             e.printStackTrace();
             return false;
         }
@@ -323,7 +343,7 @@ public class BGS implements PMCommand, GuildCommand {
         return true;
     }
 
-    public static List<String> getCSVData(Date start, int ticks) {
+    private static List<String> getCSVData(Date start, int ticks) {
         List<String> lines = new ArrayList<>();
         Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
 
