@@ -2,6 +2,7 @@ package commands.iw_commands;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import commands.GuildCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
@@ -74,7 +75,7 @@ public class Applicant implements GuildCommand {
 
         } catch (SQLException e) {
             event.getChannel().sendMessage("Something went wrong. Couldn't find applicant to delete").queue();
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
     }
 
@@ -99,7 +100,7 @@ public class Applicant implements GuildCommand {
 
         } catch (SQLException e) {
             event.getChannel().sendMessage("Something went wrong. Couldn't get status of applicant").queue();
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
     }
 
@@ -117,7 +118,7 @@ public class Applicant implements GuildCommand {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
     }
 
@@ -134,7 +135,7 @@ public class Applicant implements GuildCommand {
                 event.getChannel().sendMessage("No combat eval added. Either applicant already had his or he wasn't found.").queue();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
     }
 
@@ -166,7 +167,7 @@ public class Applicant implements GuildCommand {
             event.getChannel().sendMessage("This applicant is already registered").queue();
         } catch (SQLException e) {
             event.getChannel().sendMessage("Something went wrong. No new applicant saved.").queue();
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
     }
 

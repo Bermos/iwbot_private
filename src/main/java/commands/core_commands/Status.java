@@ -3,6 +3,7 @@ package commands.core_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.Listener;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
@@ -53,7 +54,7 @@ public class Status implements PMCommand, GuildCommand {
             rs.close();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
             return "Hmm, looks like I fucked up the number of datasets. Here's the rest of the result:";
         }
 

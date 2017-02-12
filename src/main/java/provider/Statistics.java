@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.concurrent.TimeUnit;
 
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Member;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -51,7 +52,7 @@ public class Statistics extends Thread {
 
 				Thread.sleep(10L);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LogUtil.logErr(e);
 			}
 		} while (!connected);
 		influxDB.enableBatch(2000, 1000, TimeUnit.MILLISECONDS);
@@ -88,7 +89,7 @@ public class Statistics extends Thread {
 				Thread.sleep(1000);
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				LogUtil.logErr(e);
 			}
 		}
 	}

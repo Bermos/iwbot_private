@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import org.jsoup.Jsoup;
@@ -84,8 +85,10 @@ public class Distance implements PMCommand, GuildCommand {
         } catch (JsonSyntaxException e) {
             return "[Error] Processing edsm result failed. Please contact Bermos.";
         } catch (SocketException e) {
+            LogUtil.logErr(e);
             return "[Error] Failed connecting to edsm. You might want to retry in a few";
         } catch (IOException e) {
+            LogUtil.logErr(e);
             return "[Error] Processing data failed";
         }
     }

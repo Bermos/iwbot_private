@@ -1,5 +1,6 @@
 package iw_core;
 
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
@@ -84,7 +85,7 @@ public class Users {
 			us.executeBatch();
 			is.executeBatch();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 		
 		System.out.println("[MYSQL] Sync finished.\n"
@@ -109,7 +110,7 @@ public class Users {
 			ps.setString	(6, member.getUser().getAvatarUrl());
 			ps.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	
@@ -123,7 +124,7 @@ public class Users {
 			ps.setLong	(3, Long.parseLong(event.getMember().getUser().getId().replaceAll("[^0-9]", "")));
 			ps.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	
@@ -148,7 +149,7 @@ public class Users {
 			ps.setLong		(2, Long.parseLong(member.getUser().getId().replaceAll("[^0-9]", "")));
 			ps.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	
@@ -167,7 +168,7 @@ public class Users {
 				ps.executeUpdate	();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	
@@ -178,7 +179,7 @@ public class Users {
 			ps.setLong	(2, Long.parseLong(event.getUser().getId().replaceAll("[^0-9]", "")));
 			ps.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	
@@ -191,7 +192,7 @@ public class Users {
 			ps.setLong	(2, Long.parseLong(event.getUser().getId().replaceAll("[^0-9]", "")));
 			ps.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	

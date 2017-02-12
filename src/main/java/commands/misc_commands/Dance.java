@@ -1,6 +1,7 @@
 package commands.misc_commands;
 
 import commands.GuildCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
@@ -49,7 +50,7 @@ public class Dance extends Thread implements GuildCommand {
 				try {
 					Thread.sleep(800);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					LogUtil.logErr(e);
 				}
 			}
 			message.editMessage("\\o/").queue();

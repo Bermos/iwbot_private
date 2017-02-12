@@ -1,5 +1,7 @@
 package provider;
 
+import iw_bot.LogUtil;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -18,7 +20,7 @@ public class Connections {
 					"&password=" + info.PW);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	

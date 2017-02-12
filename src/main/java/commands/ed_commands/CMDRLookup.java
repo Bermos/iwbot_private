@@ -3,6 +3,7 @@ package commands.ed_commands;
 import com.google.gson.Gson;
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
@@ -141,7 +142,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
 
         return info;
@@ -191,7 +192,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                LogUtil.logErr(e);
             }
         }
         else {
