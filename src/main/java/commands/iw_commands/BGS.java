@@ -30,6 +30,9 @@ public class BGS implements PMCommand, GuildCommand {
                 output += "```";
                 event.getChannel().sendMessage(output).queue();
             }
+            else if (args[0].equalsIgnoreCase("help")) {
+                event.getChannel().sendMessage(bgsHelp()).queue();
+            }
         }
     }
 
@@ -78,36 +81,7 @@ public class BGS implements PMCommand, GuildCommand {
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 event.getChannel().sendMessage("**Tick statistics updated as of**" + sdf.format(date)).queue();
             } else if (args[0].equalsIgnoreCase("help")) {
-                String output = " **BGS Bot Commands:**\n" +
-                        "Enter '/bgs' to add or remove BGS role\n" +
-                        "\n" +
-                        "Format for entering bgs commands is:\n"+
-                        "/bgs <activity>, <amount with no seperators>, <system identifier>\n" +
-                        "\n" +
-                        "\n" +
-                        "**BGS Activities:**\n" +
-                        "*bonds*: To log the value of combat bonds (#) claimed in a war or civil war.\n" +
-                        "\n" +
-                        "*bounties*: To log the value of bounties (#) cashed in.\n" +
-                        "\n" +
-                        "*mining*: To log the profit (#) you've made from selling mined commodities.\n" +
-                        "\n" +
-                        "*missions*: To log the number of missions completed (#) successfully.\n" +
-                        "\n" +
-                        "*murder*: To log number amount (#) of murders on opposing factions.\n" +
-                        "\n" +
-                        "*mystats*: To Receive a direct message detailing your total logged actions.\n" +
-                        "\n" +
-                        "*scans*: To log the value of exploration data (#) made with Universal Cartographics.\n" +
-                        "\n" +
-                        "*smuggling*: To log the profit (#) you've made by smuggling into a black market.\n" +
-                        "\n" +
-                        "*trade*: To log the profit made (#) when selling at a commodity market.\n" +
-                        "\n" +
-                        "**Important Notes / Caveats:**\n" +
-                        "When entering numbers (#) do not use thousand / million seperators.\n" +
-                        "e.g. '/bgs trade, 1500000'\n";
-                event.getAuthor().getPrivateChannel().sendMessage(output).queue();
+                event.getAuthor().getPrivateChannel().sendMessage(bgsHelp()).queue();
             }
 
         } else if (args.length == 2) {
@@ -411,5 +385,38 @@ public class BGS implements PMCommand, GuildCommand {
             e.printStackTrace();
         }
         return lines;
+    }
+
+    public String bgsHelp() {
+        //TODO set string for bgs help command
+        return " **BGS Bot Commands:**\n" +
+                "Enter '/bgs' to add or remove BGS role\n" +
+                "\n" +
+                "Format for entering bgs commands is:\n"+
+                "/bgs <activity>, <amount with no seperators>, <system identifier>\n" +
+                "\n" +
+                "\n" +
+                "**BGS Activities:**\n" +
+                "*bonds*: To log the value of combat bonds (#) claimed in a war or civil war.\n" +
+                "\n" +
+                "*bounties*: To log the value of bounties (#) cashed in.\n" +
+                "\n" +
+                "*mining*: To log the profit (#) you've made from selling mined commodities.\n" +
+                "\n" +
+                "*missions*: To log the number of missions completed (#) successfully.\n" +
+                "\n" +
+                "*murder*: To log number amount (#) of murders on opposing factions.\n" +
+                "\n" +
+                "*mystats*: To Receive a direct message detailing your total logged actions.\n" +
+                "\n" +
+                "*scans*: To log the value of exploration data (#) made with Universal Cartographics.\n" +
+                "\n" +
+                "*smuggling*: To log the profit (#) you've made by smuggling into a black market.\n" +
+                "\n" +
+                "*trade*: To log the profit made (#) when selling at a commodity market.\n" +
+                "\n" +
+                "**Important Notes / Caveats:**\n" +
+                "When entering numbers (#) do not use thousand / million seperators.\n" +
+                "e.g. '/bgs trade, 1500000'\n";
     }
 }
