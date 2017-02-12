@@ -31,7 +31,7 @@ public class BGS implements PMCommand, GuildCommand {
                 event.getChannel().sendMessage(output).queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
-                event.getAuthor().getPrivateChannel().sendMessage(bgsHelp()).queue();
+                event.getChannel().sendMessage(bgsHelp).queue();
             }
         }
     }
@@ -63,6 +63,9 @@ public class BGS implements PMCommand, GuildCommand {
                     output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```";
+
+                if (!event.getAuthor().hasPrivateChannel())
+                    event.getAuthor().openPrivateChannel().complete();
                 event.getAuthor().getPrivateChannel().sendMessage(output).queue();
             } else if (args[0].equalsIgnoreCase("total")) {
                 String output = "```";
@@ -72,23 +75,22 @@ public class BGS implements PMCommand, GuildCommand {
                 output += "```";
                 if (DataProvider.isAdmin(event.getMember().getRoles()))
                     event.getChannel().sendMessage(output).queue();
-                else
+                else {
+                    if (!event.getAuthor().hasPrivateChannel())
+                        event.getAuthor().openPrivateChannel().complete();
                     event.getAuthor().getPrivateChannel().sendMessage(output).queue();
-            } else if (args[0].equalsIgnoreCase("updatestats") && DataProvider.isAdmin(event.getMember().getRoles())) {
-                //String time = new time();
-                Date date = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("**dd/MM/yyyy HH:mm:ss.**");
-                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                event.getChannel().sendMessage("**Tick statistics updated as of**" + sdf.format(date)).queue();
+                }
             } else if (args[0].equalsIgnoreCase("help")) {
-                event.getAuthor().getPrivateChannel().sendMessage(bgsHelp()).queue();
+                if (!event.getAuthor().hasPrivateChannel())
+                    event.getAuthor().openPrivateChannel().complete();
+                event.getAuthor().getPrivateChannel().sendMessage(bgsHelp).queue();
             }
 
         } else if (args.length == 2) {
             event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\nThe BGS logging commands require a system name. Please enter '/bgs help' for more info.").queue();
         } else if (args.length == 3) {
             /*TODO Logging Improvements List
-            *Split this off into seperate function
+            *Split this off into separate function
             *Support for direct message
             *Confirmation message that does NOT tag them but is customised per the action logged
             *If goal is already met direct message once per activity with details on what still needs work.
@@ -108,33 +110,20 @@ public class BGS implements PMCommand, GuildCommand {
             if (activity != null) {
                 String username = event.getMember().getEffectiveName();
                 String userid = event.getAuthor().getId();
-                int amount = Integer.parseInt(args[1]);
                 String system = args[2];
-                int systemid = 0;
-                Connection connect = new Connections().getConnection();
-                try {
-                    PreparedStatement ps = connect.prepareStatement("SELECT systemid FROM bgs_systems WHERE shortname = ? or fullname = ? LIMIT 1;");
-                    ps.setString(1, system);
-                    ps.setString(2, system);
-                    ResultSet rs = ps.executeQuery();
+                int amount = Integer.parseInt(args[1]);
 
-                    if (rs.next())
-                        systemid = rs.getInt("systemid");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                if(systemid > 0) {
-                    BGS.logActivity(BGS.Activity.valueOf(activity), userid, username, amount, systemid);
+                if(logActivity(Activity.valueOf(activity), userid, username, amount, system)) {
                     //TODO nice output for commander
                     event.getChannel().sendMessage("Your engagement has been noticed. Thanks for your service o7").queue();
                 } else {
                     String message = "**WARNING ACTION NOT LOGGED**\nInvalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
                     message +="Shortname ¦ Fullname\n";
                     try {
-                        PreparedStatement ps = connect.prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
+                        PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
                         ResultSet rs = ps.executeQuery();
                         while (rs.next())
-                            message += rs.getString("shortname") + " ¦ " + rs.getString("fullname");
+                            message += String.format("%s-3 | %s", rs.getString("shortname"), rs.getString("fullname"));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -309,22 +298,29 @@ public class BGS implements PMCommand, GuildCommand {
         return total;
     }
 
-    public static void logActivity(BGS.Activity activity, String userid, String username, int amount, int systemid) {
+    public static boolean logActivity(BGS.Activity activity, String userid, String username, int amount, String system) {
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) VALUES (?, ?, ?, ?, ?)");
+            PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) " +
+                    "VALUES (?, ?, ?, ?, " +
+                    "(SELECT systemid FROM bgs_systems WHERE shortname = ? OR fullname = ? LIMIT 1))");
             ps.setString(1, username);
             ps.setString(2, userid);
             ps.setInt	(3, amount);
             ps.setString(4, activity.toString());
-            ps.setInt(5, systemid);
+            ps.setString(5, system);
+            ps.setString(6, system);
             ps.executeUpdate();
         } catch (SQLException e) {
+            System.out.println(e.getSQLState());
             e.printStackTrace();
+            return false;
         }
 
         if (!DataProvider.isDev())
             Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount);
+
+        return true;
     }
 
     public static List<String> getCSVData(Date start, int ticks) {
@@ -387,36 +383,33 @@ public class BGS implements PMCommand, GuildCommand {
         return lines;
     }
 
-    public String bgsHelp() {
-        //TODO set string for bgs help command
-        return " **BGS Bot Commands:**\n" +
-                "Enter '/bgs' to add or remove BGS role\n" +
-                "\n" +
-                "Format for entering bgs commands is:\n"+
-                "/bgs <activity>, <amount with no seperators>, <system identifier>\n" +
-                "\n" +
-                "\n" +
-                "**BGS Activities:**\n" +
-                "*bonds*: To log the value of combat bonds (#) claimed in a war or civil war.\n" +
-                "\n" +
-                "*bounties*: To log the value of bounties (#) cashed in.\n" +
-                "\n" +
-                "*mining*: To log the profit (#) you've made from selling mined commodities.\n" +
-                "\n" +
-                "*missions*: To log the number of missions completed (#) successfully.\n" +
-                "\n" +
-                "*murder*: To log number amount (#) of murders on opposing factions.\n" +
-                "\n" +
-                "*mystats*: To Receive a direct message detailing your total logged actions.\n" +
-                "\n" +
-                "*scans*: To log the value of exploration data (#) made with Universal Cartographics.\n" +
-                "\n" +
-                "*smuggling*: To log the profit (#) you've made by smuggling into a black market.\n" +
-                "\n" +
-                "*trade*: To log the profit made (#) when selling at a commodity market.\n" +
-                "\n" +
-                "**Important Notes / Caveats:**\n" +
-                "When entering numbers (#) do not use thousand / million seperators.\n" +
-                "e.g. '/bgs trade, 1500000'\n";
-    }
+    private final String bgsHelp = " **BGS Bot Commands:**\n" +
+            "Enter '/bgs' to add or remove BGS role\n" +
+            "\n" +
+            "Format for entering bgs commands is:\n"+
+            "/bgs <activity>, <amount with no seperators>, <system identifier>\n" +
+            "\n" +
+            "\n" +
+            "**BGS Activities:**\n" +
+            "*bonds*: To log the value of combat bonds (#) claimed in a war or civil war.\n" +
+            "\n" +
+            "*bounties*: To log the value of bounties (#) cashed in.\n" +
+            "\n" +
+            "*mining*: To log the profit (#) you've made from selling mined commodities.\n" +
+            "\n" +
+            "*missions*: To log the number of missions completed (#) successfully.\n" +
+            "\n" +
+            "*murder*: To log number amount (#) of murders on opposing factions.\n" +
+            "\n" +
+            "*mystats*: To Receive a direct message detailing your total logged actions.\n" +
+            "\n" +
+            "*scans*: To log the value of exploration data (#) made with Universal Cartographics.\n" +
+            "\n" +
+            "*smuggling*: To log the profit (#) you've made by smuggling into a black market.\n" +
+            "\n" +
+            "*trade*: To log the profit made (#) when selling at a commodity market.\n" +
+            "\n" +
+            "**Important Notes / Caveats:**\n" +
+            "When entering numbers (#) do not use thousand / million seperators.\n" +
+            "e.g. '/bgs trade, 1500000'\n";
 }
