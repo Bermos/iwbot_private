@@ -194,14 +194,14 @@ public class Missions implements GuildCommand {
 	@Override
 	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
 
-        //Create new mission channel and assign role to mentioned explorer
-        if (args.length == 3 && args[0].equalsIgnoreCase("new")) {
-            User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
-            Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
-            event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
-        }
+		//Create new mission channel and assign role to mentioned explorer
+		if (args.length == 3 && args[0].equalsIgnoreCase("new")) {
+			User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
+			Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
+			event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
+		}
 
-        Arrays.sort(args);
+		Arrays.sort(args);
 
         //If 'tag', remove all explorers roles in that channel
         if (Arrays.binarySearch(args, "tag") > -1) {
@@ -234,7 +234,6 @@ public class Missions implements GuildCommand {
 
 	@Override
 	public String getHelp(GuildMessageReceivedEvent event) {
-		//TODO add correct help sting
-		return "";
+		return "format: <new/close>, <mission channel name>, <@explorer name> [creates a mission text channel with permissions to mentioned explorer].";
 	}
 }
