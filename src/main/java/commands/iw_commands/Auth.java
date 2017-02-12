@@ -1,6 +1,7 @@
 package commands.iw_commands;
 
 import commands.PMCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
 
@@ -45,7 +46,7 @@ public class Auth implements PMCommand {
             ps.setLong		(4, Long.parseLong(event.getAuthor().getId()));
             ps.executeUpdate();
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException | SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
 
         event.getChannel().sendMessage("Account created. You have been issued the following password. Change it on the website by clicking on your avatar in the top right corner.").queue();

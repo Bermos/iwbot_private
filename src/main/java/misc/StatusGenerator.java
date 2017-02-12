@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.managers.Presence;
 import provider.Connections;
@@ -29,7 +30,7 @@ public class StatusGenerator extends Thread {
 				
 				Thread.sleep(5*60*1000);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LogUtil.logErr(e);
 				try {
 					Thread.sleep(60 * 1000);
 				} catch (Exception e1) {

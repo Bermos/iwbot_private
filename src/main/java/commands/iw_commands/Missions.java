@@ -1,6 +1,7 @@
 package commands.iw_commands;
 
 import commands.GuildCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -165,7 +166,7 @@ public class Missions implements GuildCommand {
 			}
 			writer.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 
 		File file = new File ("./ChannelLogs/" + channel.getName() + ".txt");
@@ -173,7 +174,7 @@ public class Missions implements GuildCommand {
 		try {
 			channel.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendFile(file, null);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 
 		channel.delete().queue();

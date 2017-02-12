@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -118,7 +119,7 @@ public class DankMemes {
 			JsonReader jReader = new JsonReader(new FileReader("./memes.json"));
 			memes = gson.fromJson(jReader, listType);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 
@@ -132,7 +133,7 @@ public class DankMemes {
 			gson.toJson(memes, listType, jWriter);
 			jWriter.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 }

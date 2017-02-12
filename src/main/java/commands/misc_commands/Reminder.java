@@ -2,6 +2,7 @@ package commands.misc_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -87,7 +88,7 @@ public class Reminder implements PMCommand, GuildCommand {
             ps.setString(3, reason);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
     }
 
@@ -130,7 +131,7 @@ public class Reminder implements PMCommand, GuildCommand {
                 ps.executeUpdate();
 
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogUtil.logErr(e);
             }
         }
     }
