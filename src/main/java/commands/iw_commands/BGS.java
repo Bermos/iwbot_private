@@ -25,7 +25,7 @@ public class BGS implements PMCommand, GuildCommand {
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
                 String output = "```";
-                for (Map.Entry<BGS.Activity, Double> entry : BGS.getTotalAmount(event.getAuthor().getId()).entrySet()) {
+                for (Map.Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
                     output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```";
@@ -60,7 +60,7 @@ public class BGS implements PMCommand, GuildCommand {
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
                 String output = "```";
-                for (Map.Entry<BGS.Activity, Double> entry : BGS.getTotalAmount(event.getAuthor().getId()).entrySet()) {
+                for (Map.Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
                     output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```";
@@ -70,7 +70,7 @@ public class BGS implements PMCommand, GuildCommand {
                 event.getAuthor().getPrivateChannel().sendMessage(output).queue();
             } else if (args[0].equalsIgnoreCase("total")) {
                 String output = "```";
-                for (Map.Entry<BGS.Activity, Double> entry : BGS.getTotalAmount().entrySet()) {
+                for (Map.Entry<Activity, Double> entry : getTotalAmount().entrySet()) {
                     output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```";
@@ -96,24 +96,7 @@ public class BGS implements PMCommand, GuildCommand {
             *Confirmation message that does NOT tag them but is customised per the action logged
             *If goal is already met direct message once per activity with details on what still needs work.
             */
-            Activity activity = null;
-            args[0] = args[0].toLowerCase();
-            switch (args[0]) {
-                case "bond"      :
-                case "bonds" 	 : activity = Activity.BOND;	  break;
-                case "bounty"    :
-                case "bounties"  : activity = Activity.BOUNTY;	  break;
-                case "mining" 	 : activity = Activity.MINING;	  break;
-                case "mission"   :
-                case "missions"  : activity = Activity.MISSION;   break;
-                case "exploration" :
-                case "scan"      :
-                case "scans"	 : activity = Activity.MURDER;	  break;
-                case "smuggling" : activity = Activity.SMUGGLING; break;
-                case "trading"   :
-                case "trade"	 : activity = Activity.TRADE;	  break;
-                case "murder"	 : activity = Activity.MURDER;	  break;
-            }
+            Activity activity = Activity.from(args[0]);
             if (activity != null) {
                 String username = event.getMember().getEffectiveName();
                 String userid = event.getAuthor().getId();
@@ -139,8 +122,8 @@ public class BGS implements PMCommand, GuildCommand {
             try {
                 time = sdf.parse(args[2]);
                 String output = "Data for " + args[1] + " ticks after " + args[2] + " UTC:\n```";
-                Map<BGS.Activity, Double> entries = BGS.getTotalAmount(time, Integer.parseInt(args[1]));
-                for (Map.Entry<BGS.Activity, Double> entry : entries.entrySet()) {
+                Map<Activity, Double> entries = getTotalAmount(time, Integer.parseInt(args[1]));
+                for (Map.Entry<Activity, Double> entry : entries.entrySet()) {
                     output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```";
@@ -157,7 +140,7 @@ public class BGS implements PMCommand, GuildCommand {
             Date time;
             try {
                 time = sdf.parse(args[2]);
-                List<String> lines = BGS.getCSVData(time, Integer.parseInt(args[1]));
+                List<String> lines = getCSVData(time, Integer.parseInt(args[1]));
 
                 String output = "Data for " + args[1] + " ticks after " + args[2] + ":\n";
                 output += "----------------------------------------------------------------------\n";
@@ -209,10 +192,35 @@ public class BGS implements PMCommand, GuildCommand {
         public String toString() {
             return name().charAt(0) + name().substring(1).toLowerCase();
         }
+
+        public static Activity from(String input) {
+            input = input.toLowerCase();
+            Activity output;
+            switch (input) {
+                case "bond"      :
+                case "bonds" 	 : output = Activity.BOND;	    break;
+                case "bounty"    :
+                case "bounties"  : output = Activity.BOUNTY;	break;
+                case "mining" 	 : output = Activity.MINING;	break;
+                case "mission"   :
+                case "missions"  : output = Activity.MISSION;   break;
+                case "exploration" :
+                case "scan"      :
+                case "scans"	 : output = Activity.SCAN;      break;
+                case "smuggling" : output = Activity.SMUGGLING; break;
+                case "trading"   :
+                case "trade"	 : output = Activity.TRADE;	    break;
+                case "murder"	 : output = Activity.MURDER;	break;
+                default          : output = null;               break;
+            }
+
+            return output;
+        }
     }
+
     private static SimpleDateFormat sqlSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public static int getTotalAmount(BGS.Activity activity) {
+    public static int getTotalAmount(Activity activity) {
         int total = 0;
 
         Connection connect = new Connections().getConnection();
@@ -229,7 +237,7 @@ public class BGS implements PMCommand, GuildCommand {
         return total;
     }
 
-    public static int getTotalAmount(BGS.Activity activity, String userid) {
+    public static int getTotalAmount(Activity activity, String userid) {
         int total = 0;
 
         Connection connect = new Connections().getConnection();
@@ -247,8 +255,8 @@ public class BGS implements PMCommand, GuildCommand {
         return total;
     }
 
-    private static Map<BGS.Activity, Double> getTotalAmount(String userid) {
-        Map<BGS.Activity, Double> totals = new LinkedHashMap<>();
+    private static Map<Activity, Double> getTotalAmount(String userid) {
+        Map<Activity, Double> totals = new LinkedHashMap<>();
 
         Connection connect = new Connections().getConnection();
         try {
@@ -257,15 +265,15 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
-                totals.put(BGS.Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
+                totals.put(Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return totals;
     }
 
-    private static Map<BGS.Activity, Double> getTotalAmount() {
-        Map<BGS.Activity, Double> totals = new LinkedHashMap<>();
+    private static Map<Activity, Double> getTotalAmount() {
+        Map<Activity, Double> totals = new LinkedHashMap<>();
 
         Connection connect = new Connections().getConnection();
         try {
@@ -273,15 +281,15 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
-                totals.put(BGS.Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
+                totals.put(Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return totals;
     }
 
-    private static Map<BGS.Activity, Double> getTotalAmount(Date start, int ticks) {
-        Map<BGS.Activity, Double> totals = new LinkedHashMap<>();
+    private static Map<Activity, Double> getTotalAmount(Date start, int ticks) {
+        Map<Activity, Double> totals = new LinkedHashMap<>();
         Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
 
         Connection connect = new Connections().getConnection();
@@ -292,7 +300,7 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
-                totals.put(BGS.Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
+                totals.put(Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -315,7 +323,7 @@ public class BGS implements PMCommand, GuildCommand {
         return total;
     }
 
-    private static boolean logActivity(BGS.Activity activity, String userid, String username, int amount, String system) {
+    private static boolean logActivity(Activity activity, String userid, String username, int amount, String system) {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) " +
@@ -338,7 +346,7 @@ public class BGS implements PMCommand, GuildCommand {
         }
 
         if (!DataProvider.isDev())
-            Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount);
+            Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount, system.toUpperCase());
 
         return true;
     }
