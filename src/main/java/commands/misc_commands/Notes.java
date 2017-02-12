@@ -8,6 +8,7 @@ import java.sql.SQLException;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -35,7 +36,7 @@ public class Notes implements PMCommand, GuildCommand{
 			if (rs.next())
 				return rs.getString("content");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 			return "$Error";
 		}
 		
@@ -59,7 +60,7 @@ public class Notes implements PMCommand, GuildCommand{
 				return true;
 						
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 		
 		return false;
@@ -82,7 +83,7 @@ public class Notes implements PMCommand, GuildCommand{
 				return true;
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 		
 		return false;
@@ -104,7 +105,7 @@ public class Notes implements PMCommand, GuildCommand{
 				return true;
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 		
 		return false;

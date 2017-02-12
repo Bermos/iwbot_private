@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
@@ -49,7 +50,7 @@ public class DataProvider {
 			JsonReader jReader = new JsonReader(new FileReader("./data.json"));
 			info = gson.fromJson(jReader, Info.class);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	
@@ -62,7 +63,7 @@ public class DataProvider {
 			gson.toJson(info, Info.class, jWriter);
 			jWriter.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LogUtil.logErr(e);
 		}
 	}
 	

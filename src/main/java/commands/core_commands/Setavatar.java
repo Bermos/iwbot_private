@@ -2,6 +2,7 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Icon;
 import net.dv8tion.jda.core.entities.Message;
@@ -55,7 +56,7 @@ public class Setavatar implements PMCommand, GuildCommand {
             } catch (UnsupportedEncodingException e) {
                 return "[Error] Filetype";
             } catch (IOException e) {
-                e.printStackTrace();
+                LogUtil.logErr(e);
             }
 
             //noinspection ResultOfMethodCallIgnored

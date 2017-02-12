@@ -3,7 +3,10 @@ package commands.iw_commands;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.JDAUtil;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
@@ -20,172 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class BGS implements PMCommand, GuildCommand {
-    @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        if (args.length == 1) {
-            if (args[0].equalsIgnoreCase("mystats")) {
-                String output = "```";
-                for (Map.Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
-                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
-                }
-                output += "```";
-                event.getChannel().sendMessage(output).queue();
-            }
-            else if (args[0].equalsIgnoreCase("help")) {
-                event.getChannel().sendMessage(bgsHelp).queue();
-            }
-        }
-    }
-
-    @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        if (args.length == 0) {
-            Role rBGS = null;
-            Role rIW = null;
-            for (Role role : event.getGuild().getRoles()) {
-                if (role.getName().equals("BGS"))
-                    rBGS = role;
-                if (role.getName().equals("Iridium Wing"))
-                    rIW  = role;
-            }
-
-            if (event.getMember().getRoles().contains(rBGS)) {
-                event.getGuild().getController().removeRolesFromMember(event.getMember(), rBGS).queue();
-                event.getChannel().sendMessage("BGS role removed").queue();
-            }
-            else if (event.getMember().getRoles().contains(rIW)) {
-                event.getGuild().getController().addRolesToMember(event.getMember(), rBGS).queue();
-                event.getChannel().sendMessage("BGS role added").queue();
-            }
-        } else if (args.length == 1) {
-            if (args[0].equalsIgnoreCase("mystats")) {
-                String output = "```";
-                for (Map.Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
-                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
-                }
-                output += "```";
-
-                if (!event.getAuthor().hasPrivateChannel())
-                    event.getAuthor().openPrivateChannel().complete();
-                event.getAuthor().getPrivateChannel().sendMessage(output).queue();
-            } else if (args[0].equalsIgnoreCase("total")) {
-                String output = "```";
-                for (Map.Entry<Activity, Double> entry : getTotalAmount().entrySet()) {
-                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
-                }
-                output += "```";
-                if (DataProvider.isAdmin(event.getMember().getRoles()))
-                    event.getChannel().sendMessage(output).queue();
-                else {
-                    if (!event.getAuthor().hasPrivateChannel())
-                        event.getAuthor().openPrivateChannel().complete();
-                    event.getAuthor().getPrivateChannel().sendMessage(output).queue();
-                }
-            } else if (args[0].equalsIgnoreCase("help")) {
-                if (!event.getAuthor().hasPrivateChannel())
-                    event.getAuthor().openPrivateChannel().complete();
-                event.getAuthor().getPrivateChannel().sendMessage(bgsHelp).queue();
-            }
-
-        } else if (args.length == 2) {
-            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\nThe BGS logging commands require a system name. Please enter '/bgs help' for more info.").queue();
-        } else if (args.length == 3) {
-            /*TODO Logging Improvements List
-            *Split this off into separate function
-            *Support for direct message
-            *Confirmation message that does NOT tag them but is customised per the action logged
-            *If goal is already met direct message once per activity with details on what still needs work.
-            */
-            Activity activity = Activity.from(args[0]);
-            if (activity != null) {
-                String username = event.getMember().getEffectiveName();
-                String userid = event.getAuthor().getId();
-                String system = args[2];
-                int amount = Integer.parseInt(args[1]);
-
-                if(logActivity(activity, userid, username, amount, system)) {
-                    //TODO nice output for commander
-                    event.getChannel().sendMessage("Your engagement has been noticed. Thanks for your service o7").queue();
-                } else {
-                    String message = getSystems();
-                    event.getChannel().sendMessage(message).queue();
-                }
-            } else {
-                String actString = "";
-                for (Activity act : Activity.values())
-                    actString += act.toString() + "\n";
-                event.getChannel().sendMessage("This activity does not exist. These do:\n" + actString).queue();
-            }
-        } else if (args[0].equalsIgnoreCase("gettick") && DataProvider.isAdmin(event.getMember().getRoles())) {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
-            Date time;
-            try {
-                time = sdf.parse(args[2]);
-                String output = "Data for " + args[1] + " ticks after " + args[2] + " UTC:\n```";
-                Map<Activity, Double> entries = getTotalAmount(time, Integer.parseInt(args[1]));
-                for (Map.Entry<Activity, Double> entry : entries.entrySet()) {
-                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
-                }
-                output += "```";
-                if (entries.isEmpty())
-                    event.getChannel().sendMessage("No records for the specified period").queue();
-                else
-                    event.getChannel().sendMessage(output).queue();
-            } catch (ParseException e) {
-                event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
-            }
-
-        } else if (args[0].equalsIgnoreCase("gettickfull") && DataProvider.isAdmin(event.getMember().getRoles())) {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
-            Date time;
-            try {
-                time = sdf.parse(args[2]);
-                List<String> lines = getCSVData(time, Integer.parseInt(args[1]));
-
-                String output = "Data for " + args[1] + " ticks after " + args[2] + ":\n";
-                output += "----------------------------------------------------------------------\n";
-                output += lines.get(0) + "\n```";
-                for (int i = 1; i < lines.size(); i++) {
-                    output += lines.get(i) + "\n";
-                }
-                if (lines.size() < 2)
-                    output += "No records found";
-                output += "```";
-
-                event.getChannel().sendMessage(output).queue();
-            } catch (ParseException e) {
-                event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
-            }
-        } else if (args.length > 3) {
-            // anything more than 3 is likely the user has tried to log data but used a number seperate (1,000,000)
-            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\n" +
-                    "Have you used a thousand/million seperator when entering the amount?\n" +
-                    "e.g. Enter /bgs trade, 1500000\n" +
-                    "Do not enter /bgs trade, 1,500,000").queue();
-
-        }
-    }
-
-    private String getSystems() {
-        String message = "**WARNING ACTION NOT LOGGED**\nInvalid system entered. You can use either the shortname or the fullname. Please select from:\n```\n";
-        message +="Shortname ¦ Fullname\n";
-        try {
-            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC;");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                message += String.format("%s-3 | %s\n", rs.getString("shortname"), rs.getString("fullname"));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        message +="```\n";
-        return message;
-    }
-
-    @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
-        return "For help with BGS bot commands use '/bgs help'";
-    }
-
     enum Activity {
         BOND, BOUNTY, MINING, MISSION, SCAN, SMUGGLING, TRADE, MURDER;
 
@@ -220,39 +57,156 @@ public class BGS implements PMCommand, GuildCommand {
 
     private static SimpleDateFormat sqlSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public static int getTotalAmount(Activity activity) {
-        int total = 0;
-
-        Connection connect = new Connections().getConnection();
-        try {
-            PreparedStatement ps = connect.prepareStatement("SELECT SUM(amount) AS total FROM bgs_activity WHERE activity = ?");
-            ps.setString(1, activity.toString());
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next())
-                total = rs.getInt("total");
-        } catch (SQLException e) {
-            e.printStackTrace();
+    @Override
+    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+        if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("mystats")) {
+                String output = "```";
+                for (Map.Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
+                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+                }
+                output += "```";
+                event.getChannel().sendMessage(output).queue();
+            }
+            else if (args[0].equalsIgnoreCase("help")) {
+                event.getChannel().sendMessage(bgsHelp).queue();
+            }
         }
-        return total;
     }
 
-    public static int getTotalAmount(Activity activity, String userid) {
-        int total = 0;
+    @Override
+    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+        if (args.length == 0) {
+            toggleBgsRole(event);
 
-        Connection connect = new Connections().getConnection();
-        try {
-            PreparedStatement ps = connect.prepareStatement("SELECT SUM(amount) AS total FROM bgs_activity WHERE activity = ? AND userid = ?");
-            ps.setString(1, activity.toString());
-            ps.setString(2, userid);
-            ResultSet rs = ps.executeQuery();
+        } else if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("mystats")) {
+                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(getUserStats(event.getAuthor().getId())).queue();
 
-            if (rs.next())
-                total = rs.getInt("total");
-        } catch (SQLException e) {
-            e.printStackTrace();
+            } else if (args[0].equalsIgnoreCase("total")) {
+                if (DataProvider.isAdmin(event.getMember().getRoles()))
+                    event.getChannel().sendMessage(getTotalAmount()).queue();
+                else
+                    JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(getTotalAmount()).queue();
+
+            } else if (args[0].equalsIgnoreCase("help")) {
+                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(bgsHelp).queue();
+
+            }
+        } else if (args.length == 2) {
+            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\nThe BGS logging commands require a system name. Please enter '/bgs help' for more info.").queue();
+
+        } else if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("gettick") && DataProvider.isAdmin(event)) {
+                event.getChannel().sendMessage(getTick(args)).queue();
+
+            } else if (args[0].equalsIgnoreCase("gettickfull") && DataProvider.isAdmin(event)) {
+                event.getChannel().sendMessage(getFullTick(args)).queue();
+
+            } else {
+                event.getChannel().sendMessage(logActivity(args[0], event.getAuthor().getId(), event.getMember().getEffectiveName(), args[1], args[2])).queue();
+
+            }
+        } else if (args.length > 3) {
+            // anything more than 3 is likely the user has tried to log data but used a number seperate (1,000,000)
+            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\n" +
+                    "Have you used a thousand/million seperator when entering the amount?\n" +
+                    "e.g. Enter /bgs trade, 1500000\n" +
+                    "Do not enter /bgs trade, 1,500,000").queue();
+
         }
-        return total;
+    }
+
+    @Override
+    public String getHelp(GuildMessageReceivedEvent event) {
+        return "For help with BGS bot commands use '/bgs help'";
+    }
+
+    private String getFullTick(String[] args) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+        Date time;
+        try {
+            time = sdf.parse(args[2]);
+            List<String> lines = getCSVData(time, Integer.parseInt(args[1]));
+
+            String output = "Data for " + args[1] + " ticks after " + args[2] + ":\n";
+            output += "----------------------------------------------------------------------\n";
+            output += lines.get(0) + "\n```";
+            for (int i = 1; i < lines.size(); i++) {
+                output += lines.get(i) + "\n";
+            }
+            if (lines.size() < 2)
+                output += "No records found";
+            output += "```";
+
+            return output;
+        } catch (ParseException e) {
+            return "Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'";
+        }
+    }
+
+    private String getTick(String[] args) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+        Date time;
+        try {
+            time = sdf.parse(args[2]);
+            String output = "Data for " + args[1] + " ticks after " + args[2] + " UTC:\n```";
+            Map<Activity, Double> entries = getTotalAmount(time, Integer.parseInt(args[1]));
+            for (Map.Entry<Activity, Double> entry : entries.entrySet()) {
+                output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+            }
+            output += "```";
+            if (entries.isEmpty())
+                return "No records for the specified period";
+            else
+                return output;
+        } catch (ParseException e) {
+            return "Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'";
+        }
+    }
+
+    private String getUserStats(String userID) {
+        String output = "```";
+        for (Map.Entry<Activity, Double> entry : getTotalAmount(userID).entrySet()) {
+            output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+        }
+        output += "```";
+
+        return output;
+    }
+
+    private void toggleBgsRole(GuildMessageReceivedEvent event) {
+        Role rBGS = null;
+        Role rIW = null;
+        for (Role role : event.getGuild().getRoles()) {
+            if (role.getName().equals("BGS"))
+                rBGS = role;
+            if (role.getName().equals("Iridium Wing"))
+                rIW  = role;
+        }
+
+        if (event.getMember().getRoles().contains(rBGS)) {
+            event.getGuild().getController().removeRolesFromMember(event.getMember(), rBGS).queue();
+            event.getChannel().sendMessage("BGS role removed").queue();
+        }
+        else if (event.getMember().getRoles().contains(rIW)) {
+            event.getGuild().getController().addRolesToMember(event.getMember(), rBGS).queue();
+            event.getChannel().sendMessage("BGS role added").queue();
+        }
+    }
+
+    private static String getSystems() {
+        String message = "```Shortname ¦ Fullname\n";
+        try {
+            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                message += String.format("%-3s | %s\n", rs.getString("shortname"), rs.getString("fullname"));
+        } catch (SQLException e) {
+            LogUtil.logErr(e);
+        }
+        message +="```\n";
+        return message;
     }
 
     private static Map<Activity, Double> getTotalAmount(String userid) {
@@ -267,13 +221,13 @@ public class BGS implements PMCommand, GuildCommand {
             while (rs.next())
                 totals.put(Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
         return totals;
     }
 
-    private static Map<Activity, Double> getTotalAmount() {
-        Map<Activity, Double> totals = new LinkedHashMap<>();
+    private static String getTotalAmount() {
+        String output = "```";
 
         Connection connect = new Connections().getConnection();
         try {
@@ -281,11 +235,13 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
-                totals.put(Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
+                output += "\n" + rs.getString("activity") + ": " + rs.getDouble("total");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
-        return totals;
+        output = output.replaceFirst("\n", "") + "```";
+
+        return output;
     }
 
     private static Map<Activity, Double> getTotalAmount(Date start, int ticks) {
@@ -302,28 +258,29 @@ public class BGS implements PMCommand, GuildCommand {
             while (rs.next())
                 totals.put(Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
         return totals;
     }
 
-    public static int getTotalParticipants() {
-        int total = 0;
+    private static String logActivity(String sActivity, String userid, String username, String sAmount, String system) {
+        /*TODO Logging Improvements List
+        *Split this off into separate function
+        *Support for direct message
+        *Confirmation message that does NOT tag them but is customised per the action logged
+        *If goal is already met direct message once per activity with details on what still needs work.
+        */
+        int amount = Integer.parseInt(sAmount);
+        Activity activity = Activity.from(sActivity);
 
-        Connection connect = new Connections().getConnection();
-        try {
-            PreparedStatement ps = connect.prepareStatement("SELECT COUNT(DISTINCT userid) AS total FROM bgs_activity");
-            ResultSet rs = ps.executeQuery();
+        if (activity == null) {
+            String output = "";
+            for (Activity act : Activity.values())
+                output += act.toString() + "\n";
+            return "This activity does not exist. These do:\n" + output;
 
-            if (rs.next())
-                total = rs.getInt("total");
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return total;
-    }
 
-    private static boolean logActivity(Activity activity, String userid, String username, int amount, String system) {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) " +
@@ -338,17 +295,19 @@ public class BGS implements PMCommand, GuildCommand {
             ps.executeUpdate();
         } catch (MySQLIntegrityConstraintViolationException e) {
             //This happens when the system was not found.
-            //Return false to tell the calling method to give the user appropriate feedback
-            return false;
+
+            String message = "**WARNING ACTION NOT LOGGED**\nInvalid system entered. You can use either the shortname or the fullname. Please select from:\n";
+            return message + getSystems();
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            LogUtil.logErr(e);
+            return "**WARNING ACTION NOT LOGGED**\nSomething went wrong saving your contribution. Please retry later";
         }
 
         if (!DataProvider.isDev())
             Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount, system.toUpperCase());
 
-        return true;
+        //TODO nice output for commander
+        return "Your engagement has been noticed. Thanks for your service o7";
     }
 
     private static List<String> getCSVData(Date start, int ticks) {
@@ -406,7 +365,7 @@ public class BGS implements PMCommand, GuildCommand {
                 lines.add(rowValues.replaceFirst(",", ""));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
         return lines;
     }

@@ -1,6 +1,7 @@
 package commands.misc_commands;
 
 import commands.GuildCommand;
+import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,7 +40,7 @@ public class XKCD implements GuildCommand {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LogUtil.logErr(e);
         }
     }
 

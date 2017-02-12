@@ -100,7 +100,7 @@ class AutoUpdate {
                     chan.sendMessage("Finished download of new version. Updating now...").complete();
                     System.exit(1);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LogUtil.logErr(e);
                 }
             }
         }
