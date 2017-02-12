@@ -235,7 +235,7 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
-                output += String.format("%-9s: %.0f\n", rs.getString("activity"), rs.getDouble("total"));
+                output += String.format(Locale.GERMANY, "%-9s: %.0f\n", rs.getString("activity"), rs.getDouble("total")).replace('.', '\'');
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
