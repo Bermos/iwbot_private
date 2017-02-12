@@ -66,7 +66,8 @@ class AutoUpdate {
                     commits += "Author: " + commit.author.username + "\n";
                     commits += "Message: " + commit.message + "\n\n";
                 }
-                System.out.println(commits);
+                if (commits.length() > 1020)
+                    commits = commits.substring(0, 1020) + "...";
 
                 EmbedBuilder eb = new EmbedBuilder()
                         .setTitle("New push to repository")
@@ -93,13 +94,14 @@ class AutoUpdate {
                     ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
                     FileOutputStream fos = new FileOutputStream("./discordbot.jar");
                     fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+
+                    System.out.println("successfully downloaded");
+
+                    chan.sendMessage("Finished download of new version. Updating now...").complete();
+                    System.exit(1);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                System.out.println("successfully downloaded");
-
-                chan.sendMessage("Finished download of new version. Updating now...").complete();
-                System.exit(1);
             }
         }
     }
