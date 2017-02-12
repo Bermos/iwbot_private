@@ -323,7 +323,7 @@ public class BGS implements PMCommand, GuildCommand {
                     "(SELECT systemid FROM bgs_systems WHERE shortname = ? OR fullname = ? LIMIT 1))");
             ps.setString(1, username);
             ps.setString(2, userid);
-            ps.setInt(3, amount);
+            ps.setInt   (3, amount);
             ps.setString(4, activity.toString());
             ps.setString(5, system);
             ps.setString(6, system);
