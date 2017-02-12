@@ -31,7 +31,7 @@ public class BGS implements PMCommand, GuildCommand {
                 event.getChannel().sendMessage(output).queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
-                event.getAuthor().getPrivateChannel().sendMessage(bgsHelp()).queue();
+                event.getChannel().sendMessage(bgsHelp()).queue();
             }
         }
     }
