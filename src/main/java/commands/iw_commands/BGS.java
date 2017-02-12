@@ -235,11 +235,11 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
-                output += "\n" + rs.getString("activity") + ": " + rs.getDouble("total");
+                output += String.format("%-9s: %.0f\n", rs.getString("activity"), rs.getDouble("total"));
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
-        output = output.replaceFirst("\n", "") + "```";
+        output += "```";
 
         return output;
     }
