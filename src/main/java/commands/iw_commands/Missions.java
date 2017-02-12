@@ -235,6 +235,6 @@ public class Missions implements GuildCommand {
 	@Override
 	public String getHelp(GuildMessageReceivedEvent event) {
 		//TODO add correct help sting
-		return "format: <new/close>, <mission channel name>, <@explorer name> [creates a mission text channel with permissions to mentioned explorer.";
+		return "format: <new/close>, <mission channel name>, <@explorer name> [creates a mission text channel with permissions to mentioned explorer].";
 	}
 }
