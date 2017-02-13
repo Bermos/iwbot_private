@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,34 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 public class DataProvider {
 	private static Info info;
+
+    public static void setDiscordToken(String discordToken) {
+        if (info == null)
+            getInfo();
+        info.discord.token = discordToken;
+
+        setInfo();
+    }
+
+    public static void setPrefix(String prefix) {
+        if (info == null)
+            getInfo();
+        info.discord.prefix = prefix;
+
+        setInfo();
+    }
+
+    public static String getPrefix() {
+        return info.discord.prefix;
+    }
+
+    static class ConData {
+        String IP;
+        String DB;
+        String US;
+        String PW;
+    }
+
 	class Info {
 		class Discord {
 			String token;
@@ -26,13 +55,7 @@ public class DataProvider {
 			List<String> idRoles;
 			String newMember;
 			String adminChanID;
-		}
-
-		class ConData {
-			String IP;
-			String DB;
-			String US;
-			String PW;
+			String prefix;
 		}
 
 		Discord discord;
@@ -237,7 +260,7 @@ public class DataProvider {
 		return info.dev;
 	}
 
-	public static Info.ConData getConData(String conName) {
+	public static ConData getConData(String conName) {
 		if (info == null)
 			getInfo();
 		return info.connections.get(conName);
@@ -253,5 +276,16 @@ public class DataProvider {
         if (info == null)
             getInfo();
         return info.githubBranch;
+    }
+
+    public static void addConnection(String name, String ip, String db, String us, String pw) {
+	    if (info == null)
+	        getInfo();
+	    ConData con = new ConData();
+	    con.IP = ip; con.DB = db;
+	    con.US = us; con.PW = pw;
+	    info.connections.put(name, con);
+
+	    setInfo();
     }
 }

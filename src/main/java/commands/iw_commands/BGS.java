@@ -6,7 +6,6 @@ import commands.PMCommand;
 import iw_bot.JDAUtil;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
