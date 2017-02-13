@@ -63,7 +63,8 @@ public class Main {
 		db = "iw_dev";
 		us = "iwbot";
 		Pattern sozPat = Pattern.compile("[!@*?()$]");
-		Pattern numPat= Pattern.compile("0123456789");
+		Pattern numPat= Pattern.compile("[0123456789]");
+		System.out.println("Creating pw for mysql user...");
 		do {
 			pw = RandomStringUtils.random(20, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@*?()$");
 			// Create new random passwords until they contain both numbers and special characters
@@ -73,6 +74,8 @@ public class Main {
 		PreparedStatement ps = con.prepareStatement("CREATE USER 'iwbot'@'localhost' IDENTIFIED BY ?;");
 		ps.setString(1, pw);
 		ps.execute();
+
+		System.out.println("Mysql user created. Setting up database and tables...");
 
 		String sql = "";
 		Scanner sc = new Scanner(new File("./create_dev_db.sql"));

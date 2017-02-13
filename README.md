@@ -5,10 +5,10 @@ I'm not expecting this bot to be useful for anyone else due to it's heavily cust
 
 ### SETUP
 
-1. Install a mysql server on your System
-2. Setup a admin user (usually root) for that server
-3. Run the bot in the same directory as the data.json and create_dev_db.json files
-4. Follow the setup steps provided by the bot
-5. You get your discord token from: https://discordapp.com/login?redirect_to=/developers/applications/me
+1. Install a [mysql server](https://dev.mysql.com/downloads/installer/) on your System
+2. Setup a admin user (usually root) for that server. Don't forget his password.
+3. Run the bot in the same directory as the data.json, memes.json and create_dev_db.json files
+4. You get your discord token from their [dev page](https://discordapp.com/login?redirect_to=/developers/applications/me)
+5. Follow the setup steps provided by the bot
 
 Done.
