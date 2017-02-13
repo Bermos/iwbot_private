@@ -1,0 +1,18 @@
+[
+	{
+		"keys": [
+			"test"
+		],
+		"outputs": [
+			"hello",
+			"holla",
+			"hallo"
+		],
+		"exact": true,
+		"randomOut": true,
+		"tts": false,
+		"chanIDs": [],
+		"cd": 0,
+		"lastUsed": 0
+	}
+]

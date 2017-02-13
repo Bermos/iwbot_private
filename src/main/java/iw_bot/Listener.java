@@ -30,7 +30,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private static SimpleDateFormat sdf;
 
-	static final String prefix = DataProvider.isDev() ? "!!" : "/";
+	static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
 
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
