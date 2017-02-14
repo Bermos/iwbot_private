@@ -14,6 +14,7 @@ public class Restart implements PMCommand, GuildCommand {
         Member author = event.getJDA().getGuildById("142749481530556416").getMember(event.getAuthor());
         if ( !( DataProvider.isOwner(event) || (author != null && DataProvider.isAdmin(author.getRoles())) ) ) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            return;
         }
 
         event.getChannel().sendMessage("Restarting...").queue();
