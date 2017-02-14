@@ -195,7 +195,7 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private static String getSystems() {
-        String message = "```Shortname ¦ Fullname\n";
+        String message = "```Shortname | Fullname\n";
         try {
             PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC");
             ResultSet rs = ps.executeQuery();
