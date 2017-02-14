@@ -10,5 +10,6 @@ I'm not expecting this bot to be useful for anyone else due to it's heavily cust
 3. Run the bot in the same directory as the data.json, memes.json and create_dev_db.json files
 4. You get your discord token from their [dev page](https://discordapp.com/login?redirect_to=/developers/applications/me)
 5. Follow the setup steps provided by the bot
+6. [Invite](https://discordapp.com/developers/docs/topics/oauth2#adding-bots-to-guilds) the bot to our discord server and give him the bot_dev role.
 
 Done.

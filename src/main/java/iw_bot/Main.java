@@ -1,6 +1,7 @@
 package iw_bot;
 
 import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -90,9 +91,27 @@ public class Main {
 
 
 		System.out.println("Database set up.");
-		System.out.print("Discord token: ");
-		DataProvider.setDiscordToken(scanner.nextLine());
-		System.out.println();
+
+		JDA jda = null;
+
+		do {
+            System.out.print("Discord token: ");
+            DataProvider.setDiscordToken(scanner.nextLine());
+            System.out.println();
+            System.out.println("Testing token...");
+
+            try {
+                jda = new JDABuilder(AccountType.BOT)
+                        .setToken(DataProvider.getToken())
+                        .buildBlocking();
+                jda.shutdown();
+            } catch (LoginException e) {
+                System.out.println("Your bot token was not accepted. Please retry.");
+            } catch (InterruptedException | RateLimitedException e) {
+                e.printStackTrace();
+            }
+
+        } while (jda == null);
 
         System.out.println("Please chose a prefix for the commands. Best would be something that isn't in use yet: ");
         DataProvider.setPrefix(scanner.nextLine());
