@@ -31,6 +31,7 @@ class AutoUpdate {
     }
     class Push {
         String ref;
+        String after;
         Commit commits[];
     }
 
@@ -71,6 +72,7 @@ class AutoUpdate {
 
                 EmbedBuilder eb = new EmbedBuilder()
                         .setTitle("New push to repository")
+                        .setUrl("https://github.com/Bermos/iwbot_private/commit/" + push.after)
                         .setColor(jda.getGuildById("142749481530556416").getMember(jda.getSelfUser()).getRoles().get(0).getColor())
                         .addField("Reference", push.ref, true)
                         .addField("Commits", commits, false);

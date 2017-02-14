@@ -24,12 +24,12 @@ public class Main {
 			install();
 
 		try {
-
+			
 			new JDABuilder(AccountType.BOT)
-					.setToken(DataProvider.getToken())
-					.addListener(new Listener())
-					.buildBlocking();
-
+			.setToken(DataProvider.getToken())
+			.addListener(new Listener())
+			.buildBlocking();
+			
 		} catch (LoginException e) {
 			System.out.println("[Error] invalid bot token.");
 		} catch (IllegalArgumentException e) {
@@ -63,7 +63,7 @@ public class Main {
 		db = "iw_dev";
 		us = "iwbot";
 		Pattern sozPat = Pattern.compile("[!@*?()$]");
-		Pattern numPat = Pattern.compile("[0123456789]");
+		Pattern numPat= Pattern.compile("[0123456789]");
 		System.out.println("Creating pw for mysql user...");
 		do {
 			pw = RandomStringUtils.random(20, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@*?()$");
@@ -79,7 +79,7 @@ public class Main {
 
 		String sql = "";
 		Scanner sc = new Scanner(new File("./create_dev_db.sql"));
-		while (sc.hasNext())
+		while(sc.hasNext())
 			sql += sc.nextLine() + "\n";
 
 		String[] statements = sql.split(";");
@@ -94,8 +94,8 @@ public class Main {
 		DataProvider.setDiscordToken(scanner.nextLine());
 		System.out.println();
 
-		System.out.println("Please chose a prefix for the commands. Best would be something that isn't in use yet: ");
-		DataProvider.setPrefix(scanner.nextLine());
+        System.out.println("Please chose a prefix for the commands. Best would be something that isn't in use yet: ");
+        DataProvider.setPrefix(scanner.nextLine());
 
 		System.out.println("Setup complete. You may still want to go into the data.json and add missing information");
 	}
