@@ -125,6 +125,8 @@ class Commands {
 
 		guildCommands.put("restart", new Restart());
 
+		guildCommands.put("shutdown", new Shutdown());
+
 		//end of commands
 	}
 }
