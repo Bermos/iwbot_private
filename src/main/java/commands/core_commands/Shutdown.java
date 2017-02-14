@@ -1,10 +1,25 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
+import commands.PMCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
 
-public class Shutdown implements GuildCommand {
+public class Shutdown implements GuildCommand, PMCommand {
+    @Override
+    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+        //Permission check
+        if (!(DataProvider.isOwner(event))) {
+            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            return;
+        }
+
+        event.getChannel().sendMessage("Goodbye, master.").complete();
+        event.getJDA().shutdown();
+        System.exit(0);
+    }
+
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
@@ -13,7 +28,7 @@ public class Shutdown implements GuildCommand {
             return;
         }
 
-        event.getChannel().sendMessage("Goodbye, master.").queue();
+        event.getChannel().sendMessage(event.getGuild().getEmoteById("281065961325461504").getAsMention() + " I don't want to go...").complete();
         event.getJDA().shutdown();
         System.exit(0);
     }
