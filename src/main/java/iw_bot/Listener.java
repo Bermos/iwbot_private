@@ -30,8 +30,8 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private static SimpleDateFormat sdf;
 
-	static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
 
+	public static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
 	public static long startupTime;
 	public static final String VERSION_NUMBER = "3.1.8_73";

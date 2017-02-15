@@ -4,6 +4,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.JDAUtil;
+import iw_bot.Listener;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -21,6 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+
 public class BGS implements PMCommand, GuildCommand {
     enum Activity {
         BOND, BOUNTY, MINING, MISSION, SCAN, SMUGGLING, TRADE, MURDER;
@@ -33,19 +35,28 @@ public class BGS implements PMCommand, GuildCommand {
             input = input.toLowerCase();
             Activity output;
             switch (input) {
+                case "bon"       :
                 case "bond"      :
                 case "bonds" 	 : output = Activity.BOND;	    break;
+                case "bou"       :
                 case "bounty"    :
                 case "bounties"  : output = Activity.BOUNTY;	break;
+                case "min"       :
                 case "mining" 	 : output = Activity.MINING;	break;
+                case "mis"       :
                 case "mission"   :
                 case "missions"  : output = Activity.MISSION;   break;
                 case "exploration" :
+                case "sca"       :
                 case "scan"      :
                 case "scans"	 : output = Activity.SCAN;      break;
+                case "smu"       :
+                case "smuggle"   :
                 case "smuggling" : output = Activity.SMUGGLING; break;
+                case "tra"   :
                 case "trading"   :
                 case "trade"	 : output = Activity.TRADE;	    break;
+                case "mur"	     :
                 case "murder"	 : output = Activity.MURDER;	break;
                 default          : output = null;               break;
             }
@@ -77,7 +88,97 @@ public class BGS implements PMCommand, GuildCommand {
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         if (args.length == 0) {
             toggleBgsRole(event);
+        }
+        // admin functions for systems
+        else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems")) && DataProvider.isAdmin(event)){
+            String systemhelp = "Help: " + Listener.prefix + "bgs system, <command modifier {add, edit, show, hide}>";
+            if (args.length == 1) {
+                event.getChannel().sendMessage(systemhelp).queue();
+            } else if (args[1].equalsIgnoreCase("list")) {
+                event.getChannel().sendMessage(getSystems(DataProvider.isAdmin(event))).queue();
 
+            } else if (args[1].equalsIgnoreCase("hide")) {
+                if (args.length == 3) {
+                    int systemid = Integer.parseInt(args[2]);
+                    Connection connect = new Connections().getConnection();
+                    try {
+                        PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET hidden = ? " +
+                                "WHERE systemid = ?");
+                        ps.setInt(1, 1);
+                        ps.setInt(2, systemid);
+                        ps.executeUpdate();
+                        event.getChannel().sendMessage("BGS star system hidden. Logging no longer possible for this system.").queue();
+                    } catch (SQLException e) {
+                        //This happens when the system was not found.
+                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT HIDDEN**").queue();
+                    }
+                } else {
+                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
+                }
+
+            } else if (args[1].equalsIgnoreCase("show")) {
+                if (args.length == 3) {
+                    int systemid = Integer.parseInt(args[2]);
+                    Connection connect = new Connections().getConnection();
+                    try {
+                        PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET hidden = ? " +
+                                "WHERE systemid = ?");
+                        ps.setInt(1, 0);
+                        ps.setInt(2, systemid);
+                        ps.executeUpdate();
+                        event.getChannel().sendMessage("BGS star system un-hidden. Logging possible for this system.").queue();
+                    } catch (SQLException e) {
+                        //This happens when the system was not found.
+                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT HIDDEN**").queue();
+                    }
+                } else{
+                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
+                }
+            } else if (args[1].equalsIgnoreCase("add")) {
+                if (args.length == 4) {
+                    String shortname = args[1];
+                    String fullname = args[2];
+
+                    Connection connect = new Connections().getConnection();
+                    try {
+                        PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_systems (shortname, fullname) " +
+                                "VALUES (?, ?)");
+                        ps.setString(1, shortname);
+                        ps.setString(2, fullname);
+                        ps.executeUpdate();
+                    } catch (SQLException e) {
+                        //This happens when the system was not found.
+                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT ADDED**").queue();
+                    }
+                    event.getChannel().sendMessage("New star system added to BGS logging.").queue();
+                } else{
+                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, add, <shortname>, <fullname>").queue();
+                }
+            } else if (args[1].equalsIgnoreCase("edit")) {
+                if (args.length == 5) {
+                    int systemid = Integer.parseInt(args[2]);
+                    String shortname = args[3];
+                    String fullname = args[4];
+
+                    Connection connect = new Connections().getConnection();
+                    try {
+                        PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET shortname = ?, fullname = ? " +
+                                "WHERE systemid = ?");
+                        ps.setString(1, shortname);
+                        ps.setString(2, fullname);
+                        ps.setInt(3, systemid);
+                        ps.executeUpdate();
+                    } catch (SQLException e) {
+                        //This happens when the system was not found.
+                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT UPDATED**").queue();
+                    }
+                    event.getChannel().sendMessage("Star system updated.").queue();
+                }else {
+                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(DataProvider.isAdmin(event))).queue();
+                }
+            } else{
+                event.getChannel().sendMessage(systemhelp).queue();
+            }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
                 JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(getUserStats(event.getAuthor().getId())).queue();
@@ -90,20 +191,22 @@ public class BGS implements PMCommand, GuildCommand {
 
             } else if (args[0].equalsIgnoreCase("help")) {
                 JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(bgsHelp).queue();
-
             }
         } else if (args.length == 2) {
-            event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\nThe BGS logging commands require a system name. Please enter '/bgs help' for more info.").queue();
+            String message = "**WARNING ACTION NOT LOGGED**\nStar system not specified? Enter '" + Listener.prefix + "bgs help' or use one of the star system names below:\n";
+            message += getSystems(DataProvider.isAdmin(event));
+            event.getChannel().sendMessage(message).queue();
+        }
 
-        } else if (args.length == 3) {
+        else if (args.length == 3) {
             if (args[0].equalsIgnoreCase("gettick") && DataProvider.isAdmin(event)) {
                 event.getChannel().sendMessage(getTick(args)).queue();
 
             } else if (args[0].equalsIgnoreCase("gettickfull") && DataProvider.isAdmin(event)) {
                 event.getChannel().sendMessage(getFullTick(args)).queue();
 
-            } else {
-                event.getChannel().sendMessage(logActivity(args[0], event.getAuthor().getId(), event.getMember().getEffectiveName(), args[1], args[2])).queue();
+            }  else {
+                event.getChannel().sendMessage(logActivity(DataProvider.isAdmin(event), args[0], event.getAuthor().getId(), event.getMember().getEffectiveName(), args[1], args[2])).queue();
 
             }
         } else if (args.length > 3) {
@@ -194,14 +297,30 @@ public class BGS implements PMCommand, GuildCommand {
         }
     }
 
-    private static String getSystems() {
-        String message = "```Shortname | Fullname\n";
+    private static String getSystems(boolean admin) {
+        String message = "```ID   | Short | Full\n";
         try {
-            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                message += String.format("%-3s | %s\n", rs.getString("shortname"), rs.getString("fullname"));
-        } catch (SQLException e) {
+            // show hidden systems in italics for admins
+            if (admin) {
+                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC");
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    if (rs.getString("hidden").equals("1")) {
+                        message += String.format("%1$-4s | %2$-5s | %3$s (hidden system)\n", rs.getString("systemid"), rs.getString("shortname"), rs.getString("fullname"));
+                    } else {
+                        message += String.format("%1$-4s | %2$-5s | %3$s\n", rs.getString("systemid"), rs.getString("shortname"), rs.getString("fullname"));
+                    }
+
+                }
+            } else { // just show live systems
+                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems WHERE hidden = 0 ORDER BY fullname ASC");
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    message += String.format("%1$-4s | %2$-6s| %3$s\n", rs.getString("systemid"), rs.getString("shortname"), rs.getString("fullname"));
+                }
+            }
+        }
+        catch (SQLException e) {
             LogUtil.logErr(e);
         }
         message +="```\n";
@@ -262,7 +381,7 @@ public class BGS implements PMCommand, GuildCommand {
         return totals;
     }
 
-    private static String logActivity(String sActivity, String userid, String username, String sAmount, String system) {
+    private static String logActivity(boolean admin, String sActivity, String userid, String username, String sAmount, String system) {
         /*TODO Logging Improvements List
         *Split this off into separate function
         *Support for direct message
@@ -296,7 +415,7 @@ public class BGS implements PMCommand, GuildCommand {
             //This happens when the system was not found.
 
             String message = "**WARNING ACTION NOT LOGGED**\nInvalid system entered. You can use either the shortname or the fullname. Please select from:\n";
-            return message + getSystems();
+            return message + getSystems(admin);
         } catch (SQLException e) {
             LogUtil.logErr(e);
             return "**WARNING ACTION NOT LOGGED**\nSomething went wrong saving your contribution. Please retry later";
@@ -370,10 +489,10 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private final String bgsHelp = " **BGS Bot Commands:**\n" +
-            "Enter '/bgs' to add or remove BGS role\n" +
+            "Enter '" + Listener.prefix + "bgs' to add or remove BGS role\n" +
             "\n" +
             "Format for entering bgs commands is:\n"+
-            "/bgs <activity>, <amount with no seperators>, <system identifier>\n" +
+            Listener.prefix + "bgs <activity>, <amount with no seperators>, <system identifier>\n" +
             "\n" +
             "\n" +
             "**BGS Activities:**\n" +
@@ -397,5 +516,5 @@ public class BGS implements PMCommand, GuildCommand {
             "\n" +
             "**Important Notes / Caveats:**\n" +
             "When entering numbers (#) do not use thousand / million seperators.\n" +
-            "e.g. '/bgs trade, 1500000'\n";
+            "e.g. '" + Listener.prefix + "bgs trade, 1500000'\n";
 }
