@@ -11,7 +11,7 @@ public class Connections {
 	private void connect() {
 		
 		try {
-			DataProvider.Info.ConData info = DataProvider.getConData("mysql");
+			DataProvider.ConData info = DataProvider.getConData("mysql");
 
 			SQLConnection = DriverManager.getConnection(
 					"jdbc:mysql://" + info.IP +
@@ -30,6 +30,16 @@ public class Connections {
 		}
 		
 		return SQLConnection;
+	}
+
+	public static Connection getLocalCon(String us, String pw) {
+		try {
+			return DriverManager.getConnection("jdbc:mysql://localhost:3306", us, pw);
+		} catch (Exception e) {
+			System.out.println("Something went wrong");
+		}
+
+		return null;
 	}
 
 }

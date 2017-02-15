@@ -3,7 +3,10 @@ package commands.ed_commands;
 import com.google.gson.Gson;
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.JDAUtil;
 import iw_bot.LogUtil;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
@@ -12,12 +15,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import java.io.InputStreamReader;
-import java.net.URL;
 import provider.DataProvider;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,13 @@ class LoggerSheet {
     List<List<String>> values;
 }
 
+class InaraUser {
+    String avatarUrl;
+    String pageUrl;
+    String name;
+    String info;
+}
+
 public class CMDRLookup implements PMCommand, GuildCommand {
 
     private static long last_lookup;
@@ -47,7 +55,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(lookup(args)).queue();
+        JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(lookup(args)).queue();
     }
 
     @Override
@@ -60,33 +68,34 @@ public class CMDRLookup implements PMCommand, GuildCommand {
         return "Finds all the information available on inara.cz and r/EliteCombatLoggers";
     }
 
-    private String lookup(String[] args) {
+    private MessageEmbed lookup(String[] args) {
+        InaraUser user = inara(args[0]);
+        String logger = "Nothing found";
         if (args.length == 1) {
-            return whois(args[0], false);
+            logger = loggers(args[0], false);
         }
         else if (args.length == 2) {
-            return whois(args[0], args[1].equalsIgnoreCase("update"));
+            logger = loggers(args[0], args[1].equalsIgnoreCase("update"));
         }
 
+        EmbedBuilder eb = new EmbedBuilder();
+        if (user != null) {
+            eb.setAuthor(user.name, user.pageUrl, user.avatarUrl)
+                    .addField("Inara", user.info, false)
+                    .setImage(user.avatarUrl);
+        } else {
+            eb.setTitle(args[0])
+                    .addField("Inara", "Nothing found", false);
+        }
+        eb.addField("r/EliteCombatLoggers", logger, false);
+
         //Should not happen but just in case
-        return "[Error] Something went really, really wrong. Try again later or something";
+        return eb.build();
     }
 
-    private static String whois(String username, boolean force_update) {
-        String info;
-        String inara   = inara(username);
-        String loggers = loggers(username, force_update);
-        //String reddit  = reddit(username);
-
-        info  = inara + "\n\n";
-        info += loggers + "\n\n";
-        //info += reddit + "\n";
-
-        return info;
-    }
-
-    private static String inara(String username) {
-        String info = "__INARA__\nNothing found";
+    private static InaraUser inara(String username) {
+        InaraUser user = new InaraUser();
+        user.info = "Nothing found";
 
         String url = "http://inara.cz/search?location=search&searchglobal=" + username.replaceAll(" ", "+");
         try {
@@ -120,38 +129,39 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 }
             }
 
-            //If there is a closest (maybe noone was found) format the findings for output
+            //If there is a closest (maybe no one was found) format the findings for output
             if (closest != null) {
-                info = "__INARA__\n";
                 url = "http://inara.cz" + closest.attr("href");
+                user.pageUrl = url;
+                user.info = "";
                 doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
 
-                info += "**" + doc.select("span.pflheadersmall").get(0).parent().text() + "**\n";
+                user.name = doc.select("span.pflheadersmall").get(0).parent().text();
                 for (Element image : doc.select("img")) {
                     if (image.parent().hasClass("profileimage"))
-                        info += image.absUrl("src") + "\n";
+                        user.avatarUrl = image.absUrl("src");
                 }
 
                 Elements cells = doc.select("span.pflcellname");
                 for (Element cell : cells) {
                     if (!(cell.parent().text().replaceFirst(cell.text(), "").trim().length() < 3))
-                        info += ( cell.text() + ": " + cell.parent().text().replaceFirst(cell.text(), "").trim() + "\n");
+                        user.info += ( cell.text() + ": " + cell.parent().text().replaceFirst(cell.text(), "").trim() + "\n");
                 }
-                info += "This information was obtained using Inara.";
+
+                return user;
             }
 
-
         } catch (IOException e) {
+            e.printStackTrace();
             LogUtil.logErr(e);
         }
 
-        return info;
+        return null;
     }
 
-    private static String loggers(String username, boolean force_update)
-    {
+    private static String loggers(String username, boolean force_update) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm zz");
-        String info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
+        String info = "Nothing found. Last updated: " + sdf.format(last_lookup);
 
         //If the last lookup was done over 3h ago or the user forces it we update
         //This is to increase performance and don't hit google api rate limits
@@ -159,7 +169,8 @@ public class CMDRLookup implements PMCommand, GuildCommand {
             try {
                 //Get doc from google
                 URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D600?key=" + DataProvider.getGoogleToken());
-                Scanner scanner = new Scanner( new InputStreamReader( url.openConnection().getInputStream() ) ) ;
+                Scanner scanner = new Scanner( url.openConnection().getInputStream() );
+
                 String json = "";
                 while (scanner.hasNext()) {
                     json += scanner.nextLine();
@@ -170,7 +181,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
                 //Refresh new last lookup time
                 last_lookup = System.currentTimeMillis();
-                info = "__r/EliteCombatLoggers__\nNothing found. Last updated: " + sdf.format(last_lookup);
+                info = "Nothing found. Last updated: " + sdf.format(last_lookup);
 
                 //Update local data to new readings from google doc
                 combat_loggers.clear();
@@ -180,8 +191,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                         break;
 
                     if (row.get(0).equalsIgnoreCase(username)) {
-                        info = "__r/EliteCombatLoggers__" + "\n"
-                                + "Exact CMDR name: " + row.get(0) + "\n"
+                        info = "Exact CMDR name: " + row.get(0) + "\n"
                                 + "No of logs: " + row.get(1) + "\n"
                                 + "Method: " + row.get(2) + "\n"
                                 + "Platform: " + row.get(3) + "\n"
@@ -198,8 +208,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
         else {
             for (CombatLogger logger : combat_loggers) {
                 if (logger.name.equalsIgnoreCase(username)) {
-                    info = "__r/EliteCombatLoggers__" + "\n"
-                            + "Exact CMDR name: " + logger.name + "\n"
+                    info = "Exact CMDR name: " + logger.name + "\n"
                             + "No of logs: " + logger.no_of_logs + "\n"
                             + "Method: " + logger.type_of_log + "\n"
                             + "Platform: " + logger.platform + "\n"

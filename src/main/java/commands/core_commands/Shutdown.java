@@ -2,42 +2,39 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
 
-public class Restart implements PMCommand, GuildCommand {
+public class Shutdown implements GuildCommand, PMCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        Member author = event.getJDA().getGuildById("142749481530556416").getMember(event.getAuthor());
-        if ( !( DataProvider.isOwner(event) || (author != null && DataProvider.isAdmin(author.getRoles())) ) ) {
+        if (!(DataProvider.isOwner(event))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
-        event.getChannel().sendMessage("Restarting...").queue();
-        System.exit(1);
+        event.getChannel().sendMessage("Goodbye, master.").complete();
+        event.getJDA().shutdown();
+        System.exit(0);
     }
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+        if (!(DataProvider.isOwner(event))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
-        event.getChannel().sendMessage("Restarting...").queue();
-        System.exit(1);
+        event.getChannel().sendMessage(event.getGuild().getEmoteById("281065961325461504").getAsMention() + " I don't want to go...").complete();
+        event.getJDA().shutdown();
+        System.exit(0);
     }
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
-            return "";
-        }
-        return "Restarts the bot. Use when he behaves strangely or throws a fit";
+        return "";
     }
 }

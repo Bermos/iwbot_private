@@ -36,7 +36,7 @@ public class Statistics extends Thread {
 	}
 	
 	public void connect(JDA jda) {
-		DataProvider.Info.ConData info = DataProvider.getConData("influx");
+		DataProvider.ConData info = DataProvider.getConData("influx");
 
 		Statistics.influxDB = InfluxDBFactory.connect(info.IP, info.US, info.PW);
 		Statistics.jda = jda;

@@ -4,11 +4,12 @@
     "idOwner": [],
     "idRoles": [],
     "newMember": "",
-    "adminChanID": ""
+    "adminChanID": "",
+    "prefix": "/"
   },
   "connections": {
-    "mysql": {
-      "IP": "localhost:3306",
+    "influx": {
+      "IP": "",
       "DB": "",
       "US": "",
       "PW": ""
@@ -18,5 +19,5 @@
   "googleToken": "",
   "githubToken": "",
   "githubBranch": "",
-  "dev": false
+  "dev": true
 }
