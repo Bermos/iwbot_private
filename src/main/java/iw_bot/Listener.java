@@ -140,6 +140,8 @@ public class Listener extends ListenerAdapter {
 
         if (!DataProvider.isDev())
 		    Statistics.getInstance().logMessage(event);
+
+        event.getAuthor().isFake();
 	}
 	
 	@Override
