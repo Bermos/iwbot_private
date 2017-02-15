@@ -39,7 +39,7 @@ public class Memes implements PMCommand, GuildCommand {
         return "Interacts with the maymays";
     }
 
-    private String memes(String[] args) {
+    public String memes(String[] args) {
         if (args.length == 1 && args[0].equalsIgnoreCase("update")) {
             DankMemes.update();
             return "Memes updated from file.";

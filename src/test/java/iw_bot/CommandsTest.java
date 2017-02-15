@@ -1,5 +1,6 @@
-package commands.misc_commands;
+package iw_bot;
 
+import commands.GuildCommand;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
@@ -8,17 +9,15 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import org.apache.http.HttpHost;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Map;
 
-public class CmdMemesTest {
-    @org.junit.Before
-    public void setUp() throws Exception {
+import static org.junit.Assert.*;
 
-    }
+public class CommandsTest {
 
     @Test
-    public void getHelp() {
-        Memes memes = new Memes(); // Class to be tested
+    public void runTest() {
+        Commands commands = new Commands();
 
         JDAImpl jda = new JDAImpl(AccountType.BOT, new HttpHost("0"), false, false, false, false);
         GuildImpl guildimpl = new GuildImpl(jda,"0");
@@ -26,14 +25,11 @@ public class CmdMemesTest {
 
         User user = new UserImpl("135891021048315904", jda);
 
-        Message mess = new MessageImpl("0", textimpl, true).setAuthor(user).setContent("");
+        Message mess = new MessageImpl("0", textimpl, true).setAuthor(user);
         GuildMessageReceivedEvent event = new GuildMessageReceivedEvent(jda, 0, mess);
 
-        String[] args = {"update"};
-        assertEquals("Memes updated from file.", memes.memes(args));
-
-        args[0] = "upgrade"; //typo
-        assertEquals("[Error] Wrong arguments", memes.memes(args));
+        for (Map.Entry<String, GuildCommand> entry : commands.guildCommands.entrySet()) {
+            assertNotNull(entry.getValue().getHelp(event));
+        }
     }
-
 }
