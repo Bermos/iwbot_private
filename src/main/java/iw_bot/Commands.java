@@ -2,7 +2,6 @@ package iw_bot;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import commands.core_commands.Welcome;
 import commands.core_commands.*;
 import commands.ed_commands.CMDRLookup;
 import commands.ed_commands.Distance;

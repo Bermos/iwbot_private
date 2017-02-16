@@ -23,7 +23,7 @@ public class CommandsTest {
         GuildImpl guildimpl = new GuildImpl(jda,"0");
         TextChannelImpl textimpl = new TextChannelImpl("0", guildimpl);
 
-        User user = new UserImpl("135891021048315904", jda);
+        User user = new UserImpl("1", jda);
 
         Message mess = new MessageImpl("0", textimpl, true).setAuthor(user);
         GuildMessageReceivedEvent event = new GuildMessageReceivedEvent(jda, 0, mess);

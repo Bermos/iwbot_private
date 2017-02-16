@@ -1,39 +1,38 @@
 package commands.misc_commands;
 
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.entities.impl.*;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import org.apache.http.HttpHost;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class CmdMemesTest {
+    private List<TestCase> tests;
+    class TestCase {
+        TestCase(String u, String[] i, String o) {
+            userId = u; inputs = i; output = o;
+        }
+        String   userId;
+        String[] inputs;
+        String   output;
+    }
+
     @org.junit.Before
     public void setUp() throws Exception {
-
+        tests = new ArrayList<>();
+        tests.add(new TestCase("1", new String[] {"update"},  "Memes updated from file."));
+        tests.add(new TestCase("1", new String[] {"upgrade"}, "[Error] Wrong arguments"));
+        tests.add(new TestCase("0", new String[] {"update"},  "[Error] You aren't authorized to do this"));
     }
 
     @Test
     public void getHelp() {
         Memes memes = new Memes(); // Class to be tested
 
-        JDAImpl jda = new JDAImpl(AccountType.BOT, new HttpHost("0"), false, false, false, false);
-        GuildImpl guildimpl = new GuildImpl(jda,"0");
-        TextChannelImpl textimpl = new TextChannelImpl("0", guildimpl);
-
-        User user = new UserImpl("135891021048315904", jda);
-
-        Message mess = new MessageImpl("0", textimpl, true).setAuthor(user).setContent("");
-        GuildMessageReceivedEvent event = new GuildMessageReceivedEvent(jda, 0, mess);
-
-        String[] args = {"update"};
-        assertEquals("Memes updated from file.", memes.memes(args));
-
-        args[0] = "upgrade"; //typo
-        assertEquals("[Error] Wrong arguments", memes.memes(args));
+        for (TestCase testCase : tests) {
+            assertEquals(memes.memes(testCase.userId, testCase.inputs), testCase.output);
+        }
     }
 
 }

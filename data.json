@@ -1,10 +1,10 @@
 {
   "discord": {
     "token": "",
-    "idOwner": [],
-    "idRoles": [],
+    "idOwner": ["1"],
+    "idRoles": ["1"],
     "newMember": "",
-    "adminChanID": "",
+    "adminChanID": "1",
     "prefix": "/"
   },
   "connections": {
@@ -15,9 +15,9 @@
       "PW": ""
     }
   },
-  "inaraPW": "",
-  "googleToken": "",
-  "githubToken": "",
-  "githubBranch": "",
+  "inaraPW": "1",
+  "googleToken": "1",
+  "githubToken": "1",
+  "githubBranch": "1",
   "dev": true
 }

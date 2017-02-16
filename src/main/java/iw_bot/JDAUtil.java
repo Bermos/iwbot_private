@@ -10,4 +10,5 @@ public class JDAUtil {
 
         return user.getPrivateChannel();
     }
+
 }
