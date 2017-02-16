@@ -252,10 +252,12 @@ public class BGS implements PMCommand, GuildCommand {
             Date time = usrSdf.parse(args[3]);
             List<String> lines = getCSVData(time, Integer.parseInt(args[2]));
 
-            String output = "Data for " + args[2] + " ticks after " + args[3] + ":\n";
+            args[2] = args[2].equals("1") ? "1 tick" : args[2] + " ticks";
+
+            String output = "Data for " + args[2] + " after " + args[3] + ":\n";
             output += "----------------------------------------------------------------------\n";
             output += lines.get(0) + "\n```";
-            for (int i = 1; i < lines.size(); i++) { //TODO check
+            for (int i = 1; i < lines.size(); i++) {
                 output += lines.get(i) + "\n";
                 if (output.length() >= 1900) {
                     output += "```";
@@ -480,20 +482,20 @@ public class BGS implements PMCommand, GuildCommand {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
-                "b.userid AS CMDR, " +
+                "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
                 "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60))) AS Tick, " +
                 "s.fullname AS System, " +
-                "SUM( if( b.activity = 'Bond', b.amount, 0 ) ) AS Bonds, " +
-                "SUM( if( b.activity = 'Bounty', b.amount, 0 ) ) AS Bounties, " +
-                "SUM( if( b.activity = 'Failed', b.amount, 0 ) ) AS Failed, " +
-                "SUM( if( b.activity = 'Fine', b.amount, 0 ) ) AS Fine, " +
-                "SUM( if( b.activity = 'Intel', b.amount, 0 ) ) AS Intel, " +
-                "SUM( if( b.activity = 'Mining', b.amount, 0 ) ) AS Mining, " +
-                "SUM( if( b.activity = 'Mission', b.amount, 0 ) ) AS Missions, " +
-                "SUM( if( b.activity = 'Murder', b.amount, 0 ) ) AS Murder," +
-                "SUM( if( b.activity = 'Scan', b.amount, 0 ) ) AS Scans, " +
+                "SUM( if( b.activity = 'Bond',      b.amount, 0 ) ) AS Bonds, " +
+                "SUM( if( b.activity = 'Bounty',    b.amount, 0 ) ) AS Bounties, " +
+                "SUM( if( b.activity = 'Failed',    b.amount, 0 ) ) AS Failed, " +
+                "SUM( if( b.activity = 'Fine',      b.amount, 0 ) ) AS Fine, " +
+                "SUM( if( b.activity = 'Intel',     b.amount, 0 ) ) AS Intel, " +
+                "SUM( if( b.activity = 'Mining',    b.amount, 0 ) ) AS Mining, " +
+                "SUM( if( b.activity = 'Mission',   b.amount, 0 ) ) AS Missions, " +
+                "SUM( if( b.activity = 'Murder',    b.amount, 0 ) ) AS Murder," +
+                "SUM( if( b.activity = 'Scan',      b.amount, 0 ) ) AS Scans, " +
                 "SUM( if( b.activity = 'Smuggling', b.amount, 0 ) ) AS Smuggling, " +
-                "SUM( if( b.activity = 'Trade', b.amount, 0 ) ) AS Trading " +
+                "SUM( if( b.activity = 'Trade',     b.amount, 0 ) ) AS Trading " +
                 "FROM " +
                 "bgs_activity b " +
                 "LEFT JOIN bgs_systems s ON b.systemid = s.systemid " +
@@ -511,22 +513,21 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             // We already know those 3 columns for sure. Don't check for them, just append all the uncertain ones afterwards
-            String columnNames = "CMDR, Tick, ";
+            String columnNames = "CMDR, Tick";
             int columnCount = rs.getMetaData().getColumnCount();
             for (int i = 4; i <= columnCount; i++) {
                 columnNames = String.join(", ", columnNames, rs.getMetaData().getColumnName(i));
             }
-            columnNames += ", System"; // In the back in case it needs to be there
-            lines.add(columnNames.replaceFirst(",", ""));
+            columnNames += ", System";
+            lines.add(columnNames);
 
             while (rs.next()) {
-                // ToDo find a way of converting userid to current username. Then we do not need to store username in the bgs_activity table and we can remove it from the query (which is causing the groupby issue)
-                String rowValues = rs.getString("userid") + ", ";  //Shouldn't this column be named 'CMDR' anyways?
-                rowValues += rs.getString("Tick").replaceAll("-", "/").replaceAll(".0", "") + ", ";
+                String rowValues = rs.getString("CMDR") + ",";
+                rowValues += rs.getString("Tick").replace(".0", "").replace("-", "/") + ",";
                 for (int i = 4; i <= columnCount; i++) {
-                    rowValues += rs.getString(i).equals("0") ? "" : rs.getString(i);
+                    rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i) + ",") + ",";
                 }
-                rowValues += rs.getString("fullname");
+                rowValues += rs.getString("System");
                 lines.add(rowValues);
             }
         } catch (SQLException e) {

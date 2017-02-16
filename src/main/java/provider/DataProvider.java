@@ -107,7 +107,7 @@ public class DataProvider {
 	 * 
 	 * @return list of ID strings
 	 */
-	private static List<String> getOwnerIDs() {
+	public static List<String> getOwnerIDs() {
 		if (info == null)
 			getInfo();
 		return info.discord.idOwner;
