@@ -49,19 +49,19 @@ public class Setavatar implements PMCommand, GuildCommand {
         if (!message.getAttachments().isEmpty()) {
             File avatarFile;
             Message.Attachment attachment = message.getAttachments().get(0);
-            attachment.download(avatarFile = new File("./temp/newavatar.jpg"));
             try {
+                attachment.download(avatarFile = new File("./temp/newavatar.jpg"));
                 Icon avatar = Icon.from(avatarFile);
                 jda.getSelfUser().getManager().setAvatar(avatar).queue();
+
+                avatarFile.delete();
+                return "[Success] Avatar changed.";
             } catch (UnsupportedEncodingException e) {
                 return "[Error] Filetype";
             } catch (IOException e) {
                 LogUtil.logErr(e);
+                return "[Error] Something went wrong";
             }
-
-            //noinspection ResultOfMethodCallIgnored
-            avatarFile.delete();
-            return "[Success] Avatar changed.";
         }
         else {
             return "[Error] No image attached";
