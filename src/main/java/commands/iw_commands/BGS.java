@@ -480,28 +480,28 @@ public class BGS implements PMCommand, GuildCommand {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
-                "username AS CMDR, " +
+                "b.userid AS CMDR, " +
                 "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60))) AS Tick, " +
-                "fullname AS System, " +
-                "SUM( if( activity = 'Bond', amount, 0 ) ) AS Bonds, " +
-                "SUM( if( activity = 'Bounty', amount, 0 ) ) AS Bounties, " +
-                "SUM( if( activity = 'Failed', amount, 0 ) ) AS Failed, " +
-                "SUM( if( activity = 'Fine', amount, 0 ) ) AS Fine, " +
-                "SUM( if( activity = 'Intel', amount, 0 ) ) AS Intel, " +
-                "SUM( if( activity = 'Mining', amount, 0 ) ) AS Mining, " +
-                "SUM( if( activity = 'Mission', amount, 0 ) ) AS Missions, " +
-                "SUM( if( activity = 'Murder', amount, 0 ) ) AS Murder," +
-                "SUM( if( activity = 'Scan', amount, 0 ) ) AS Scans, " +
-                "SUM( if( activity = 'Smuggling', amount, 0 ) ) AS Smuggling, " +
-                "SUM( if( activity = 'Trade', amount, 0 ) ) AS Trading " +
+                "s.fullname AS System, " +
+                "SUM( if( b.activity = 'Bond', b.amount, 0 ) ) AS Bonds, " +
+                "SUM( if( b.activity = 'Bounty', b.amount, 0 ) ) AS Bounties, " +
+                "SUM( if( b.activity = 'Failed', b.amount, 0 ) ) AS Failed, " +
+                "SUM( if( b.activity = 'Fine', b.amount, 0 ) ) AS Fine, " +
+                "SUM( if( b.activity = 'Intel', b.amount, 0 ) ) AS Intel, " +
+                "SUM( if( b.activity = 'Mining', b.amount, 0 ) ) AS Mining, " +
+                "SUM( if( b.activity = 'Mission', b.amount, 0 ) ) AS Missions, " +
+                "SUM( if( b.activity = 'Murder', b.amount, 0 ) ) AS Murder," +
+                "SUM( if( b.activity = 'Scan', b.amount, 0 ) ) AS Scans, " +
+                "SUM( if( b.activity = 'Smuggling', b.amount, 0 ) ) AS Smuggling, " +
+                "SUM( if( b.activity = 'Trade', b.amount, 0 ) ) AS Trading " +
                 "FROM " +
                 "bgs_activity b " +
                 "LEFT JOIN bgs_systems s ON b.systemid = s.systemid " +
                 "WHERE " +
-                "timestamp >= ? AND timestamp < ? " +
+                "b.timestamp >= ? AND b.timestamp < ? " +
                 "GROUP BY " +
-                "System, userid, Tick " +
-                "ORDER BY Tick ASC, userid ASC");
+                "System, b.userid, Tick " +
+                "ORDER BY Tick ASC, b.userid ASC");
             ps.setInt(1, tickHour);
             ps.setInt(2, tickMinute);
             ps.setInt(3, tickHour);
@@ -520,7 +520,8 @@ public class BGS implements PMCommand, GuildCommand {
             lines.add(columnNames.replaceFirst(",", ""));
 
             while (rs.next()) {
-                String rowValues = rs.getString("username") + ", ";  //Shouldn't this column be named 'CMDR' anyways?
+                // ToDo find a way of converting userid to current username. Then we do not need to store username in the bgs_activity table and we can remove it from the query (which is causing the groupby issue)
+                String rowValues = rs.getString("userid") + ", ";  //Shouldn't this column be named 'CMDR' anyways?
                 rowValues += rs.getString("Tick").replaceAll("-", "/").replaceAll(".0", "") + ", ";
                 for (int i = 4; i <= columnCount; i++) {
                     rowValues += rs.getString(i).equals("0") ? "" : rs.getString(i);
