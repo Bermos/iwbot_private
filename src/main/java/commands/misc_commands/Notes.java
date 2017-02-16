@@ -1,30 +1,109 @@
 package commands.misc_commands;
 
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import commands.GuildCommand;
 import commands.PMCommand;
+import iw_bot.JDAUtil;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
 import provider.DataProvider;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Notes implements PMCommand, GuildCommand{
 	private static Connection connect;
+
+	@Override
+	public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+		String userId = event.getAuthor().getId();
+		String effName = event.getAuthor().getName();
+		String[] roleIds = {};
+
+		event.getChannel().sendMessage(notes(userId, effName, roleIds, args));
+	}
+
+	@Override
+	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+		String userId = event.getAuthor().getId();
+		String effName = event.getMember().getEffectiveName();
+		String[] roleIds = JDAUtil.getRoleIdStrings(event.getMember());
+
+		event.getChannel().sendMessage(notes(userId, effName, roleIds, args));
+	}
+
+    @Override
+    public String getHelp(GuildMessageReceivedEvent event) {
+        return "Relatively complicated. Refer to the guide linked below";
+    }
+
+	String notes(String authorId, String effectiveName, String[] roleIds, String[] args) {
+
+		if (args.length == 1) {
+			String response = Notes.get(args[0], authorId);
+			if (response == null)
+				return "Sorry, couldn't find that note for you";
+			else {
+				String name = effectiveName.lastIndexOf("s") == effectiveName.length() ? effectiveName : effectiveName + "'s";
+				return name + " note:\n" + response;
+			}
+		}
+
+		else if (args.length > 1) {
+			boolean hasRights = DataProvider.isAdmin(roleIds);
+
+			if (args[0].equalsIgnoreCase("add")) {
+				boolean isPublic = false;
+                if (args[2].equals("1") || args[2].equalsIgnoreCase("public")) {
+					isPublic = true;
+					args[2] = args[3];
+					if (args.length > 4) {
+						for (int i = 4; i < args.length; i++)
+							args[2] = String.join(", ", args[2], args[i]);
+					}
+				} else {
+					if (args.length > 3) {
+						for (int i = 3; i < args.length; i++)
+							args[2] = String.join(", ", args[2], args[i]);
+					}
+				}
+
+				if (isPublic && !hasRights)
+                    return "[Error] You are not authorised to make public notes.";
+				if (Notes.add(args[1], authorId, args[2], (isPublic)))
+					return "Saved";
+
+				return "Error, something went wrong. Maybe there's already a note with that name?";
+			} else if (args[0].equalsIgnoreCase("edit")) {
+				if (args.length < 3) {
+					return "Seems like you forgot to put the name or the new content in your message.";
+				}
+
+				if (Notes.edit(args[1], authorId, args[2], hasRights))
+					return "Edited";
+				else
+					return "No note with that name found or you aren't allowed to edit the one I did find.";
+			} else if (args[0].equalsIgnoreCase("del")) {
+				if (Notes.delete(args[1], authorId, hasRights))
+					return "Deleted";
+				else
+					return "No note with that name found or you aren't allowed to delete the one I did find.";
+			}
+		}
+
+		return "'/note' help : [add|edit|del], [public], notes name, notes content";
+	}
 	
 	private static void connect() {
 		if (connect == null)
 			connect = new Connections().getConnection();
 	}
 
-	public static String get (String name, String id) {
+	private static String get (String name, String id) {
 		connect();
 		
 		try {
@@ -47,7 +126,7 @@ public class Notes implements PMCommand, GuildCommand{
 		connect();
 		
 		try {
-			if (get (name, id) != null)
+			if ((get (name, id) != null) && !DataProvider.isTest())
 				return false;
 			
 			PreparedStatement ps = connect.prepareStatement("INSERT INTO notes (authorid, name, is_public, content) VALUES (?, ?, ?, ?)");
@@ -109,79 +188,5 @@ public class Notes implements PMCommand, GuildCommand{
 		}
 		
 		return false;
-	}
-
-	@Override
-	public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-		//TODO add in pm functionality
-	}
-
-	@Override
-	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-		if (args.length == 1) {
-			String response = Notes.get(args[0], event.getAuthor().getId());
-			if (response == null)
-				event.getChannel().sendMessage("Sorry, couldn't find that note for you").queue();
-			else {
-				String name = event.getMember().getEffectiveName();
-				name = name.lastIndexOf("s") == name.length() ? name : name + "'s";
-				System.out.println(name.lastIndexOf("s") + " " + name.length());
-				EmbedBuilder eb = new EmbedBuilder()
-						.setColor(event.getMember().getRoles().get(0).getColor())
-						.addField(name + " note: ", response, true);
-				MessageEmbed embed = eb.build();
-				event.getChannel().sendMessage(embed).queue();
-			}
-		}
-		else if (args.length > 1) {
-			boolean hasRights = (DataProvider.isOwner(event) || DataProvider.isAdmin(event));
-
-			if (args[0].equalsIgnoreCase("add")) {
-				boolean isPublic = false;
-				if (args[2].equals("1") || args[2].equalsIgnoreCase("public")) {
-					isPublic = true;
-					args[2] = args[3];
-					if (args.length > 4) {
-						for (int i = 4; i < args.length; i++)
-							args[2] = String.join(", ", args[2], args[i]);
-					}
-				} else {
-					if (args.length > 3) {
-						for (int i = 3; i < args.length; i++)
-							args[2] = String.join(", ", args[2], args[i]);
-					}
-				}
-
-				if (Notes.add(args[1], event.getAuthor().getId(), args[2], (isPublic && hasRights)))
-					event.getChannel().sendMessage("Saved").queue();
-				else
-					event.getChannel().sendMessage("Error, something went wrong. Maybe there's already a note with that name?").queue();
-			} else if (args[0].equalsIgnoreCase("edit")) {
-				if (args.length < 3) {
-					event.getChannel().sendMessage("Seems like you forgot to put the name or the new content in your message").queue();
-					return;
-				}
-
-				if (Notes.edit(args[1], event.getAuthor().getId(), args[2], hasRights))
-					event.getChannel().sendMessage("Edited").queue();
-				else
-					event.getChannel().sendMessage("No note with that name found or you aren't allowed to edit the ones I did find").queue();
-			} else if (args[0].equalsIgnoreCase("del")) {
-				if (args.length < 2) {
-					event.getChannel().sendMessage("Seems like you forgot to put the name or the new content in your message").queue();
-					return;
-				}
-
-				if (Notes.delete(args[1], event.getAuthor().getId(), hasRights))
-					event.getChannel().sendMessage("Deleted").queue();
-				else
-					event.getChannel().sendMessage("No note with that name found or you aren't allowed to edit the ones I did find").queue();
-			}
-		}
-	}
-
-	@Override
-	public String getHelp(GuildMessageReceivedEvent event) {
-		return "Relatively complicated. Refer to the guide linked below";
 	}
 }

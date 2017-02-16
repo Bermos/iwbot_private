@@ -10,37 +10,12 @@ import java.util.Random;
 public class RollDice implements PMCommand, GuildCommand{
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        int max = 6;
-        if (args.length == 1)
-            max = Integer.parseInt(args[0]);
-
-        event.getChannel().sendMessage("Your rolled a " + roll(max)).queue();
+        event.getChannel().sendMessage(roll(args)).queue();
     }
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        int max = 6;
-        boolean negative = false;
-        if (args.length == 1) {
-            try {
-                max = Integer.parseInt(args[0]);
-
-                if (max == 0) {
-                    event.getChannel().sendMessage("You rolled a 0. Surprise, dumbass!").queue();
-                    return;
-                } else if (max < 0) {
-                    negative = true;
-                    max = 0 - max;
-                }
-            } catch (NumberFormatException e) {
-                event.getChannel().sendMessage("[Error] " + args[0] + " is not a valid number.").queue();
-                return;
-            }
-        }
-
-        int roll = negative ? 0 - roll(max) : roll(max);
-
-        event.getChannel().sendMessage("You rolled a " + roll).queue();
+        event.getChannel().sendMessage(roll(args)).queue();
     }
 
     @Override
@@ -48,7 +23,31 @@ public class RollDice implements PMCommand, GuildCommand{
         return "<###?> rolls a dice between 1 and 6 or the specified number";
     }
 
-    private int roll (int max) {
-        return (new Random().nextInt(max) + 1);
+    String roll (String[] args) {
+        int max = 6;
+        boolean negative = false;
+
+        if (args.length == 1) {
+            try {
+                max = Integer.parseInt(args[0]);
+
+                if (max == 0) {
+                    return "You rolled a 0. Surprise, dumbass!";
+                } else if (max < 0) {
+                    negative = true;
+                    max = 0 - max;
+                }
+            } catch (NumberFormatException e) {
+                return "[Error] " + args[0] + " is not a valid number.";
+            }
+
+
+        }
+        if (args.length > 1)
+            return "What do you want me to do with all those arguments?";
+
+        int roll = negative ? 0 - (new Random().nextInt(max) + 1) : new Random().nextInt(max) + 1;
+
+        return "You rolled a " + roll;
     }
 }

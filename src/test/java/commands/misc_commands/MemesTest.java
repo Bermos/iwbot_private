@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class CmdMemesTest {
+public class MemesTest {
     private List<TestCase> tests;
     class TestCase {
         TestCase(String u, String[] i, String o) {

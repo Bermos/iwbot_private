@@ -19,5 +19,6 @@
   "googleToken": "1",
   "githubToken": "1",
   "githubBranch": "1",
-  "dev": true
+  "dev": true,
+  "test": true
 }
