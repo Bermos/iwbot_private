@@ -474,28 +474,28 @@ public class BGS implements PMCommand, GuildCommand {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
-                "username AS CMDR, " +
+                "b.userid, " +
                 "from_unixtime(floor((unix_timestamp(timestamp) - ((" + tickHour + "*60*60) + (" + tickMinute + "*60)))/(24*60*60)) * (24*60*60) + ((" + tickHour + "*60*60) + (" + tickMinute + "*60) + (24*60*60))) AS Tick, " +
-                "SUM( if( activity = 'Bond', amount, 0 ) ) AS Bonds, " +
-                "SUM( if( activity = 'Bounty', amount, 0 ) ) AS Bounties, " +
-                "SUM( if( activity = 'Failed', amount, 0 ) ) AS Failed, " +
-                "SUM( if( activity = 'Fine', amount, 0 ) ) AS Fine, " +
-                "SUM( if( activity = 'Intel', amount, 0 ) ) AS Intel, " +
-                "SUM( if( activity = 'Mining', amount, 0 ) ) AS Mining, " +
-                "SUM( if( activity = 'Mission', amount, 0 ) ) AS Missions, " +
-                "SUM( if( activity = 'Murder', amount, 0 ) ) AS Murder," +
-                "SUM( if( activity = 'Scan', amount, 0 ) ) AS Scans, " +
-                "SUM( if( activity = 'Smuggling', amount, 0 ) ) AS Smuggling, " +
-                "SUM( if( activity = 'Trade', amount, 0 ) ) AS Trading, " +
-                "fullname AS System " +
+                "SUM( if( b.activity = 'Bond', b.amount, 0 ) ) AS Bonds, " +
+                "SUM( if( b.activity = 'Bounty', b.amount, 0 ) ) AS Bounties, " +
+                "SUM( if( b.activity = 'Failed', b.amount, 0 ) ) AS Failed, " +
+                "SUM( if( b.activity = 'Fine', b.amount, 0 ) ) AS Fine, " +
+                "SUM( if( b.activity = 'Intel', b.amount, 0 ) ) AS Intel, " +
+                "SUM( if( b.activity = 'Mining', b.amount, 0 ) ) AS Mining, " +
+                "SUM( if( b.activity = 'Mission', b.amount, 0 ) ) AS Missions, " +
+                "SUM( if( b.activity = 'Murder', b.amount, 0 ) ) AS Murder," +
+                "SUM( if( b.activity = 'Scan', b.amount, 0 ) ) AS Scans, " +
+                "SUM( if( b.activity = 'Smuggling', b.amount, 0 ) ) AS Smuggling, " +
+                "SUM( if( b.activity = 'Trade', b.amount, 0 ) ) AS Trading, " +
+                "s.fullname AS System " +
                 "FROM " +
                 "bgs_activity b " +
                 "LEFT JOIN bgs_systems s ON b.systemid = s.systemid " +
                 "WHERE " +
-                "timestamp >= ? AND timestamp < ? " +
+                "b.timestamp >= ? AND b.timestamp < ? " +
                 "GROUP BY " +
-                "System, userid, Tick " +
-                "ORDER BY Tick ASC, userid ASC");
+                "System, b.userid, Tick " +
+                "ORDER BY Tick ASC, b.userid ASC");
             ps.setString(1, sqlSdf.format(start));
             ps.setString(2, sqlSdf.format(end));
             ResultSet rs = ps.executeQuery();
@@ -503,11 +503,11 @@ public class BGS implements PMCommand, GuildCommand {
             String columnNames = "";
             int columnCount = rs.getMetaData().getColumnCount();
             int columnDateTime = -1;
-            int columnCMDRName = -1;
+            int columnCMDRID = -1;
             int columnSystem = -1;
             for (int i = 0; i < columnCount; i++) {
-                if (rs.getMetaData().getColumnName(i+1).equalsIgnoreCase("username")) {
-                    columnCMDRName = i;
+                if (rs.getMetaData().getColumnName(i+1).equalsIgnoreCase("userid")) {
+                    columnCMDRID = i;
                 } else if (rs.getMetaData().getColumnName(i+1).equalsIgnoreCase("Tick")) {
                     columnDateTime = i;
                 } else if (rs.getMetaData().getColumnName(i+1).equalsIgnoreCase("fullname")) {
@@ -515,12 +515,14 @@ public class BGS implements PMCommand, GuildCommand {
                 }
                 columnNames = String.join(", ", columnNames, rs.getMetaData().getColumnName(i+1));
             }
-            lines.add(columnNames.replaceFirst(",", "").replace("username", "CMDR").replace("fullname", "System"));
+            lines.add(columnNames.replaceFirst(",", "").replace("fullname", "System"));
             while (rs.next()) {
                 String rowValues = "";
                 for (int i = 0; i < columnCount; i++) {
                     String rowValue;
-                    if (i == columnCMDRName)
+                    //TODO Bermos to work out how to convert the userid to username and use this in output. Once this is done we can delete the username column in the bgs_activity table.
+                    //TODO Logging will need updating to not log the username.
+                    if (i == columnCMDRID)
                         rowValue = rs.getString(i+1);
                     else if (i == columnDateTime)
                         rowValue = rs.getString(i+1).replaceAll("-", "/").replace(".0", "");
