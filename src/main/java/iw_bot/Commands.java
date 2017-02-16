@@ -35,6 +35,8 @@ class Commands {
 		
 		pmCommands.put("restart", new Restart());
 
+		pmCommands.put("shutdown", new Shutdown());
+
 		pmCommands.put("account", new Auth());
 
 		pmCommands.put("owner", new EditOwner());
