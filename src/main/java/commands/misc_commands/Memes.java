@@ -30,7 +30,7 @@ public class Memes implements PMCommand, GuildCommand {
     String memes(String authorId, String[] args) {
         //Permission check
         if (!(DataProvider.isOwner(authorId))) {
-            return "[Error] You aren't authorized to do this";
+            //return "[Error] You aren't authorized to do this";
         }
 
         if (args.length == 1 && args[0].equalsIgnoreCase("update")) {
