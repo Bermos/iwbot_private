@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Map.Entry;
 import java.util.*;
 
 
@@ -59,7 +60,7 @@ public class BGS implements PMCommand, GuildCommand {
                 case "smu"       :
                 case "smuggle"   :
                 case "smuggling" : output = Activity.SMUGGLING; break;
-                case "tra"   :
+                case "tra"       :
                 case "trading"   :
                 case "trade"	 : output = Activity.TRADE;	    break;
                 case "mur"	     :
@@ -71,14 +72,16 @@ public class BGS implements PMCommand, GuildCommand {
         }
     }
 
-    private static SimpleDateFormat sqlSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final static String statshelp = "Help: " + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
+    private final static SimpleDateFormat sqlSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final static SimpleDateFormat usrSdf = new SimpleDateFormat("dd/MM/yy HH:mm");
 
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
                 String output = "```";
-                for (Map.Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
+                for (Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
                     output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```";
@@ -97,22 +100,26 @@ public class BGS implements PMCommand, GuildCommand {
         }
         // admin calls for stats
         else if (args[0].equalsIgnoreCase("stats") && DataProvider.isAdmin(event)) {
-            String statshelp = "Help: " + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
             if (args.length == 1) {
                 event.getChannel().sendMessage(statshelp).queue();
+
             } else if (args[1].equalsIgnoreCase("summary")){
                 // no system filter
                 if(args.length == 4 || args.length == 5 ) {
-                    getTick(event,args);
+                    event.getChannel().sendMessage(getTick(args)).queue();
+
                 } else {
                     event.getChannel().sendMessage(statshelp).queue();
+
                 }
             }
             // CSV output
             else if (args[1].equalsIgnoreCase("csv") && args.length >= 4){
-                getFullTick(event, args);
+                JDAUtil.sendMultipleMessages(event.getChannel(), getFullTick(args));
+
             } else {
                 event.getChannel().sendMessage(statshelp).queue();
+
             }
         }
         // admin functions for systems
@@ -120,88 +127,24 @@ public class BGS implements PMCommand, GuildCommand {
             String systemhelp = "Help: " + Listener.prefix + "bgs system, <command modifier {add, edit, show, hide}>";
             if (args.length == 1) {
                 event.getChannel().sendMessage(systemhelp).queue();
+
             } else if (args[1].equalsIgnoreCase("list")) {
                 event.getChannel().sendMessage(getSystems(DataProvider.isAdmin(event))).queue();
 
-            } else if (args[1].equalsIgnoreCase("hide")) {
+            } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) {
                 if (args.length == 3) {
-                    int systemid = Integer.parseInt(args[2]);
-                    Connection connect = new Connections().getConnection();
-                    try {
-                        PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET hidden = ? " +
-                                "WHERE systemid = ?");
-                        ps.setInt(1, 1);
-                        ps.setInt(2, systemid);
-                        ps.executeUpdate();
-                        event.getChannel().sendMessage("BGS star system hidden. Logging no longer possible for this system.").queue();
-                    } catch (SQLException e) {
-                        //This happens when the system was not found.
-                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT HIDDEN**").queue();
-                    }
+                    event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
+
                 } else {
-                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
+                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide|show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
                 }
 
-            } else if (args[1].equalsIgnoreCase("show")) {
-                if (args.length == 3) {
-                    int systemid = Integer.parseInt(args[2]);
-                    Connection connect = new Connections().getConnection();
-                    try {
-                        PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET hidden = ? " +
-                                "WHERE systemid = ?");
-                        ps.setInt(1, 0);
-                        ps.setInt(2, systemid);
-                        ps.executeUpdate();
-                        event.getChannel().sendMessage("BGS star system un-hidden. Logging possible for this system.").queue();
-                    } catch (SQLException e) {
-                        //This happens when the system was not found.
-                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT HIDDEN**").queue();
-                    }
-                } else{
-                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
-                }
             } else if (args[1].equalsIgnoreCase("add")) {
-                if (args.length == 4) {
-                    String shortname = args[1];
-                    String fullname = args[2];
+                event.getChannel().sendMessage(addSystem(args)).queue();
 
-                    Connection connect = new Connections().getConnection();
-                    try {
-                        PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_systems (shortname, fullname) " +
-                                "VALUES (?, ?)");
-                        ps.setString(1, shortname);
-                        ps.setString(2, fullname);
-                        ps.executeUpdate();
-                    } catch (SQLException e) {
-                        //This happens when the system was not found.
-                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT ADDED**").queue();
-                    }
-                    event.getChannel().sendMessage("New star system added to BGS logging.").queue();
-                } else{
-                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, add, <shortname>, <fullname>").queue();
-                }
             } else if (args[1].equalsIgnoreCase("edit")) {
-                if (args.length == 5) {
-                    int systemid = Integer.parseInt(args[2]);
-                    String shortname = args[3];
-                    String fullname = args[4];
+                event.getChannel().sendMessage(editSystem(args, DataProvider.isAdmin(event))).queue();
 
-                    Connection connect = new Connections().getConnection();
-                    try {
-                        PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET shortname = ?, fullname = ? " +
-                                "WHERE systemid = ?");
-                        ps.setString(1, shortname);
-                        ps.setString(2, fullname);
-                        ps.setInt(3, systemid);
-                        ps.executeUpdate();
-                    } catch (SQLException e) {
-                        //This happens when the system was not found.
-                        event.getChannel().sendMessage("**WARNING STAR SYSTEM NOT UPDATED**").queue();
-                    }
-                    event.getChannel().sendMessage("Star system updated.").queue();
-                }else {
-                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(DataProvider.isAdmin(event))).queue();
-                }
             } else{
                 event.getChannel().sendMessage(systemhelp).queue();
             }
@@ -222,9 +165,11 @@ public class BGS implements PMCommand, GuildCommand {
             String message = "**WARNING ACTION NOT LOGGED**\nStar system not specified? Enter '" + Listener.prefix + "bgs help' or use one of the star system names below:\n";
             message += getSystems(DataProvider.isAdmin(event));
             event.getChannel().sendMessage(message).queue();
+
         }
         else if (args.length == 3) {
             event.getChannel().sendMessage(logActivity(DataProvider.isAdmin(event), args[0], event.getAuthor().getId(), event.getMember().getEffectiveName(), args[1], args[2])).queue();
+
         } else if (args.length > 3) {
             // anything more than 3 is likely the user has tried to log data but used a number seperate (1,000,000)
             event.getChannel().sendMessage("**WARNING ACTION NOT LOGGED**\n" +
@@ -240,62 +185,123 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
-    private void getFullTick(GuildMessageReceivedEvent event, String[] args) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
-        Date time;
+    private String editSystem(String[] args, boolean isAdmin) {
+        if (args.length == 5) {
+
+            Connection connect = new Connections().getConnection();
+            try {
+                PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET shortname = ?, fullname = ? WHERE systemid = ?");
+                ps.setString(1, args[3]);
+                ps.setString(2, args[4]);
+                ps.setInt   (3, Integer.parseInt(args[2]));
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                //This happens when the system was not found.
+                return "**WARNING STAR SYSTEM NOT UPDATED**";
+            }
+            return "Star system updated.";
+        } else {
+            return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(isAdmin);
+        }
+    }
+
+    private String addSystem(String[] args) {
+        if (args.length == 4) {
+            Connection connect = new Connections().getConnection();
+            try {
+                PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_systems (shortname, fullname) VALUES (?, ?)");
+                ps.setString(1, args[1]);
+                ps.setString(2, args[2]);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                //This only happens when there's a serious issue with mysql or the connection to it
+                return "**WARNING STAR SYSTEM NOT ADDED**";
+            }
+            return "New star system added to BGS logging.";
+        } else{
+            return "Help: " + Listener.prefix + "bgs system, add, <shortname>, <fullname>";
+        }
+    }
+
+    private String setSystemVisibility(boolean show, String system) {
+        int systemid = Integer.parseInt(system);
+        Connection connect = new Connections().getConnection();
         try {
-            time = sdf.parse(args[3]);
+            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET hidden = ? WHERE systemid = ?");
+            ps.setInt(1, show ? 1 : 0);
+            ps.setInt(2, systemid);
+
+            // if one row was altered
+            if (ps.executeUpdate() == 1) {
+                if (show)
+                    return "BGS star system un-hidden. Logging possible for this system.";
+                else
+                    return "BGS BGS star system hidden. Logging no longer possible for this system.";
+            } else { // if no row was altered the system wasn't found
+                return "**WARNING SYSTEM VISIBILITY NOT CHANGED**\nSystem not found.";
+            }
+        } catch (SQLException e) {
+            //This only happens when there's a serious issue with mysql or the connection to it
+            return "**WARNING SYSTEM VISIBILITY NOT CHANGED**";
+        }
+    }
+
+    private static List<String> getFullTick(String[] args) {
+        List<String> outputs = new ArrayList<>();
+        try {
+            Date time = usrSdf.parse(args[3]);
             List<String> lines = getCSVData(time, Integer.parseInt(args[2]));
 
             String output = "Data for " + args[2] + " ticks after " + args[3] + ":\n";
             output += "----------------------------------------------------------------------\n";
             output += lines.get(0) + "\n```";
-            for (int i = 1; i < lines.size(); i++) {
+            for (int i = 1; i < lines.size(); i++) { //TODO check
                 output += lines.get(i) + "\n";
                 if (output.length() >= 1900) {
-                    event.getChannel().sendMessage(output += "```").queue();
+                    output += "```";
+                    outputs.add(output);
                     output = "```";
                 }
             }
-            if (lines.size() < 2)
+            if (lines.size() <= 1)
                 output += "No records found";
             output += "```";
 
-            event.getChannel().sendMessage(output).queue();
+            outputs.add(output);
         } catch (ParseException e) {
-            event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
+            outputs.add("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'");
         }
+
+        return outputs;
     }
 
-    private void getTick(GuildMessageReceivedEvent event,String[] args) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
-        Date time;
+    private static String getTick(String[] args) {
         String system = "all";
 
         if (args.length == 5){
             system = args[4];
         }
         try {
-            time = sdf.parse(args[3]);
+            Date time = usrSdf.parse(args[3]);
             String output = "Data for " + args[1] + " ticks after " + args[3] + " UTC System Filter: " + system + "\n```";
             Map<String, Double> entries = getTotalAmount(time, Integer.parseInt(args[2]), system);
-            for (Map.Entry<String, Double> entry : entries.entrySet()) {
+            for (Entry<String, Double> entry : entries.entrySet()) {
                 output += entry.getKey() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
             }
             output += "```";
             if (entries.isEmpty())
-                event.getChannel().sendMessage("No records for the specified period").queue();
+                return "No records for the specified period";
             else {
-                event.getChannel().sendMessage(output).queue();
+                return output;
             }
         } catch (ParseException e) {
-            event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
+            return "Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'";
         }
     }
 
-    private String getUserStats(String userID) {
+    private static String getUserStats(String userID) {
         String output = "```";
-        for (Map.Entry<Activity, Double> entry : getTotalAmount(userID).entrySet()) {
+        for (Entry<Activity, Double> entry : getTotalAmount(userID).entrySet()) {
             output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
         }
         output += "```";
@@ -303,7 +309,7 @@ public class BGS implements PMCommand, GuildCommand {
         return output;
     }
 
-    private void toggleBgsRole(GuildMessageReceivedEvent event) {
+    private static void toggleBgsRole(GuildMessageReceivedEvent event) {
         Role rBGS = null;
         Role rIW = null;
         for (Role role : event.getGuild().getRoles()) {
@@ -363,7 +369,7 @@ public class BGS implements PMCommand, GuildCommand {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next())
-                totals.put(Activity.valueOf(rs.getString("activity").toUpperCase()), rs.getDouble("total"));
+                totals.put(Activity.from(rs.getString("activity")), rs.getDouble("total"));
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
@@ -466,73 +472,61 @@ public class BGS implements PMCommand, GuildCommand {
 
     private static List<String> getCSVData(Date start, int ticks) {
         List<String> lines = new ArrayList<>();
-        Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
+        Date end = (ticks == 0) ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
 
-        String tickHour = new SimpleDateFormat("HH").format(start);
-        String tickMinute = new SimpleDateFormat("mm").format(start);
+        int tickHour = Integer.parseInt(new SimpleDateFormat("HH").format(start));
+        int tickMinute = Integer.parseInt(new SimpleDateFormat("mm").format(start));
 
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
-                "b.userid, " +
-                "from_unixtime(floor((unix_timestamp(timestamp) - ((" + tickHour + "*60*60) + (" + tickMinute + "*60)))/(24*60*60)) * (24*60*60) + ((" + tickHour + "*60*60) + (" + tickMinute + "*60) + (24*60*60))) AS Tick, " +
-                "SUM( if( b.activity = 'Bond', b.amount, 0 ) ) AS Bonds, " +
-                "SUM( if( b.activity = 'Bounty', b.amount, 0 ) ) AS Bounties, " +
-                "SUM( if( b.activity = 'Failed', b.amount, 0 ) ) AS Failed, " +
-                "SUM( if( b.activity = 'Fine', b.amount, 0 ) ) AS Fine, " +
-                "SUM( if( b.activity = 'Intel', b.amount, 0 ) ) AS Intel, " +
-                "SUM( if( b.activity = 'Mining', b.amount, 0 ) ) AS Mining, " +
-                "SUM( if( b.activity = 'Mission', b.amount, 0 ) ) AS Missions, " +
-                "SUM( if( b.activity = 'Murder', b.amount, 0 ) ) AS Murder," +
-                "SUM( if( b.activity = 'Scan', b.amount, 0 ) ) AS Scans, " +
-                "SUM( if( b.activity = 'Smuggling', b.amount, 0 ) ) AS Smuggling, " +
-                "SUM( if( b.activity = 'Trade', b.amount, 0 ) ) AS Trading, " +
-                "s.fullname AS System " +
+                "username AS CMDR, " +
+                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60))) AS Tick, " +
+                "fullname AS System, " +
+                "SUM( if( activity = 'Bond', amount, 0 ) ) AS Bonds, " +
+                "SUM( if( activity = 'Bounty', amount, 0 ) ) AS Bounties, " +
+                "SUM( if( activity = 'Failed', amount, 0 ) ) AS Failed, " +
+                "SUM( if( activity = 'Fine', amount, 0 ) ) AS Fine, " +
+                "SUM( if( activity = 'Intel', amount, 0 ) ) AS Intel, " +
+                "SUM( if( activity = 'Mining', amount, 0 ) ) AS Mining, " +
+                "SUM( if( activity = 'Mission', amount, 0 ) ) AS Missions, " +
+                "SUM( if( activity = 'Murder', amount, 0 ) ) AS Murder," +
+                "SUM( if( activity = 'Scan', amount, 0 ) ) AS Scans, " +
+                "SUM( if( activity = 'Smuggling', amount, 0 ) ) AS Smuggling, " +
+                "SUM( if( activity = 'Trade', amount, 0 ) ) AS Trading " +
                 "FROM " +
                 "bgs_activity b " +
                 "LEFT JOIN bgs_systems s ON b.systemid = s.systemid " +
                 "WHERE " +
-                "b.timestamp >= ? AND b.timestamp < ? " +
+                "timestamp >= ? AND timestamp < ? " +
                 "GROUP BY " +
-                "System, b.userid, Tick " +
-                "ORDER BY Tick ASC, b.userid ASC");
-            ps.setString(1, sqlSdf.format(start));
-            ps.setString(2, sqlSdf.format(end));
+                "System, userid, Tick " +
+                "ORDER BY Tick ASC, userid ASC");
+            ps.setInt(1, tickHour);
+            ps.setInt(2, tickMinute);
+            ps.setInt(3, tickHour);
+            ps.setInt(4, tickMinute);
+            ps.setString(5, sqlSdf.format(start));
+            ps.setString(6, sqlSdf.format(end));
             ResultSet rs = ps.executeQuery();
 
-            String columnNames = "";
+            // We already know those 3 columns for sure. Don't check for them, just append all the uncertain ones afterwards
+            String columnNames = "CMDR, Tick, ";
             int columnCount = rs.getMetaData().getColumnCount();
-            int columnDateTime = -1;
-            int columnCMDRID = -1;
-            int columnSystem = -1;
-            for (int i = 0; i < columnCount; i++) {
-                if (rs.getMetaData().getColumnName(i+1).equalsIgnoreCase("userid")) {
-                    columnCMDRID = i;
-                } else if (rs.getMetaData().getColumnName(i+1).equalsIgnoreCase("Tick")) {
-                    columnDateTime = i;
-                } else if (rs.getMetaData().getColumnName(i+1).equalsIgnoreCase("fullname")) {
-                    columnSystem = i;
-                }
-                columnNames = String.join(", ", columnNames, rs.getMetaData().getColumnName(i+1));
+            for (int i = 4; i <= columnCount; i++) {
+                columnNames = String.join(", ", columnNames, rs.getMetaData().getColumnName(i));
             }
-            lines.add(columnNames.replaceFirst(",", "").replace("fullname", "System"));
+            columnNames += ", System"; // In the back in case it needs to be there
+            lines.add(columnNames.replaceFirst(",", ""));
+
             while (rs.next()) {
-                String rowValues = "";
-                for (int i = 0; i < columnCount; i++) {
-                    String rowValue;
-                    //TODO Bermos to work out how to convert the userid to username and use this in output. Once this is done we can delete the username column in the bgs_activity table.
-                    //TODO Logging will need updating to not log the username.
-                    if (i == columnCMDRID)
-                        rowValue = rs.getString(i+1);
-                    else if (i == columnDateTime)
-                        rowValue = rs.getString(i+1).replaceAll("-", "/").replace(".0", "");
-                    else if (i == columnSystem)
-                        rowValue = rs.getString(i+1);
-                    else
-                        rowValue = rs.getString(i+1).equals("0") ? "" : rs.getString(i+1);
-                    rowValues = String.join(",", rowValues, rowValue);
+                String rowValues = rs.getString("username") + ", ";  //Shouldn't this column be named 'CMDR' anyways?
+                rowValues += rs.getString("Tick").replaceAll("-", "/").replaceAll(".0", "") + ", ";
+                for (int i = 4; i <= columnCount; i++) {
+                    rowValues += rs.getString(i).equals("0") ? "" : rs.getString(i);
                 }
-                lines.add(rowValues.replaceFirst(",", ""));
+                rowValues += rs.getString("fullname");
+                lines.add(rowValues);
             }
         } catch (SQLException e) {
             LogUtil.logErr(e);
