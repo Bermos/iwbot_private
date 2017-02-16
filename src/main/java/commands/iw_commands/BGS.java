@@ -20,8 +20,10 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
+
+import static iw_bot.Constants.*;
 
 
 public class BGS implements PMCommand, GuildCommand {
@@ -72,10 +74,6 @@ public class BGS implements PMCommand, GuildCommand {
         }
     }
 
-    private final static String statshelp = "Help: " + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
-    private final static SimpleDateFormat sqlSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private final static SimpleDateFormat usrSdf = new SimpleDateFormat("dd/MM/yy HH:mm");
-
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         if (args.length == 1) {
@@ -88,7 +86,7 @@ public class BGS implements PMCommand, GuildCommand {
                 event.getChannel().sendMessage(output).queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
-                event.getChannel().sendMessage(bgsHelp).queue();
+                event.getChannel().sendMessage(BGS_LOG_HELP).queue();
             }
         }
     }
@@ -101,7 +99,7 @@ public class BGS implements PMCommand, GuildCommand {
         // admin calls for stats
         else if (args[0].equalsIgnoreCase("stats") && DataProvider.isAdmin(event)) {
             if (args.length == 1) {
-                event.getChannel().sendMessage(statshelp).queue();
+                event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
             } else if (args[1].equalsIgnoreCase("summary")){
                 // no system filter
@@ -109,7 +107,7 @@ public class BGS implements PMCommand, GuildCommand {
                     event.getChannel().sendMessage(getTick(args)).queue();
 
                 } else {
-                    event.getChannel().sendMessage(statshelp).queue();
+                    event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
                 }
             }
@@ -118,7 +116,7 @@ public class BGS implements PMCommand, GuildCommand {
                 JDAUtil.sendMultipleMessages(event.getChannel(), getFullTick(args));
 
             } else {
-                event.getChannel().sendMessage(statshelp).queue();
+                event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
             }
         }
@@ -159,7 +157,7 @@ public class BGS implements PMCommand, GuildCommand {
                     JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(getTotalAmount()).queue();
 
             } else if (args[0].equalsIgnoreCase("help")) {
-                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(bgsHelp).queue();
+                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(BGS_LOG_HELP).queue();
             }
         } else if (args.length == 2) {
             String message = "**WARNING ACTION NOT LOGGED**\nStar system not specified? Enter '" + Listener.prefix + "bgs help' or use one of the star system names below:\n";
@@ -249,7 +247,7 @@ public class BGS implements PMCommand, GuildCommand {
     private static List<String> getFullTick(String[] args) {
         List<String> outputs = new ArrayList<>();
         try {
-            Date time = usrSdf.parse(args[3]);
+            Date time = USER_SDF.parse(args[3]);
             List<String> lines = getCSVData(time, Integer.parseInt(args[2]));
 
             args[2] = args[2].equals("1") ? "1 tick" : args[2] + " ticks";
@@ -284,7 +282,7 @@ public class BGS implements PMCommand, GuildCommand {
             system = args[4];
         }
         try {
-            Date time = usrSdf.parse(args[3]);
+            Date time = USER_SDF.parse(args[3]);
             String output = "Data for " + args[1] + " ticks after " + args[3] + " UTC System Filter: " + system + "\n```";
             Map<String, Double> entries = getTotalAmount(time, Integer.parseInt(args[2]), system);
             for (Entry<String, Double> entry : entries.entrySet()) {
@@ -404,15 +402,15 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             if (system.equals("all")) {
                 PreparedStatement ps = connect.prepareStatement("SELECT fullname, activity, SUM(amount) AS total FROM bgs_activity b LEFT JOIN bgs_systems s ON b.systemid = s.systemid WHERE timestamp > ? AND timestamp < ? GROUP BY fullname, activity ORDER BY fullname ASC, activity ASC");
-                ps.setString(1, sqlSdf.format(start));
-                ps.setString(2, sqlSdf.format(end));
+                ps.setString(1, SQL_SDF.format(start));
+                ps.setString(2, SQL_SDF.format(end));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next())
                     totals.put((Activity.valueOf(rs.getString("activity" ).toUpperCase()).toString())+ " (" + rs.getString("fullname" ) + ")", rs.getDouble("total"));
             } else {
                 PreparedStatement ps = connect.prepareStatement("SELECT fullname, activity, SUM(amount) AS total FROM bgs_activity b LEFT JOIN bgs_systems s ON b.systemid = s.systemid WHERE timestamp > ? AND timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1) GROUP BY activity ORDER BY fullname ASC, activity ASC");
-                ps.setString(1, sqlSdf.format(start));
-                ps.setString(2, sqlSdf.format(end));
+                ps.setString(1, SQL_SDF.format(start));
+                ps.setString(2, SQL_SDF.format(end));
                 ps.setString(3, system);
                 ps.setString(4, system);
                 ResultSet rs = ps.executeQuery();
@@ -508,8 +506,8 @@ public class BGS implements PMCommand, GuildCommand {
             ps.setInt(2, tickMinute);
             ps.setInt(3, tickHour);
             ps.setInt(4, tickMinute);
-            ps.setString(5, sqlSdf.format(start));
-            ps.setString(6, sqlSdf.format(end));
+            ps.setString(5, SQL_SDF.format(start));
+            ps.setString(6, SQL_SDF.format(end));
             ResultSet rs = ps.executeQuery();
 
             // We already know those 3 columns for sure. Don't check for them, just append all the uncertain ones afterwards
@@ -535,40 +533,4 @@ public class BGS implements PMCommand, GuildCommand {
         }
         return lines;
     }
-
-    private final String bgsHelp = " **BGS Bot Commands:**\n" +
-            "Enter '" + Listener.prefix + "bgs' to add or remove BGS role\n" +
-            "\n" +
-            "Format for entering bgs commands is:\n"+
-            Listener.prefix + "bgs <activity>, <amount with no seperators>, <system identifier>\n" +
-            "\n" +
-            "\n" +
-            "**BGS Activities:**\n" +
-            "*bonds*: To log the value of combat bonds (#) claimed in a war or civil war.\n" +
-            "\n" +
-            "*bounties*: To log the value of bounties (#) cashed in.\n" +
-            "\n" +
-            "*failed*: To log the number of missions failed (#).\n" +
-            "\n" +
-            "*fine*: To log the amount (#) of fines gained (#).\n" +
-            "\n" +
-            "*intel*: To log the value of of intel packages (#) cashed in (#).\n" +
-            "\n" +
-            "*mining*: To log the profit (#) you've made from selling mined commodities.\n" +
-            "\n" +
-            "*missions*: To log the number of missions completed (#) successfully.\n" +
-            "\n" +
-            "*murder*: To log number amount (#) of murders on opposing factions.\n" +
-            "\n" +
-            "*mystats*: To Receive a direct message detailing your total logged actions.\n" +
-            "\n" +
-            "*scans*: To log the value of exploration data (#) made with Universal Cartographics.\n" +
-            "\n" +
-            "*smuggling*: To log the profit (#) you've made by smuggling into a black market.\n" +
-            "\n" +
-            "*trade*: To log the profit made (#) when selling at a commodity market.\n" +
-            "\n" +
-            "**Important Notes / Caveats:**\n" +
-            "When entering numbers (#) do not use thousand / million seperators.\n" +
-            "e.g. '" + Listener.prefix + "bgs trade, 1500000'\n";
 }
