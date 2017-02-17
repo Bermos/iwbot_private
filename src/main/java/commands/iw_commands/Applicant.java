@@ -23,7 +23,7 @@ import java.util.Arrays;
  * TODO
  */
 public class Applicant implements GuildCommand {
-    private final Connection connection = new Connections().getConnection();
+    private final Connection connection = DataProvider.isDev() ? null : new Connections().getConnection();
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {

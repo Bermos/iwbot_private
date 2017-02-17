@@ -10,24 +10,12 @@ import provider.DataProvider;
 public class Memes implements PMCommand, GuildCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-            return;
-        }
-
-        event.getChannel().sendMessage(memes(args)).queue();
+        event.getChannel().sendMessage(memes(event.getAuthor().getId(), args)).queue();
     }
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-            return;
-        }
-
-        event.getChannel().sendMessage(memes(args)).queue();
+        event.getChannel().sendMessage(event.getAuthor().getId()).queue();
     }
 
     @Override
@@ -39,7 +27,12 @@ public class Memes implements PMCommand, GuildCommand {
         return "Interacts with the maymays";
     }
 
-    private String memes(String[] args) {
+    String memes(String authorId, String[] args) {
+        //Permission check
+        if (!(DataProvider.isOwner(authorId))) {
+            return "[Error] You aren't authorized to do this";
+        }
+
         if (args.length == 1 && args[0].equalsIgnoreCase("update")) {
             DankMemes.update();
             return "Memes updated from file.";

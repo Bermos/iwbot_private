@@ -25,7 +25,7 @@ public class UTCTime implements PMCommand, GuildCommand {
         return "UTC date & time now";
     }
 
-    private String time() {
+    String time() {
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));

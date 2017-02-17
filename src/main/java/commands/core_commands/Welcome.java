@@ -1,26 +1,19 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
+import iw_bot.JDAUtil;
+import iw_bot.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 
 public class Welcome implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-            return;
-        }
+        String name = event.getMember().getEffectiveName();
+        String[] roleIds = JDAUtil.getRoleIdStrings(event.getMember());
 
-        if (args.length == 0) {
-            event.getChannel().sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getEffectiveName())).queue();
-        }
-        else {
+        event.getChannel().sendMessage(welcome(name, roleIds, args)).queue();
 
-            DataProvider.setNewMemberInfo(event.getMessage().getRawContent().replaceFirst("/new", "").trim());
-            event.getChannel().sendMessage("[Success] New member message changed").queue();
-        }
     }
 
     @Override
@@ -29,5 +22,22 @@ public class Welcome implements GuildCommand {
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
             return "";
         return "<information?> - sets information for new players or shows it";
+    }
+
+    String welcome(String name, String[] roleIds, String[] args) {
+        //Permission check
+        if (!DataProvider.isAdmin(roleIds)) {
+            return "[Error] You aren't authorized to do this";
+        }
+
+        if (args.length == 0) {
+            String welcomeMsg = DataProvider.getNewMemberInfo().replaceAll("<user>", name);
+            return welcomeMsg.isEmpty() ? "[Error] No welcome message set." : welcomeMsg;
+
+        } else {
+            String welcomeMsg = String.join(", ", args);
+            DataProvider.setNewMemberInfo(welcomeMsg);
+            return "[Success] New member message changed";
+        }
     }
 }
