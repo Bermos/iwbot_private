@@ -1,7 +1,5 @@
 package provider;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.concurrent.TimeUnit;
 
 import iw_bot.LogUtil;
@@ -10,8 +8,6 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Pong;
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;

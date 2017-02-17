@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +37,8 @@ public class DataProvider {
     }
 
     public static String getPrefix() {
+		if (info == null)
+			getInfo();
         return info.discord.prefix;
     }
 
@@ -65,6 +66,7 @@ public class DataProvider {
 		String githubToken;
 		String githubBranch;
 		boolean dev;
+		boolean test;
 	}
 	
 	private static void getInfo() {
@@ -238,6 +240,15 @@ public class DataProvider {
 		return isAdmin;
 	}
 
+	public static boolean isAdmin(String[] roleIds) {
+		boolean isAdmin = false;
+		for (String roleId : roleIds) {
+			if (getAdminRoleIDs().contains(roleId))
+				isAdmin = true;
+		}
+		return isAdmin;
+	}
+
 	public static String getInaraPW() {
 		if (info == null)
 			getInfo();
@@ -288,4 +299,10 @@ public class DataProvider {
 
 	    setInfo();
     }
+
+    public static boolean isTest() {
+		if (info == null)
+			getInfo();
+		return info.test;
+	}
 }

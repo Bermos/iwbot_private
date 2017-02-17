@@ -4,7 +4,6 @@ import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
@@ -21,64 +20,69 @@ import java.util.concurrent.TimeUnit;
 public class Reminder implements PMCommand, GuildCommand {
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        reminder(event.getMessage(), args);
+        event.getChannel().sendMessage(reminder(event.getAuthor().getId(), args));
     }
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        reminder(event.getMessage(), args);
+        event.getChannel().sendMessage(reminder(event.getAuthor().getId(), args));
     }
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        return "Syntax is: '/reminder ##t, reason' - ## number, t time unit (s, m, h, d, w, y), reason is optional";
+        return "Syntax is: '/reminder ##t, reason' - ## number, t time unit (s|m|h|d|w|y), reason is optional";
     }
 
-    private void reminder(Message message, String[] args) {
-        String userid = message.getAuthor().getId();
+    String reminder(String userid, String[] args) {
+        if (args.length == 0)
+            return "[Error] Please specify a time frame number(s|m|h|d|w|y)";
+
         String reason = "";
-        long time = decode(args);
+        long time = decode(args[0]);
         if (time == -1) {
-            message.getChannel().sendMessage("Please specify the time unit (s, m, h, d, w, y)").queue();
-            return;
+            return "[Error] Please specify the time unit (s|m|h|d|w|y)";
+        }
+        if (time == -2) {
+            return "[Error] Incompatible time format, please use: number(s|m|h|d|w|y)";
         }
 
         if (args.length >= 2) {
             for (int i = 1; i < args.length; i++)
                 reason = reason + ", " + args[i];
         }
-        reason = reason.replace(", ", "");
+        reason = reason.replaceFirst(", ", "");
 
-        add(userid, reason, time);
+        if (add(userid, reason, time))
+            return "Reminder set";
+
+        return "Something went terribly wrong, reminder not set.";
     }
 
-    private long decode(String[] args) {
+    private long decode(String argsTime) {
         long time = new Date().getTime();
-        if (args[0].contains("s")) {
-            time += Integer.parseInt(args[0].replace("s", "")) * 1000;
-        }
-        else if (args[0].contains("m")) {
-            time += Integer.parseInt(args[0].replace("m", "")) * 1000 * 60;
-        }
-        else if (args[0].contains("h")) {
-            time += Integer.parseInt(args[0].replace("h", "")) * 1000 * 60 * 60;
-        }
-        else if (args[0].contains("d")) {
-            time += Integer.parseInt(args[0].replace("d", "")) * 1000 * 60 * 60 * 24;
-        }
-        else if (args[0].contains("w")) {
-            time += Integer.parseInt(args[0].replace("w", "")) * 1000 * 60 * 60 * 24 * 7;
-        }
-        else if (args[0].contains("y")) {
-            time += Integer.parseInt(args[0].replace("y", "")) * 1000 * 60 * 60 * 24 * 365;
-        }
-        else {
-            return -1;
+        try {
+            if (argsTime.contains("s")) {
+                time += Integer.parseInt(argsTime.replace("s", "")) * 1000;
+            } else if (argsTime.contains("m")) {
+                time += Integer.parseInt(argsTime.replace("m", "")) * 1000 * 60;
+            } else if (argsTime.contains("h")) {
+                time += Integer.parseInt(argsTime.replace("h", "")) * 1000 * 60 * 60;
+            } else if (argsTime.contains("d")) {
+                time += Integer.parseInt(argsTime.replace("d", "")) * 1000 * 60 * 60 * 24;
+            } else if (argsTime.contains("w")) {
+                time += Integer.parseInt(argsTime.replace("w", "")) * 1000 * 60 * 60 * 24 * 7;
+            } else if (argsTime.contains("y")) {
+                time += Integer.parseInt(argsTime.replace("y", "")) * 1000 * 60 * 60 * 24 * 365;
+            } else {
+                return -1;
+            }
+        } catch (Exception e) {
+            return -2;
         }
         return time;
     }
 
-    private static void add (String userid, String reason, long time) {
+    private static boolean add (String userid, String reason, long time) {
         Connection connect = new Connections().getConnection();
 
         try {
@@ -86,10 +90,13 @@ public class Reminder implements PMCommand, GuildCommand {
             ps.setString(1, userid);
             ps.setLong  (2, time);
             ps.setString(3, reason);
-            ps.executeUpdate();
+
+            if(ps.executeUpdate() == 1)
+                return true;
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
+        return false;
     }
 
     public void startChecks(JDA jda) {
