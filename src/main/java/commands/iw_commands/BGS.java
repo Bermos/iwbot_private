@@ -130,17 +130,17 @@ public class BGS implements PMCommand, GuildCommand {
 
             } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) {
                 if (args.length == 3) {
-                    event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2], DataProvider.isAdmin(event))).queue();
+                    event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
 
                 } else {
                     event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide|show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
                 }
 
             } else if (args[1].equalsIgnoreCase("add")) {
-                event.getChannel().sendMessage(addSystem(args, DataProvider.isAdmin(event))).queue();
+                event.getChannel().sendMessage(addSystem(args)).queue();
 
             } else if (args[1].equalsIgnoreCase("edit")) {
-                event.getChannel().sendMessage(editSystem(args, DataProvider.isAdmin(event))).queue();
+                event.getChannel().sendMessage(editSystem(args)).queue();
 
             } else{
                 event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
@@ -182,7 +182,7 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
-    private String editSystem(String[] args, boolean isAdmin) {
+    private String editSystem(String[] args) {
         if (args.length == 5) {
 
             Connection connect = new Connections().getConnection();
@@ -196,13 +196,13 @@ public class BGS implements PMCommand, GuildCommand {
                 //This happens when the system was not found.
                 return "**WARNING STAR SYSTEM NOT UPDATED**";
             }
-            return "Star system updated\n" + getSystems(isAdmin);
+            return "Star system updated\n" + getSystems(true);
         } else {
-            return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(isAdmin);
+            return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(true);
         }
     }
 
-    private String addSystem(String[] args, boolean isAdmin) {
+    private String addSystem(String[] args) {
         if (args.length == 4) {
             Connection connect = new Connections().getConnection();
             try {
@@ -214,13 +214,13 @@ public class BGS implements PMCommand, GuildCommand {
                 //This only happens when there's a serious issue with mysql or the connection to it
                 return "**WARNING STAR SYSTEM NOT ADDED**";
             }
-            return "New star system added to BGS logging.\n" + getSystems(isAdmin);
+            return "New star system added to BGS logging.\n" + getSystems(true);
         } else{
             return "Help: " + Listener.prefix + "bgs system, add, <shortname>, <fullname>";
         }
     }
 
-    private String setSystemVisibility(boolean show, String system, boolean isAdmin) {
+    private String setSystemVisibility(boolean show, String system) {
         int systemid = Integer.parseInt(system);
         Connection connect = new Connections().getConnection();
         try {
@@ -231,11 +231,11 @@ public class BGS implements PMCommand, GuildCommand {
             // if one row was altered
             if (ps.executeUpdate() == 1) {
                 if (show)
-                    return "BGS star system **VISIBLE**. Logging possible for this system.\n"  + getSystems(isAdmin);
+                    return "BGS star system **VISIBLE**. Logging possible for this system.\n"  + getSystems(true);
                 else
-                    return "BGS star system **HIDDEN**. Logging no longer possible for this system.\n"  + getSystems(isAdmin);
+                    return "BGS star system **HIDDEN**. Logging no longer possible for this system.\n"  + getSystems(true);
             } else { // if no row was altered the system wasn't found
-                return "**WARNING SYSTEM VISIBILITY NOT CHANGED**\nSystem not found.\n" + getSystems(isAdmin);
+                return "**WARNING SYSTEM VISIBILITY NOT CHANGED**\nSystem not found.\n" + getSystems(true);
             }
         } catch (SQLException e) {
             //This only happens when there's a serious issue with mysql or the connection to it
