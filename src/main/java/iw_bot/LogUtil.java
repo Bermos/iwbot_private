@@ -4,6 +4,8 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.entities.User;
+import provider.DataProvider;
 
 import java.awt.*;
 import java.io.PrintWriter;
@@ -36,9 +38,8 @@ public class LogUtil {
                     .setColor(new Color(179, 58, 58));
             MessageEmbed embed = eb.build();
 
-            Guild iw = Listener.jda.getGuildById("142749481530556416");
-            for (Member member : iw.getMembersWithRoles(iw.getRolesByName("Bot Wizard", true).get(0))) {
-                JDAUtil.getPrivateChannel(member.getUser()).sendMessage(embed).queue();
+            for (String userId : DataProvider.getOwnerIDs()) {
+                JDAUtil.getPrivateChannel(Listener.jda.getUserById(userId)).sendMessage(embed).queue();
             }
         } catch (Exception e1) {
             e1.printStackTrace();

@@ -16,17 +16,18 @@ CREATE TABLE `bgs_activity` (
   `userid` varchar(20) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `amount` int(11) DEFAULT NULL,
-  `activity` enum('Bond','Bounty','Mining','Mission','Scan','Smuggling','Trade','Murder') NOT NULL,
+  `activity` enum('Bond','Bounty','Failed','Fine','Intel','Mining','Mission','Scan','Smuggling','Trade','Murder') NOT NULL,
   `systemid` int(11) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1892 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `bgs_systems` (
   `systemid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `shortname` varchar(5) NOT NULL,
   `fullname` varchar(50) NOT NULL DEFAULT '0',
+  `hidden` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`systemid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='Systems tracked by the BGS';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Systems tracked by the BGS';
 
 CREATE TABLE `markov` (
   `idmarkov` int(15) NOT NULL AUTO_INCREMENT,
@@ -39,7 +40,7 @@ CREATE TABLE `markov` (
   PRIMARY KEY (`idmarkov`),
   KEY `index_pre` (`word1`,`word2`,`word3`,`word4`),
   KEY `index_post` (`word2`,`word3`,`word4`,`word5`)
-) ENGINE=InnoDB AUTO_INCREMENT=1345904 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `notes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -48,7 +49,7 @@ CREATE TABLE `notes` (
   `is_public` bit(1) NOT NULL DEFAULT b'0',
   `content` varchar(2000) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `reminders` (
   `idreminders` int(11) NOT NULL AUTO_INCREMENT,
@@ -57,7 +58,7 @@ CREATE TABLE `reminders` (
   `reason` varchar(250) DEFAULT NULL,
   `reminded` binary(1) DEFAULT '0',
   PRIMARY KEY (`idreminders`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `user` (
   `iduser` bigint(20) NOT NULL,
