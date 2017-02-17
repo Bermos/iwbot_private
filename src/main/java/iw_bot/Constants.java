@@ -5,8 +5,8 @@ import java.text.SimpleDateFormat;
 public class Constants {
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public final static SimpleDateFormat USER_SDF = new SimpleDateFormat("dd/MM/yy HH:mm");
-
     public final static String BGS_STATS_HELP = "Help: " + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
+    public final static String BGS_SYSTEM_HELP = "Help: " + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
     public final static String BGS_LOG_HELP = " **BGS Bot Commands:**\n" +
             "Enter '" + Listener.prefix + "bgs' to add or remove BGS role\n" +
             "\n" +

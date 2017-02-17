@@ -101,7 +101,7 @@ public class BGS implements PMCommand, GuildCommand {
             if (args.length == 1) {
                 event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
-            } else if (args[1].equalsIgnoreCase("summary")){
+            } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")){
                 // no system filter
                 if(args.length == 4 || args.length == 5 ) {
                     event.getChannel().sendMessage(getTick(args)).queue();
@@ -121,30 +121,29 @@ public class BGS implements PMCommand, GuildCommand {
             }
         }
         // admin functions for systems
-        else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems")) && DataProvider.isAdmin(event)){
-            String systemhelp = "Help: " + Listener.prefix + "bgs system, <command modifier {add, edit, show, hide}>";
+        else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems") || args[0].equalsIgnoreCase("sys")) && DataProvider.isAdmin(event)){
             if (args.length == 1) {
-                event.getChannel().sendMessage(systemhelp).queue();
+                event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
 
             } else if (args[1].equalsIgnoreCase("list")) {
                 event.getChannel().sendMessage(getSystems(DataProvider.isAdmin(event))).queue();
 
             } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) {
                 if (args.length == 3) {
-                    event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
+                    event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2], DataProvider.isAdmin(event))).queue();
 
                 } else {
                     event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide|show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
                 }
 
             } else if (args[1].equalsIgnoreCase("add")) {
-                event.getChannel().sendMessage(addSystem(args)).queue();
+                event.getChannel().sendMessage(addSystem(args, DataProvider.isAdmin(event))).queue();
 
             } else if (args[1].equalsIgnoreCase("edit")) {
                 event.getChannel().sendMessage(editSystem(args, DataProvider.isAdmin(event))).queue();
 
             } else{
-                event.getChannel().sendMessage(systemhelp).queue();
+                event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
@@ -197,13 +196,13 @@ public class BGS implements PMCommand, GuildCommand {
                 //This happens when the system was not found.
                 return "**WARNING STAR SYSTEM NOT UPDATED**";
             }
-            return "Star system updated.";
+            return "Star system updated\n" + getSystems(isAdmin);
         } else {
             return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(isAdmin);
         }
     }
 
-    private String addSystem(String[] args) {
+    private String addSystem(String[] args, boolean isAdmin) {
         if (args.length == 4) {
             Connection connect = new Connections().getConnection();
             try {
@@ -215,28 +214,28 @@ public class BGS implements PMCommand, GuildCommand {
                 //This only happens when there's a serious issue with mysql or the connection to it
                 return "**WARNING STAR SYSTEM NOT ADDED**";
             }
-            return "New star system added to BGS logging.";
+            return "New star system added to BGS logging.\n" + getSystems(isAdmin);
         } else{
             return "Help: " + Listener.prefix + "bgs system, add, <shortname>, <fullname>";
         }
     }
 
-    private String setSystemVisibility(boolean show, String system) {
+    private String setSystemVisibility(boolean show, String system, boolean isAdmin) {
         int systemid = Integer.parseInt(system);
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET hidden = ? WHERE systemid = ?");
-            ps.setInt(1, show ? 1 : 0);
+            ps.setInt(1, show ? 0 : 1);
             ps.setInt(2, systemid);
 
             // if one row was altered
             if (ps.executeUpdate() == 1) {
                 if (show)
-                    return "BGS star system un-hidden. Logging possible for this system.";
+                    return "BGS star system **VISIBLE**. Logging possible for this system.\n"  + getSystems(isAdmin);
                 else
-                    return "BGS BGS star system hidden. Logging no longer possible for this system.";
+                    return "BGS star system **HIDDEN**. Logging no longer possible for this system.\n"  + getSystems(isAdmin);
             } else { // if no row was altered the system wasn't found
-                return "**WARNING SYSTEM VISIBILITY NOT CHANGED**\nSystem not found.";
+                return "**WARNING SYSTEM VISIBILITY NOT CHANGED**\nSystem not found.\n" + getSystems(isAdmin);
             }
         } catch (SQLException e) {
             //This only happens when there's a serious issue with mysql or the connection to it
@@ -283,7 +282,7 @@ public class BGS implements PMCommand, GuildCommand {
         }
         try {
             Date time = USER_SDF.parse(args[3]);
-            String output = "Data for " + args[1] + " ticks after " + args[3] + " UTC System Filter: " + system + "\n```";
+            String output = "Data for " + args[2] + " ticks after " + args[3] + " UTC System Filter: " + system + "\n```";
             Map<String, Double> entries = getTotalAmount(time, Integer.parseInt(args[2]), system);
             for (Entry<String, Double> entry : entries.entrySet()) {
                 output += entry.getKey() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
@@ -401,14 +400,25 @@ public class BGS implements PMCommand, GuildCommand {
         Connection connect = new Connections().getConnection();
         try {
             if (system.equals("all")) {
-                PreparedStatement ps = connect.prepareStatement("SELECT fullname, activity, SUM(amount) AS total FROM bgs_activity b LEFT JOIN bgs_systems s ON b.systemid = s.systemid WHERE timestamp > ? AND timestamp < ? GROUP BY fullname, activity ORDER BY fullname ASC, activity ASC");
+                PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS fullname, " +
+                        "b.activity, " +
+                        "SUM(b.amount) AS total " +
+                        "FROM bgs_activity b " +
+                        "WHERE timestamp > ? AND timestamp < ? " +
+                        "GROUP BY fullname, activity " +
+                        "ORDER BY fullname ASC, activity ASC");
                 ps.setString(1, SQL_SDF.format(start));
                 ps.setString(2, SQL_SDF.format(end));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next())
                     totals.put((Activity.valueOf(rs.getString("activity" ).toUpperCase()).toString())+ " (" + rs.getString("fullname" ) + ")", rs.getDouble("total"));
             } else {
-                PreparedStatement ps = connect.prepareStatement("SELECT fullname, activity, SUM(amount) AS total FROM bgs_activity b LEFT JOIN bgs_systems s ON b.systemid = s.systemid WHERE timestamp > ? AND timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1) GROUP BY activity ORDER BY fullname ASC, activity ASC");
+                PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS fullname," +
+                        "b.activity, " +
+                        "SUM(b.amount) AS total " +
+                        "FROM bgs_activity b " +
+                        "WHERE b.timestamp > ? AND b.timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1) " +
+                        "GROUP BY fullname, activity ORDER BY fullname ASC, activity ASC");
                 ps.setString(1, SQL_SDF.format(start));
                 ps.setString(2, SQL_SDF.format(end));
                 ps.setString(3, system);
@@ -482,7 +492,7 @@ public class BGS implements PMCommand, GuildCommand {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
                 "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
                 "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60))) AS Tick, " +
-                "s.fullname AS System, " +
+                "(SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS System, " +
                 "SUM( if( b.activity = 'Bond',      b.amount, 0 ) ) AS Bonds, " +
                 "SUM( if( b.activity = 'Bounty',    b.amount, 0 ) ) AS Bounties, " +
                 "SUM( if( b.activity = 'Failed',    b.amount, 0 ) ) AS Failed, " +
@@ -496,7 +506,6 @@ public class BGS implements PMCommand, GuildCommand {
                 "SUM( if( b.activity = 'Trade',     b.amount, 0 ) ) AS Trading " +
                 "FROM " +
                 "bgs_activity b " +
-                "LEFT JOIN bgs_systems s ON b.systemid = s.systemid " +
                 "WHERE " +
                 "b.timestamp >= ? AND b.timestamp < ? " +
                 "GROUP BY " +
