@@ -3,9 +3,11 @@ package commands.iw_commands;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import commands.GuildCommand;
 import commands.PMCommand;
+import commands.core_commands.SendMessage;
 import iw_bot.JDAUtil;
 import iw_bot.Listener;
 import iw_bot.LogUtil;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
@@ -13,14 +15,12 @@ import provider.Connections;
 import provider.DataProvider;
 import provider.Statistics;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 
 public class BGS implements PMCommand, GuildCommand {
@@ -291,6 +291,36 @@ public class BGS implements PMCommand, GuildCommand {
         } catch (ParseException e) {
             event.getChannel().sendMessage("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'").queue();
         }
+    }
+
+    //Set tick time
+    private void tickTurnover(GuildMessageReceivedEvent event, String[] args) {
+        if (args[1].equalsIgnoreCase("settick") && DataProvider.isAdmin(event)) {
+            Date tick = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            String BGStick = sdf.format(tick);
+
+            event.getChannel().sendMessage( "Tick set at:\n" + sdf.format(tick) + "UTC");
+        }
+    }
+
+    //Automated tick post and pin by bot. Will post new message on 1h past tick, and update q4h.
+    private void tickAutopost(PrivateMessageReceivedEvent event,String[] args) {
+        //if (args.equals("starAutopost") && DataProvider.isOwner(event)) {
+        Timer timer = new Timer ();
+        TimerTask q4hTask = new TimerTask () {
+            @Override
+            public void run(){
+            }
+        };
+
+
+        };
+
+        // schedule the task to run starting now and then every 4 hours
+        //timer.schedule (q4hTask, 1000*60*60, 1000*60*240);
     }
 
     private String getUserStats(String userID) {
