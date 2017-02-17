@@ -308,7 +308,7 @@ public class BGS implements PMCommand, GuildCommand {
 
     //Automated tick post and pin by bot. Will post new message on 1h past tick, and update q4h.
     private void tickAutopost(PrivateMessageReceivedEvent event,String[] args) {
-        //if (args.equals("starAutopost") && DataProvider.isOwner(event)) {
+        //if (args.equals("startAutopost") && DataProvider.isOwner(event)) {
         Timer timer = new Timer ();
         TimerTask q4hTask = new TimerTask () {
             @Override
