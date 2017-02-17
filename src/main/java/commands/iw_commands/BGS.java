@@ -298,36 +298,6 @@ public class BGS implements PMCommand, GuildCommand {
         }
     }
 
-    //Set tick time
-    private void tickTurnover(GuildMessageReceivedEvent event, String[] args) {
-        if (args[1].equalsIgnoreCase("settick") && DataProvider.isAdmin(event)) {
-            Date tick = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-            String BGStick = sdf.format(tick);
-
-            event.getChannel().sendMessage( "Tick set at:\n" + sdf.format(tick) + "UTC");
-        }
-    }
-
-    //Automated tick post and pin by bot. Will post new message on 1h past tick, and update q4h.
-    private void tickAutopost(PrivateMessageReceivedEvent event,String[] args) {
-        //if (args.equals("startAutopost") && DataProvider.isOwner(event)) {
-        Timer timer = new Timer ();
-        TimerTask q4hTask = new TimerTask () {
-            @Override
-            public void run(){
-            }
-        };
-
-
-    };
-
-    // schedule the task to run starting now and then every 4 hours
-    //timer.schedule (q4hTask, 1000*60*60, 1000*60*240);
-}
-
     private static String getUserStats(String userID) {
         String output = "```";
         for (Entry<Activity, Double> entry : getTotalAmount(userID).entrySet()) {
