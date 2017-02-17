@@ -92,12 +92,7 @@ public class Listener extends ListenerAdapter {
         if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().isBot()) {
             String content = event.getMessage().getContent();
             String commandName = content.replaceFirst(prefix, "").split(" ")[0];
-            String[] args = {};
-            if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
-                args = content.replaceFirst(prefix + commandName, "").trim().split(",");
-                for (int i = 0; i < args.length; i++)
-                    args[i] = args[i].trim();
-            }
+			String[] args = getArgs(content, commandName);
 
             if (commands.pmCommands.containsKey(commandName)) {
                 event.getChannel().sendTyping();
@@ -119,12 +114,7 @@ public class Listener extends ListenerAdapter {
 		if (event.getMessage().getContent().startsWith(prefix) && !event.getAuthor().isBot()) {
 			String content = event.getMessage().getContent();
 			String commandName = content.replaceFirst(prefix, "").split(" ")[0];
-			String[] args = {};
-			if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
-				args = content.replaceFirst(prefix + commandName, "").trim().split(",");
-				for (int i = 0; i < args.length; i++)
-					args[i] = args[i].trim();
-			}
+			String[] args = getArgs(content, commandName);
 			
 			if (commands.guildCommands.containsKey(commandName)) {
                 if(!DataProvider.isDev())
@@ -142,7 +132,17 @@ public class Listener extends ListenerAdapter {
 
         event.getAuthor().isFake();
 	}
-	
+
+	public static String[] getArgs(String content, String commandName) {
+		String[] args = {};
+		if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
+            args = content.replaceFirst(prefix + commandName, "").trim().split(",");
+            for (int i = 0; i < args.length; i++)
+                args[i] = args[i].trim();
+        }
+		return args;
+	}
+
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 	    if (!DataProvider.isDev()) {
