@@ -1,8 +1,12 @@
 {
   "discord": {
     "token": "",
-    "idOwner": ["1"],
-    "idRoles": ["1"],
+    "idOwner": [
+      "1"
+    ],
+    "idRoles": [
+      "1"
+    ],
     "newMember": "",
     "adminChanID": "1",
     "prefix": "/"

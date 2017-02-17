@@ -37,6 +37,8 @@ public class DataProvider {
     }
 
     public static String getPrefix() {
+		if (info == null)
+			getInfo();
         return info.discord.prefix;
     }
 
