@@ -532,7 +532,7 @@ public class BGS implements PMCommand, GuildCommand {
                 String rowValues = rs.getString("CMDR") + ",";
                 rowValues += rs.getString("Tick").replace(".0", "").replace("-", "/") + ",";
                 for (int i = 4; i <= columnCount; i++) {
-                    rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i) + ",") + ",";
+                    rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i)) + ",";
                 }
                 rowValues += rs.getString("System");
                 lines.add(rowValues);
