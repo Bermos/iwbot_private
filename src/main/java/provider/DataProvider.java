@@ -19,6 +19,7 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 public class DataProvider {
 	private static Info info;
+    public static String FakeMessage;
 
     public static void setDiscordToken(String discordToken) {
         if (info == null)

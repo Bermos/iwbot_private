@@ -1,5 +1,6 @@
 package commands.core_commands;
 
+import fake_testing_classes.FakeTextChannel;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
@@ -10,6 +11,7 @@ import org.apache.http.HttpHost;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import provider.DataProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class TopicTest {
         JDAImpl jda = new JDAImpl(AccountType.BOT, new HttpHost("0"), false, false, false, false);
         Guild guild = new GuildImpl(jda,"0");
 
-        TextChannel channel = new TextChannelImpl("0", guild).setTopic("This is a topic");
+        TextChannel channel = new FakeTextChannel("0", guild).setTopic("This is a topic");
         Message mess = new MessageImpl("0", channel, true);
 
         tests.add(new GuildMessageReceivedEvent(jda, 0, mess));
@@ -46,6 +48,7 @@ public class TopicTest {
 
         for (GuildMessageReceivedEvent test : tests) {
             topic.runCommand(test, new String[] {});
+            System.out.println(DataProvider.FakeMessage);
         }
     }
 
