@@ -74,7 +74,7 @@ public class Missions implements GuildCommand {
 			.grant(Permission.MANAGE_CHANNEL)
 			.update().queue();
 
-		// Set permissions for iwmembers
+		// Set permissions for iw pilots
 		permManager = missionChannel.createPermissionOverride(iwRole).complete().getManagerUpdatable();
 		permManager.grant(Permission.MESSAGE_READ)
 			.grant(Permission.MESSAGE_WRITE)
@@ -235,6 +235,6 @@ public class Missions implements GuildCommand {
 
 	@Override
 	public String getHelp(GuildMessageReceivedEvent event) {
-		return "format: <new/close>, <mission channel name>, <@explorer name> [creates a mission text channel with permissions to mentioned explorer].";
+		return "format: <new/close>, <mission channel name>, <@explorer name> [creates a mission channel].";
 	}
 }

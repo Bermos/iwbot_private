@@ -55,6 +55,8 @@ public class BGS implements PMCommand, GuildCommand {
                 case "mis"       :
                 case "mission"   :
                 case "missions"  : output = Activity.MISSION;   break;
+                case "mur"	     :
+                case "murder"	 : output = Activity.MURDER;	break;
                 case "exploration" :
                 case "sca"       :
                 case "scan"      :
@@ -65,8 +67,6 @@ public class BGS implements PMCommand, GuildCommand {
                 case "tra"       :
                 case "trading"   :
                 case "trade"	 : output = Activity.TRADE;	    break;
-                case "mur"	     :
-                case "murder"	 : output = Activity.MURDER;	break;
                 default          : output = null;               break;
             }
 
@@ -440,8 +440,8 @@ public class BGS implements PMCommand, GuildCommand {
         *Confirmation message that does NOT tag them but is customised per the action logged
         *If goal is already met direct message once per activity with details on what still needs work.
         */
-        int amount = Integer.parseInt(sAmount);
         Activity activity = Activity.from(sActivity);
+        int amount = 0;
 
         if (activity == null) {
             String output = "";
@@ -453,16 +453,22 @@ public class BGS implements PMCommand, GuildCommand {
 
         Connection connect = new Connections().getConnection();
         try {
+            amount = Integer.parseInt(sAmount);
+
             PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) " +
                     "VALUES (?, ?, ?, ?, " +
                     "(SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1))");
             ps.setString(1, username);
             ps.setString(2, userid);
-            ps.setInt   (3, amount);
+            ps.setInt(3, amount);
             ps.setString(4, activity.toString());
             ps.setString(5, system);
             ps.setString(6, system);
             ps.executeUpdate();
+
+        } catch (NumberFormatException e) {
+
+            return "[Error] " + sAmount + " is not a valid number to log. Make sure you have the format '/bgs *activity*, *number*, *system*";
         } catch (MySQLIntegrityConstraintViolationException e) {
             //This happens when the system was not found.
 
@@ -532,7 +538,7 @@ public class BGS implements PMCommand, GuildCommand {
                 String rowValues = rs.getString("CMDR") + ",";
                 rowValues += rs.getString("Tick").replace(".0", "").replace("-", "/") + ",";
                 for (int i = 4; i <= columnCount; i++) {
-                    rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i) + ",") + ",";
+                    rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i)) + ",";
                 }
                 rowValues += rs.getString("System");
                 lines.add(rowValues);

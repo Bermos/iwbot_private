@@ -26,10 +26,17 @@ public class Connections {
 	
 	public Connection getConnection() {
 		if (SQLConnection == null) {
-			connect();
+			if (DataProvider.isTest())
+				fakeConnect();
+			else
+				connect();
 		}
 		
 		return SQLConnection;
+	}
+
+	private void fakeConnect() {
+		SQLConnection = new FakeConnection();
 	}
 
 	public static Connection getLocalCon(String us, String pw) {

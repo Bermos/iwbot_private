@@ -28,27 +28,27 @@ import java.util.TimeZone;
 
 public class Listener extends ListenerAdapter {
 	private Commands commands;
-	private static SimpleDateFormat sdf;
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 	public static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
+
 	public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
-	public static long startupTime;
-	public static final String VERSION_NUMBER = "3.1.10_75";
+	public static final long startupTime = new Date().getTime();
+	public static final String VERSION_NUMBER = "3.1.10_76";
 	public static JDA jda;
 	
 	Listener() {
-		this.commands = new Commands();
-        new AutoUpdate();
-		Listener.startupTime = new Date().getTime();
-		Listener.sdf = new SimpleDateFormat("HH:mm:ss");
 		Listener.sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-		//Initial parsing of the memes.json file
-		DankMemes.update();
 	}
 	
 	@Override
 	public void onReady(ReadyEvent event) {
+		this.commands = new Commands();
+		new AutoUpdate();
+
+		//Initial parsing of the memes.json file
+		DankMemes.update();
+
 		//Print out startup info
 		System.out.println("[" + sdf.format(new Date()) + "][Info] Listener v" + VERSION_NUMBER + " ready!");
 		System.out.println("[" + sdf.format(new Date()) + "][Info] Connected to:");
@@ -139,6 +139,8 @@ public class Listener extends ListenerAdapter {
 
         if (!DataProvider.isDev())
 		    Statistics.getInstance().logMessage(event);
+
+        event.getAuthor().isFake();
 	}
 	
 	@Override
