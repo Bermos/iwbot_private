@@ -102,7 +102,7 @@ public class Listener extends ListenerAdapter {
 	}
 	
 	@Override
-	public void onGuildMessageReceived(GuildMessageReceivedEvent  event) {
+	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		if (isDebug) {
 			System.out.printf("[" + sdf.format(new Date()) + "][%s][%s] %s: %s\n", event.getGuild().getName(),
 					event.getChannel().getName(),
@@ -133,7 +133,7 @@ public class Listener extends ListenerAdapter {
         event.getAuthor().isFake();
 	}
 
-	public static String[] getArgs(String content, String commandName) {
+	private static String[] getArgs(String content, String commandName) {
 		String[] args = {};
 		if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
             args = content.replaceFirst(prefix + commandName, "").trim().split(",");

@@ -4,14 +4,17 @@ import fake_testing_classes.FakeTextChannel;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.impl.*;
+import net.dv8tion.jda.core.entities.impl.GuildImpl;
+import net.dv8tion.jda.core.entities.impl.JDAImpl;
+import net.dv8tion.jda.core.entities.impl.MessageImpl;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import org.apache.http.HttpHost;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import provider.DataProvider;
+import test_helper.FakeStuff;
+import test_helper.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,21 +22,23 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class TopicTest {
-    private List<GuildMessageReceivedEvent> tests = new ArrayList<>();
+    private List<TestCase> tests = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
-        JDAImpl jda = new JDAImpl(AccountType.BOT, new HttpHost("0"), false, false, false, false);
-        Guild guild = new GuildImpl(jda,"0");
+        JDAImpl jda = FakeStuff.getJDA();
+        Guild guild = FakeStuff.getGuild();
 
-        TextChannel channel = new FakeTextChannel("0", guild).setTopic("This is a topic");
+        FakeTextChannel channel = new FakeTextChannel("0", guild).setTopic("This is a topic");
         Message mess = new MessageImpl("0", channel, true);
 
-        tests.add(new GuildMessageReceivedEvent(jda, 0, mess));
+        String[] args = new String[] {};
 
-        channel = new TextChannelImpl("", guild).setTopic("");
+        tests.add(new TestCase(new GuildMessageReceivedEvent(jda, 0, mess), args, "This is a topic"));
+
+        channel = new FakeTextChannel("", guild).setTopic("");
         mess = new MessageImpl("0", channel, true);
-        tests.add(new GuildMessageReceivedEvent(jda, 0, mess));
+        tests.add(new TestCase(new GuildMessageReceivedEvent(jda, 0, mess), args, "This channel has no topic."));
     }
 
     @After
@@ -44,11 +49,10 @@ public class TopicTest {
     @Test
     public void runCommand() throws Exception {
         Topic topic = new Topic();
-        //TODO redo, it's shit right now
 
-        for (GuildMessageReceivedEvent test : tests) {
-            topic.runCommand(test, new String[] {});
-            System.out.println(DataProvider.FakeMessage);
+        for (TestCase test : tests) {
+            topic.runCommand(test.event, test.args);
+            assertEquals(test.output, DataProvider.lastMessageSent);
         }
     }
 
