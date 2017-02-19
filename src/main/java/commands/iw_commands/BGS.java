@@ -491,7 +491,7 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
                 "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
-                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60))) AS Tick, " +
+                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%D %b %Y') AS Tick, " +
                 "(SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS System, " +
                 "SUM( if( b.activity = 'Bond',      b.amount, 0 ) ) AS Bonds, " +
                 "SUM( if( b.activity = 'Bounty',    b.amount, 0 ) ) AS Bounties, " +
@@ -530,7 +530,7 @@ public class BGS implements PMCommand, GuildCommand {
 
             while (rs.next()) {
                 String rowValues = rs.getString("CMDR") + ",";
-                rowValues += rs.getString("Tick").replace(".0", "").replace("-", "/") + ",";
+                rowValues += rs.getString("Tick") + ",";
                 for (int i = 4; i <= columnCount; i++) {
                     rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i)) + ",";
                 }
