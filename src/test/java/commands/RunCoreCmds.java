@@ -1,14 +1,13 @@
 package commands;
 
-import commands.core_commands.StatusTest;
-import commands.core_commands.TopicTest;
-import commands.core_commands.UTCTimeTest;
-import commands.core_commands.WelcomeTest;
+import commands.core_commands.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        DebugModeTest.class,
+        EditOwnerTest.class,
         StatusTest.class,
         TopicTest.class,
         UTCTimeTest.class,
