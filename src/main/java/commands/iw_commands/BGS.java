@@ -145,6 +145,74 @@ public class BGS implements PMCommand, GuildCommand {
             } else{
                 event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
             }
+        }
+        // admin functions for goals
+        else if ((args[0].equalsIgnoreCase("goal") || args[0].equalsIgnoreCase("goals")) && DataProvider.isAdmin(event)) {
+            if (args.length == 1) {
+                event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
+
+            } else if (args[1].equalsIgnoreCase("add")) {
+                //ToDo Add a goal
+                //bgs goals,add,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+                if (args.length >= 5) {
+
+                } else{
+                    event.getChannel().sendMessage(BGS_GOAL_ADD_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("delete") || args[1].equalsIgnoreCase("del")) {
+                //ToDo Delete a goal
+                //bgs goals,<del>,goalid
+                if (args.length == 3) {
+
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_DEL_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("deleteact") || args[1].equalsIgnoreCase("delact")) {
+                //ToDo Delete activities of a goal
+                //bgs goals,<delact>,goalid,Activity
+                if (args.length == 4) {
+
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_DELACT_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("edit")) {
+                //ToDo edit a goal
+                //bgs goals,edit,goalid,Start Date:Time, Ticks
+                if (args.length == 5) {
+
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_EDIT_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("editactivity") || args[1].equalsIgnoreCase("addactivity") || args[1].equalsIgnoreCase("editact") || args[1].equalsIgnoreCase("addact")) {
+                //ToDo Add/edit activities of a goal
+                //bgs goals,<addact,editact>,goalid,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+                if (args.length >= 4) {
+
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_EDITACT_HELP).queue();
+                }
+            }
+
+            else if (args[1].equalsIgnoreCase("list")) {
+                //ToDo get X most recent goals grouped by startts so that goals with multiple activity targets are grouped together
+                //bgs goals, list,#
+                //Get # most recent goals
+                //If # is not specified then get all active goals
+
+                /*Output
+                Goals for the last # time periods
+                **ID | Start Date:Time | End Date:Time | Currently Active**
+                * Activity, User Goal (% complete), Global Goal (% complete)
+                * Activity, User Goal (% complete), Global Goal (% complete)
+                 */
+            }
+            else{
+                event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
+            }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
                 JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(getUserStats(event.getAuthor().getId())).queue();
@@ -329,10 +397,11 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private static String getSystems(boolean admin) {
-        String message = "```ID   | Short | Full\n";
+        String message = null;
         try {
             // show hidden systems in italics for admins
             if (admin) {
+                message = "```ID   | Short | Full\n";
                 PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC");
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
@@ -344,10 +413,11 @@ public class BGS implements PMCommand, GuildCommand {
 
                 }
             } else { // just show live systems
+                message = "```Short | Full\n";
                 PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems WHERE hidden = 0 ORDER BY fullname ASC");
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
-                    message += String.format("%1$-4s | %2$-6s| %3$s\n", rs.getString("systemid"), rs.getString("shortname"), rs.getString("fullname"));
+                    message += String.format("%1$-6s| %2$s\n", rs.getString("shortname"), rs.getString("fullname"));
                 }
             }
         }

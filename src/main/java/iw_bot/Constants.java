@@ -5,8 +5,28 @@ import java.text.SimpleDateFormat;
 public class Constants {
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public final static SimpleDateFormat USER_SDF = new SimpleDateFormat("dd/MM/yy HH:mm");
-    public final static String BGS_STATS_HELP = "Help: " + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
-    public final static String BGS_SYSTEM_HELP = "Help: " + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
+
+    public final static String BGS_STATS_HELP = "**Help: Produce Statistics on BGS Data\n" + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
+
+    public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
+
+    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, list}>\n";
+    public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/CMDRGoal #/GlobalGoal #>\n"+
+            "You can append as many <Activity/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
+    public final static String BGS_GOAL_DEL_HELP = "**Help: Delete BGS Goal**\n" + Listener.prefix + "bgs goal, {delete,del}, <goalid #>\n"+
+            "You can get a list of goals by using " + Listener.prefix + "bgs goals, list, <last # goals>";
+    public final static String BGS_GOAL_DELACT_HELP = "**Help: Delete Specific BGS Goal Activity Target**\n" + Listener.prefix + "bgs goal, {deleteactivity, delact}, <goalid #>, <activity>\n"+
+            "You can get a list of goals by using " + Listener.prefix + "bgs goal, list, <last # goals>";
+    public final static String BGS_GOAL_EDIT_HELP = "**Help: Edit BGS Goal**\n" + Listener.prefix + "bgs goal, edit, <goalid #>, <activity>\n"+
+            "You can get a list of goals by using " + Listener.prefix + "bgs goal, list, <last # goals>\n"+
+            "To edit the activity targets of a goal use " + Listener.prefix + "bgs goal, editactivity\n"+
+            "To add an activity target to a goal use " + Listener.prefix + "bgs goal, addactivity";
+    public final static String BGS_GOAL_EDITACT_HELP = "**Help: Add/Edit BGS Goal Activity Targets**\n" + Listener.prefix + "bgs goal, {addactivity, addact, editactivity, editact}, <Activity/CMDRGoal #/GlobalGoal #>\n"+
+            "You can append as many <Activity/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
+    public final static String BGS_GOAL_LIST = "**Help: List BGS Goals\n" + Listener.prefix + "bgs goal, list, <last # goals>\n"+
+            "If you do not specift the last # goals then all active goals are returned.";
+
+
     public final static String BGS_LOG_HELP = " **BGS Bot Commands:**\n" +
             "Enter '" + Listener.prefix + "bgs' to add or remove BGS role\n" +
             "\n" +
