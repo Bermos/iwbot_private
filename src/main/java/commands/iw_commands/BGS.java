@@ -47,6 +47,7 @@ public class BGS implements PMCommand, GuildCommand {
                 case "fai"       :
                 case "failed"    : output = Activity.FAILED;	break;
                 case "fin"       :
+                case "fine"      :
                 case "fines"     : output = Activity.FINE;	    break;
                 case "int"       :
                 case "intel"     : output = Activity.INTEL;	    break;
@@ -80,8 +81,7 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 String output = "```";
                 for (Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
-                    output += entry.getKey().toString();
-                    //output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
                 output += "```\n";
                 output += listGoal("0", event.getAuthor().getId());
@@ -256,7 +256,7 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
-    private String listGoal(String recent, String userid) {
+    private static String listGoal(String recent, String userid) {
         Connection connect = new Connections().getConnection();
 
         try {
@@ -535,7 +535,8 @@ public class BGS implements PMCommand, GuildCommand {
         for (Entry<Activity, Double> entry : getTotalAmount(userID).entrySet()) {
             output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
         }
-        output += "```";
+        output += "```\n";
+        output += listGoal("0", userID);
 
         return output;
     }
