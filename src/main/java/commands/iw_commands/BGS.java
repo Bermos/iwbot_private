@@ -79,12 +79,7 @@ public class BGS implements PMCommand, GuildCommand {
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
-                String output = "```";
-                for (Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
-                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
-                }
-                output += "```\n";
-                output += listGoal("0", event.getAuthor().getId());
+                String output = getUserStats(event.getAuthor().getId());
                 event.getChannel().sendMessage(output).queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
@@ -208,7 +203,7 @@ public class BGS implements PMCommand, GuildCommand {
                 if(args.length == 3) {
                     recent = args[2];
                 }
-                event.getChannel().sendMessage(listGoal(recent,event.getAuthor().getId())).queue();
+                event.getChannel().sendMessage(listGoal(recent,event.getAuthor().getId(), false)).queue();
                 /*Output
                 Goals for the last # time periods
                 **ID | Start Date:Time | End Date:Time | Currently Active**
@@ -256,7 +251,7 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
-    private static String listGoal(String recent, String userid) {
+    private static String listGoal(String recent, String userid, boolean showUserP) {
         Connection connect = new Connections().getConnection();
 
         try {
@@ -283,18 +278,23 @@ public class BGS implements PMCommand, GuildCommand {
                 message += "**" + rs.getString("fullname") + "** from " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + rs.getString("ticks") + " ticks)\n";
 
                 ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
-                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, "+
-                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone "+
-                        "FROM bgs_goal_item i "+
+                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
+                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
+                        "FROM bgs_goal_item i " +
                         "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ?");
                 ps1.setString(1, userid);
                 ps1.setInt(2, rs.getInt("goalid"));
                 ResultSet rs1 = ps1.executeQuery();
-                message += String.format("```%1$-9s | %2$-17s | %3$s\n","Activity","Your CMDR Goal","Global Goal");
+
+                message += String.format("```%1$-9s | %2$-17s | %3$s\n", "Activity",  (showUserP) ? "Your Goal" : "Per CMDR Goal", "Iridium Wing Goal");
                 while (rs1.next()) {
-                    double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal"))*100;
-                    double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal"))*100;
-                    message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("usergoal"))).replace('.', '\'') + " (" + (int)userP + "%)", NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("globalgoal"))).replace('.', '\'') + " (" + (int)globalP + "%)");
+                    double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal")) * 100;
+                    double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal")) * 100;
+                    if (showUserP) {
+                        message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("usergoal"))).replace('.', '\'') + " (" + (int) userP + "%)", NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("globalgoal"))).replace('.', '\'') + " (" + (int) globalP + "%)");
+                    }else{
+                        message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("usergoal"))).replace('.', '\''), NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("globalgoal"))).replace('.', '\'') + " (" + (int) globalP + "%)");
+                    }
                 }
                 message += "```\n";
 
@@ -531,13 +531,12 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private static String getUserStats(String userID) {
-        String output = "```";
+        String output = listGoal("0", userID, true);
+        output += "**All Time Totals**\n```";
         for (Entry<Activity, Double> entry : getTotalAmount(userID).entrySet()) {
             output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
         }
         output += "```\n";
-        output += listGoal("0", userID);
-
         return output;
     }
 
