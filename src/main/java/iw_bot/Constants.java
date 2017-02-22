@@ -1,6 +1,7 @@
 package iw_bot;
 
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 public class Constants {
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -11,13 +12,13 @@ public class Constants {
     public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
 
     public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, list}>\n";
-    public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/CMDRGoal #/GlobalGoal #>\n"+
+    public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/CMDRGoal #/GlobalGoal #>\n"+
             "You can append as many <Activity/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
     public final static String BGS_GOAL_DEL_HELP = "**Help: Delete BGS Goal**\n" + Listener.prefix + "bgs goal, {delete,del}, <goalid #>\n"+
             "You can get a list of goals by using " + Listener.prefix + "bgs goals, list, <last # goals>";
     public final static String BGS_GOAL_DELACT_HELP = "**Help: Delete Specific BGS Goal Activity Target**\n" + Listener.prefix + "bgs goal, {deleteactivity, delact}, <goalid #>, <activity>\n"+
             "You can get a list of goals by using " + Listener.prefix + "bgs goal, list, <last # goals>";
-    public final static String BGS_GOAL_EDIT_HELP = "**Help: Edit BGS Goal**\n" + Listener.prefix + "bgs goal, edit, <goalid #>, <activity>\n"+
+    public final static String BGS_GOAL_EDIT_HELP = "**Help: Edit BGS Goal**\n" + Listener.prefix + "bgs goal, edit, <goalid #>, <system>, <Start dd/MM/yy HH:mm>, <ticks #>\n"+
             "You can get a list of goals by using " + Listener.prefix + "bgs goal, list, <last # goals>\n"+
             "To edit the activity targets of a goal use " + Listener.prefix + "bgs goal, editactivity\n"+
             "To add an activity target to a goal use " + Listener.prefix + "bgs goal, addactivity";

@@ -80,9 +80,11 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 String output = "```";
                 for (Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
-                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+                    output += entry.getKey().toString();
+                    //output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
                 }
-                output += "```";
+                output += "```\n";
+                output += listGoal("0", event.getAuthor().getId());
                 event.getChannel().sendMessage(output).queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
@@ -153,9 +155,9 @@ public class BGS implements PMCommand, GuildCommand {
 
             } else if (args[1].equalsIgnoreCase("add")) {
                 //ToDo Add a goal
-                //bgs goals,add,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+                //bgs goals,add,system,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
                 if (args.length >= 5) {
-
+                    event.getChannel().sendMessage(addGoal(args)).queue();
                 } else{
                     event.getChannel().sendMessage(BGS_GOAL_ADD_HELP).queue();
                 }
@@ -202,7 +204,11 @@ public class BGS implements PMCommand, GuildCommand {
                 //bgs goals, list,#
                 //Get # most recent goals
                 //If # is not specified then get all active goals
-
+                String recent = "0";
+                if(args.length == 3) {
+                    recent = args[2];
+                }
+                event.getChannel().sendMessage(listGoal(recent,event.getAuthor().getId())).queue();
                 /*Output
                 Goals for the last # time periods
                 **ID | Start Date:Time | End Date:Time | Currently Active**
@@ -250,6 +256,148 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
+    private String listGoal(String recent, String userid) {
+        Connection connect = new Connections().getConnection();
+
+        try {
+            PreparedStatement ps;
+            PreparedStatement ps1;
+            String message;
+            if(Integer.parseInt(recent) == 0) { // get active goals
+                ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname, "+
+                        "startts, endts, ticks "+
+                        "FROM bgs_goal g "+
+                        "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
+                message = "**Active Goals**\n";
+            } else{
+                ps = connect.prepareStatement("SELECT *, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname "+
+                                "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
+                ps.setInt(1, Integer.parseInt(recent));
+                message = "**" + recent + " Most Recent Goals**\n";
+            }
+            ResultSet rs = ps.executeQuery();
+            int rows = 0;
+
+            while (rs.next()) {
+                rows = rows + 1;
+                message += "**" + rs.getString("fullname") + "** from " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + rs.getString("ticks") + " ticks)\n";
+
+                ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
+                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, "+
+                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone "+
+                        "FROM bgs_goal_item i "+
+                        "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ?");
+                ps1.setString(1, userid);
+                ps1.setInt(2, rs.getInt("goalid"));
+                ResultSet rs1 = ps1.executeQuery();
+                message += String.format("```%1$-9s | %2$-17s | %3$s\n","Activity","Your CMDR Goal","Global Goal");
+                while (rs1.next()) {
+                    double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal"))*100;
+                    double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal"))*100;
+                    message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("usergoal"))).replace('.', '\'') + " (" + (int)userP + "%)", NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(rs1.getString("globalgoal"))).replace('.', '\'') + " (" + (int)globalP + "%)");
+                }
+                message += "```\n";
+
+            }
+            if(rows == 0) {
+                message += "No goals found\n";
+            }
+            return message;
+
+        } catch (SQLException e) {
+            //This happens when the system was not found.
+            return "**SQL Failed!**";
+        } catch (ParseException e) {
+            return "**SQL Date Failed!**";
+        }
+    }
+
+    private String addGoal(String[] args) {
+        //bgs goals,add,System,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+        if (args.length >= 5) {
+            Connection connect = new Connections().getConnection();
+            try {
+                Date starttime = USER_SDF.parse(args[3]);
+                Date endtime = new Date(starttime.getTime() + (Integer.parseInt(args[4])*24*60*60*1000L));
+                PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_goal (systemid, startts, endts, ticks) VALUES ("+
+                        "(SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1), ?, ?, ?)",PreparedStatement.RETURN_GENERATED_KEYS);
+                ps.setString(1, args[2]);
+                ps.setString(2, args[2]);
+                ps.setString(3, SQL_SDF.format(starttime));
+                ps.setString(4, SQL_SDF.format(endtime));
+                ps.setInt(5,  Integer.parseInt(args[4]));
+                ps.executeUpdate();
+
+                ResultSet rs = ps.getGeneratedKeys();
+                int goalid = 0;
+                if (rs.next()) {
+                    goalid = rs.getInt(1);
+                }
+
+                String message = "**New goal added to BGS logging**\n"+
+                        "*System:* " + getSystemFullname(args[2]) + "\n"+
+                        "*Start:* " + starttime + "\n" +
+                        "*End:* " + endtime + " (" + args[4] + " ticks)\n";
+                if (args.length >= 6) {
+                    for (int i = 5; i < args.length; i++) {
+                        String[] goalitem = args[i].split("/");
+                        message += addGoalItem(goalitem, i-4, goalid);
+                    }
+                    return message;
+                }
+            } catch (SQLException e) {
+                //This only happens when there's a serious issue with mysql or the connection to it
+                return "**WARNING ACTION NOT LOGGED**\nDid you specify a correct system? Try using one of the star system names below:\n" + getSystems(true);
+            } catch (ParseException e) {
+                return "Parsing error. Make sure the start date follows the pattern 'dd/MM/yy HH:mm'";
+            } catch (NumberFormatException e) {
+                return "Parsing error. Make sure the ticks, and any UserGoals or GlobalGoals are whole numbers'";
+            }
+
+            return "New goal added to BGS logging.";
+        } else{
+            return BGS_GOAL_ADD_HELP;
+        }
+    }
+    private String addGoalItem(String[] goalitem, Integer i, Integer goalid) {
+        String message;
+        if (goalitem.length == 3) {
+            Activity activity = Activity.from(goalitem[0]);
+
+            if (activity == null) {
+                String output = "";
+                for (Activity act : Activity.values())
+                    output += act.toString() + "\n";
+                return "Incorrect activity (" + goalitem[0] + ") for goal item #" + Integer.toString(i) + ". Try one of these:\n" + output;
+            } else {
+                Connection connect = new Connections().getConnection();
+                try {
+                    PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_goal_item (goalid, activity, usergoal, globalgoal) VALUES (?, ?, ?, ?);");
+                    ps.setInt(1, goalid);
+                    ps.setString(2, activity.toString());
+                    ps.setInt(3, Integer.parseInt(goalitem[1]));
+                    ps.setInt(4, Integer.parseInt(goalitem[2]));
+                    ps.executeUpdate();
+                } catch (NumberFormatException e) {
+                    return "Parsing error. Make sure 'UserGoal' and 'GlobalGoal' are whole numbers for goal item #" + Integer.toString(i) + ".\n" + String.join("/",goalitem);
+                } catch (SQLException e) {
+                    //This only happens when there's a serious issue with mysql or the connection to it
+                    return "Incorrect format for goal item #" + Integer.toString(i) + ":\n" + String.join("/",goalitem);
+                }
+            }
+
+            message = "**Goal Item #" + Integer.toString(i) + " Added**\n" +
+                    "*Activity:* " + activity + "\n" +
+                    "*CMDR Goal:* " + NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(goalitem[1])).replace('.', '\'') + "\n" +
+                    "*Global Goal:* " + NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(goalitem[2])).replace('.', '\'') + "\n";
+        } else {
+            message = "**Failed adding goal item #" + Integer.toString(i) + ":**\n" +
+                    "Each goal item requires 3 arguments: <activity>/<UserGoal>/<GlobalGoal>.\n" +
+                    "You supplied the following: " + String.join("/",goalitem) + "\n\n";
+        }
+        return message;
+    }
+
     private String editSystem(String[] args) {
         if (args.length == 5) {
 
@@ -267,6 +415,22 @@ public class BGS implements PMCommand, GuildCommand {
             return "Star system updated\n" + getSystems(true);
         } else {
             return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(true);
+        }
+    }
+
+    private String getSystemFullname(String system) {
+        String fullname = null;
+        try {
+            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT fullname FROM bgs_systems WHERE shortname = ? OR fullname = ? LIMIT 1");
+            ps.setString(1, system);
+            ps.setString(2, system);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                fullname = rs.getString("fullname");
+            return fullname;
+        } catch (SQLException e) {
+            //This happens when the system was not found.
+            return "**WARNING STAR SYSTEM DOES NOT EXIST**" + system;
         }
     }
 
@@ -465,7 +629,7 @@ public class BGS implements PMCommand, GuildCommand {
 
     private static Map<String, Double> getTotalAmount(Date start, int ticks, String system) {
         Map<String, Double> totals = new LinkedHashMap<>();
-        Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
+        Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000L));
 
         Connection connect = new Connections().getConnection();
         try {
@@ -552,7 +716,7 @@ public class BGS implements PMCommand, GuildCommand {
 
     private static List<String> getCSVData(Date start, int ticks) {
         List<String> lines = new ArrayList<>();
-        Date end = (ticks == 0) ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
+        Date end = (ticks == 0) ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000L));
 
         int tickHour = Integer.parseInt(new SimpleDateFormat("HH").format(start));
         int tickMinute = Integer.parseInt(new SimpleDateFormat("mm").format(start));
