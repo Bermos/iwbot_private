@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 public class Main {
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
-		//ToDo Check with bermos if this should be here.
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		if (DataProvider.getToken().isEmpty())
 			install();
