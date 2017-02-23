@@ -9,7 +9,7 @@ public class AdminChannel implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getMember().getRoles()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }

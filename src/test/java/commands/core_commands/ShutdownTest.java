@@ -14,7 +14,7 @@ public class ShutdownTest {
     @Before
     public void setUp() throws Exception {
         String[] args = new String[] {};
-        tests.add(new GTestCase(getGMREvent(false, ""), args, ""));
+        //tests.add(new GTestCase(getGMREvent(false, ""), args, ""));
     }
 
     @Test
