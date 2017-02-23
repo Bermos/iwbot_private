@@ -47,6 +47,7 @@ public class BGS implements PMCommand, GuildCommand {
                 case "fai"       :
                 case "failed"    : output = Activity.FAILED;	break;
                 case "fin"       :
+                case "fine"      :
                 case "fines"     : output = Activity.FINE;	    break;
                 case "int"       :
                 case "intel"     : output = Activity.INTEL;	    break;
