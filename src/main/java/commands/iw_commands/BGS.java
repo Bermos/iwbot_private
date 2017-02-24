@@ -783,7 +783,6 @@ public class BGS implements PMCommand, GuildCommand {
 
         int amount = Integer.parseInt(sAmount);
         Activity activity = Activity.from(sActivity);
-        int amount = 0;
 
         if (activity == null) {
             String output = "";
