@@ -312,7 +312,7 @@ public class BGS implements PMCommand, GuildCommand {
                         if (showUserP) {
                             message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         } else {
-                            message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs1.getString("userfinished") + " CMDRs)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
+                            message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs1.getString("userfinished") + " Done)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         }
                     }
                     message += ((rs.getString("note").length() > 0) ? "\nSPECIAL ORDERS\n--------------\n" + rs.getString("note") : "\nPlease ensure that your actions benefit Iridum Wing in " + rs.getString("fullname") + ". If you are not sure ask on the #bgs_ops channel.") + "```" + "\u0000";
