@@ -1,7 +1,6 @@
 package iw_bot;
 
 import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 
 public class Constants {
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -24,8 +23,6 @@ public class Constants {
             "To add an activity target to a goal use " + Listener.prefix + "bgs goal, addactivity";
     public final static String BGS_GOAL_EDITACT_HELP = "**Help: Add/Edit BGS Goal Activity Targets**\n" + Listener.prefix + "bgs goal, {addactivity, addact, editactivity, editact}, <goalid> <Activity/CMDRGoal #/GlobalGoal #>\n"+
             "You can append as many <Activity/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
-    public final static String BGS_GOAL_LIST = "**Help: List BGS Goals\n" + Listener.prefix + "bgs goal, list, <last # goals>\n"+
-            "If you do not specify the last # goals then all active goals are returned.";
     public final static String BGS_GOAL_NOTE_HELP = "**Help: List BGS Goals" + Listener.prefix + "bgs goal, note, <goalid>, <text>>\n"+
             "Add a note to a goal with specific instructions for CMDRs";
 

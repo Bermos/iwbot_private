@@ -268,7 +268,7 @@ public class BGS implements PMCommand, GuildCommand {
 
     private static ArrayList<String> listGoal(String recent, String userid, boolean showUserP) {
         Connection connect = new Connections().getConnection();
-        ArrayList<String> messages = new ArrayList();
+        ArrayList<String> messages = new ArrayList<>();
         try {
             PreparedStatement ps;
             PreparedStatement ps1;
@@ -450,7 +450,6 @@ public class BGS implements PMCommand, GuildCommand {
         return "**Note added to goal**";
     }
     private String deleteGoalItem(Activity activity, String goalid) {
-        String message;
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal_item WHERE goalid = (SELECT goalid FROM bgs_goal WHERE goalid = ?) AND activity = ? LIMIT 1");
@@ -794,7 +793,6 @@ public class BGS implements PMCommand, GuildCommand {
 
         Connection connect = new Connections().getConnection();
         try {
-            amount = Integer.parseInt(sAmount);
 
             PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) " +
                     "VALUES (?, ?, ?, ?, " +
