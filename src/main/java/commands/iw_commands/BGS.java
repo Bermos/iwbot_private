@@ -292,7 +292,7 @@ public class BGS implements PMCommand, GuildCommand {
                 rows = rows + 1;
 
                 ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
-                        "(SELECT COUNT('1') AS tmp FROM bgs_activity a WHERE a.activity = i.activity AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal ORDER BY tmp DESC LIMIT 1) AS userfinished, "+
+                        "IFNULL((SELECT COUNT(1) AS tmp FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal ORDER BY tmp DESC LIMIT 1),0) AS userfinished, "+
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
                         "FROM bgs_goal_item i " +
