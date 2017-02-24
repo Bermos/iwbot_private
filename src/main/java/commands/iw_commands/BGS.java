@@ -79,12 +79,11 @@ public class BGS implements PMCommand, GuildCommand {
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
-                String output = "```";
-                for (Entry<Activity, Double> entry : getTotalAmount(event.getAuthor().getId()).entrySet()) {
-                    output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+                ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
+                messages.add(getUserStats(event.getAuthor().getId()));
+                for (String message : messages){
+                    event.getChannel().sendMessage(message).queue();
                 }
-                output += "```";
-                event.getChannel().sendMessage(output).queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
                 event.getChannel().sendMessage(BGS_LOG_HELP).queue();
@@ -99,15 +98,15 @@ public class BGS implements PMCommand, GuildCommand {
         }
         // admin calls for stats
         else if (args[0].equalsIgnoreCase("stats") && DataProvider.isAdmin(event)) {
-            if (args.length == 1) {
+            if (args.length == 1) { // send default help message for stats admin
                 event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
-            } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")){
-                // no system filter
+            } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")){ // summary stats
+                // Two options. No system filter and filtering for a system
                 if(args.length == 4 || args.length == 5 ) {
                     event.getChannel().sendMessage(getTick(args)).queue();
 
-                } else {
+                } else { // send help for summary stats
                     event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
                 }
@@ -116,38 +115,122 @@ public class BGS implements PMCommand, GuildCommand {
             else if (args[1].equalsIgnoreCase("csv") && args.length >= 4){
                 JDAUtil.sendMultipleMessages(event.getChannel(), getFullTick(args));
 
-            } else {
+            } else { // If got this far something went wrong so show help for stats
                 event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
             }
         }
         // admin functions for systems
         else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems") || args[0].equalsIgnoreCase("sys")) && DataProvider.isAdmin(event)){
-            if (args.length == 1) {
+            if (args.length == 1) { // send default help message for system admin
                 event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
 
-            } else if (args[1].equalsIgnoreCase("list")) {
+            } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the systems available
                 event.getChannel().sendMessage(getSystems(DataProvider.isAdmin(event))).queue();
 
-            } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) {
+            } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) { // show or hide a system
                 if (args.length == 3) {
                     event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
 
-                } else {
+                } else { // show system help if wrong number of arguments
                     event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide|show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
                 }
 
-            } else if (args[1].equalsIgnoreCase("add")) {
+            } else if (args[1].equalsIgnoreCase("add")) { // add a new system to the database
                 event.getChannel().sendMessage(addSystem(args)).queue();
 
-            } else if (args[1].equalsIgnoreCase("edit")) {
+            } else if (args[1].equalsIgnoreCase("edit")) { // edit a system in the database
                 event.getChannel().sendMessage(editSystem(args)).queue();
 
-            } else{
+            } else{ // if got this far something went wrong. Show system help
                 event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
+            }
+        }
+        // admin functions for goals
+        else if ((args[0].equalsIgnoreCase("goal") || args[0].equalsIgnoreCase("goals")) && DataProvider.isAdmin(event)) {
+            if (args.length == 1) { // Send help message for goals
+                event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
+
+            } else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
+                //bgs goals,add,system,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+                if (args.length >= 5) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
+                    event.getChannel().sendMessage(addGoal(args)).queue();
+                } else{ // show help message for adding a goal as less than 5 arguments
+                    event.getChannel().sendMessage(BGS_GOAL_ADD_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("delete") || args[1].equalsIgnoreCase("del")) { // delete a goal
+                //bgs goals,<del>,goalid
+                if (args.length == 3) {
+                    event.getChannel().sendMessage(deleteGoal(args[2])).queue();
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_DEL_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("deleteact") || args[1].equalsIgnoreCase("delact")) { // delete an individual goal item from a goal
+                //bgs goals,<delact>,goalid,Activity
+                if (args.length == 4) {
+                    event.getChannel().sendMessage(deleteGoalItem(Activity.from(args[3]),args[2])).queue();
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_DELACT_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("edit")) { // edit a goal. Goal items are edited using /editact
+                //bgs golas,edit,goalid,system,Start Date:Time, Ticks
+                if (args.length == 6) {
+                    event.getChannel().sendMessage(editGoal(args)).queue();
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_EDIT_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("editactivity") || args[1].equalsIgnoreCase("addactivity") || args[1].equalsIgnoreCase("editact") || args[1].equalsIgnoreCase("addact")) {
+                //bgs goals,<addact,editact>,goalid,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+                String message = "";
+                // need 4 or more arguments to add a goal item
+                if (args.length >= 4) {
+                    // loop through the goal items which are in the array from 3 onwards
+                    for (int i = 3; i < args.length; i++) {
+                        String[] goalitem = args[i].split("/");
+                        message += addGoalItem(goalitem, i-2, args[2]); // add the goal item
+                    }
+                    event.getChannel().sendMessage(message).queue();
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_EDITACT_HELP).queue();
+                }
+            }
+
+            else if (args[1].equalsIgnoreCase("note")) { // add a note to a goal. Allows special instructions to be given.
+                if (args.length >= 3) {
+                    //bgs goals, goalid, note
+                    event.getChannel().sendMessage(addGoalNote(args)).queue();
+                } else {
+                    event.getChannel().sendMessage(BGS_GOAL_NOTE_HELP).queue();
+                }
+            }
+
+            else if (args[1].equalsIgnoreCase("list")) {
+                //bgs goals, list,#
+                //Get # most recent goals
+                //If # is not specified then get all active goals
+                String recent = "0";
+                if(args.length == 3) {
+                    recent = args[2];
+                }
+                ArrayList<String> messages = listGoal(recent,event.getAuthor().getId(), false);
+                for (String message : messages){
+                    event.getChannel().sendMessage(message).queue();
+                }
+            }
+            else{
+                event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
+                ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
+                messages.add(getUserStats(event.getAuthor().getId()));
+                for (String message : messages){
+                    JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(message).queue();
+                }
                 JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(getUserStats(event.getAuthor().getId())).queue();
 
             } else if (args[0].equalsIgnoreCase("total")) {
@@ -183,6 +266,247 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
+    private static ArrayList<String> listGoal(String recent, String userid, boolean showUserP) {
+        Connection connect = new Connections().getConnection();
+        ArrayList<String> messages = new ArrayList();
+        try {
+            PreparedStatement ps;
+            PreparedStatement ps1;
+            String message;
+            if(Integer.parseInt(recent) == 0) { // get active goals
+                ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname, "+
+                        "startts, endts, ticks, note "+
+                        "FROM bgs_goal g "+
+                        "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
+                message = "**Active Goals**\n";
+            } else{
+                ps = connect.prepareStatement("SELECT *, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname "+
+                                "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
+                ps.setInt(1, Integer.parseInt(recent));
+                message = "**" + recent + " Most Recent Goals**\n";
+            }
+            ResultSet rs = ps.executeQuery();
+            int rows = 0;
+
+            while (rs.next()) {
+                rows = rows + 1;
+
+                ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
+                        "(SELECT COUNT('1') AS tmp FROM bgs_activity a WHERE a.activity = i.activity AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal ORDER BY tmp DESC LIMIT 1) AS userfinished, "+
+                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
+                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
+                        "FROM bgs_goal_item i " +
+                        "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ?");
+                ps1.setString(1, userid);
+                ps1.setInt(2, rs.getInt("goalid"));
+                ResultSet rs1 = ps1.executeQuery();
+                rs1.last();
+                int numrows = rs1.getRow();
+                rs1.beforeFirst();
+                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + rs.getString("ticks") + " ticks)";
+                if(numrows> 0) {
+                    message += String.format("```%1$-9s | %2$-17s | %3$s\n", "Activity", (showUserP) ? "Your Goal" : "Per CMDR Goal", "Iridium Wing Goal");
+                    while (rs1.next()) {
+                        double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal")) * 100;
+                        double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal")) * 100;
+                        if (showUserP) {
+                            message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
+                        } else {
+                            message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs1.getString("userfinished") + " CMDRs)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
+                        }
+                    }
+                    message += ((rs.getString("note").length() > 0) ? "\nSPECIAL ORDERS\n--------------\n" + rs.getString("note") : "\nPlease ensure that your actions benefit Iridum Wing in " + rs.getString("fullname") + ". If you are not sure ask on the #bgs_ops channel.") + "```" + "\u0000";
+                } else {
+                    message += "```There are currently no goals set```" + "\u0000";
+                }
+                messages.add(message);
+                message = "";
+            }
+            if(rows == 0) {
+                message += "No goals found\n";
+                messages.add(message);
+            }
+            return messages;
+
+        } catch (SQLException e) {
+            //This happens when the system was not found.
+            messages.add("**SQL Failed!**");
+            return messages;
+        } catch (ParseException e) {
+            messages.add("**SQL Date Failed!**");
+            return messages;
+        }
+    }
+
+    private String deleteGoal(String goalid) {
+        Connection connect = new Connections().getConnection();
+        try {
+            PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal WHERE goalid = ?");
+            ps.setInt(1, Integer.parseInt(goalid));
+            if(ps.executeUpdate() == 0) {
+                return "**Failed to delete goal!**\nDid you specify a correct goalid?";
+            }
+
+        } catch (SQLException e) {
+            return "**Failed to delete goal!**";
+        }
+        return "**Goal and all Items Deleted**";
+    }
+
+    private String editGoal(String[] args) {
+        //bgs goals,edit,goalid,System,Start Date:Time, Ticks
+        Connection connect = new Connections().getConnection();
+        try {
+            Date starttime = USER_SDF.parse(args[4]);
+            Date endtime = new Date(starttime.getTime() + (Integer.parseInt(args[5]) * 24 * 60 * 60 * 1000L));
+            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_goal SET systemid = (SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) LIMIT 1), " +
+                    "startts = ?, " +
+                    "endts = ?, " +
+                    "ticks = ? " +
+                    "WHERE goalid = ?");
+            ps.setString(1, args[3]);
+            ps.setString(2, args[3]);
+            ps.setString(3, SQL_SDF.format(starttime));
+            ps.setString(4, SQL_SDF.format(endtime));
+            ps.setInt(5, Integer.parseInt(args[5]));
+            ps.setInt(6, Integer.parseInt(args[2]));
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            //This only happens when there's a serious issue with mysql or the connection to it
+            return "**Warning goal not updated**";
+        } catch (ParseException e) {
+            return "Parsing error. Make sure the start date follows the pattern 'dd/MM/yy HH:mm'";
+        } catch (NumberFormatException e) {
+            return "Parsing error. Make sure 'goalid' and 'ticks' are whole numbers";
+        }
+        return "**Goal Updated**";
+    }
+
+    private String addGoal(String[] args) {
+        //bgs goals,add,System,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+        if (args.length >= 5) {
+            Connection connect = new Connections().getConnection();
+            try {
+                Date starttime = USER_SDF.parse(args[3]);
+                Date endtime = new Date(starttime.getTime() + (Integer.parseInt(args[4])*24*60*60*1000L));
+                PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_goal (systemid, startts, endts, ticks, note) VALUES ("+
+                        "(SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1), ?, ?, ?, '')",PreparedStatement.RETURN_GENERATED_KEYS);
+                ps.setString(1, args[2]);
+                ps.setString(2, args[2]);
+                ps.setString(3, SQL_SDF.format(starttime));
+                ps.setString(4, SQL_SDF.format(endtime));
+                ps.setInt(5,  Integer.parseInt(args[4]));
+                ps.executeUpdate();
+
+                ResultSet rs = ps.getGeneratedKeys();
+                int goalid = 0;
+                if (rs.next()) {
+                    goalid = rs.getInt(1);
+                }
+
+                String message = "**New goal added to BGS logging**\n"+
+                        "*System:* " + getSystemFullname(args[2]) + "\n"+
+                        "*Start:* " + starttime + "\n" +
+                        "*End:* " + endtime + " (" + args[4] + " ticks)\n";
+                if (args.length >= 6) {
+                    for (int i = 5; i < args.length; i++) {
+                        String[] goalitem = args[i].split("/");
+                        message += addGoalItem(goalitem, i-4, Integer.toString(goalid));
+                    }
+                    return message;
+                }
+            } catch (SQLException e) {
+                //This only happens when there's a serious issue with mysql or the connection to it
+                return "**Warning goal not created**";
+            } catch (ParseException e) {
+                return "Parsing error. Make sure the start date follows the pattern 'dd/MM/yy HH:mm'";
+            } catch (NumberFormatException e) {
+                return "Parsing error. Make sure the 'ticks', and any 'UserGoals' or 'GlobalGoals' are whole numbers";
+            }
+
+            return "New goal added to BGS logging.";
+        } else{
+            return BGS_GOAL_ADD_HELP;
+        }
+    }
+    private String addGoalNote(String[] args) {
+        //bgs goals, goalid, note
+        try{
+            int goalid = Integer.parseInt(args[2]);
+            String note = String.join(", ", Arrays.copyOfRange(args, 3,args.length)); // join notes back together in case the note string contained a comma
+
+            Connection connect = new Connections().getConnection();
+
+            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_goal SET note = ? WHERE goalid = ?");
+            ps.setString(1, note);
+            ps.setInt(2, goalid);
+            int updated = ps.executeUpdate();
+            if (updated==0) {
+                return "**Failed to add Note**\nCheck you have specified a valid goalid";
+            }
+        } catch (SQLException e){
+            return "**SQL ERROR NOTE NOT ADDED**\n";
+        }
+        return "**Note added to goal**";
+    }
+    private String deleteGoalItem(Activity activity, String goalid) {
+        String message;
+        Connection connect = new Connections().getConnection();
+        try {
+            PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal_item WHERE goalid = (SELECT goalid FROM bgs_goal WHERE goalid = ?) AND activity = ? LIMIT 1");
+            ps.setInt(1, Integer.parseInt(goalid));
+            ps.setString(2, activity.toString());
+            ps.executeUpdate();
+        }
+        catch(SQLException e) {
+            return "**Failed deleting Goal Item**\n" + Listener.prefix + "bgs goal,{deleteitem,delitem},<goalid>";
+        }
+        return "**Goal Item Deleted**";
+    }
+    private String addGoalItem(String[] goalitem, Integer i, String goalid) {
+        String message;
+        if (goalitem.length == 3) {
+            Activity activity = Activity.from(goalitem[0]);
+
+            if (activity == null) {
+                String output = "";
+                for (Activity act : Activity.values())
+                    output += act.toString() + "\n";
+                return "Incorrect activity (" + goalitem[0] + ") for goal item #" + Integer.toString(i) + ". Try one of these:\n" + output;
+            } else {
+                Connection connect = new Connections().getConnection();
+                try {
+                    PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_goal_item (goalid, activity, usergoal, globalgoal) \n" +
+                            "VALUES ((SELECT goalid FROM bgs_goal WHERE goalid = ?), ?, ?, ?) ON DUPLICATE KEY UPDATE usergoal=?,globalgoal=?");
+                    ps.setInt(1, Integer.parseInt(goalid));
+                    ps.setString(2, activity.toString());
+                    ps.setInt(3, Integer.parseInt(goalitem[1]));
+                    ps.setInt(4, Integer.parseInt(goalitem[2]));
+                    ps.setInt(5, Integer.parseInt(goalitem[1]));
+                    ps.setInt(6, Integer.parseInt(goalitem[2]));
+
+                    ps.executeUpdate();
+                } catch (NumberFormatException e) {
+                    return "Parsing error. Make sure 'UserGoal' and 'GlobalGoal' are whole numbers for goal item #" + Integer.toString(i) + ".\n" + String.join("/",goalitem);
+                } catch (SQLException e) {
+                    //This only happens when there's a serious issue with mysql or the connection to it
+                    return "**Failed adding Goal Item #" + Integer.toString(i) + "**\n"+
+                            "Check goalid (" + goalid + ") is valid. Check format of goal item (" + String.join("/",goalitem) + ")\n";
+                }
+            }
+
+            message = "**Goal Item #" + Integer.toString(i) + " Added**\n" +
+                    "*Activity:* " + activity + "\n" +
+                    "*CMDR Goal:* " + NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(goalitem[1])).replace('.', '\'') + "\n" +
+                    "*Global Goal:* " + NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(goalitem[2])).replace('.', '\'') + "\n";
+        } else {
+            message = "**Failed adding goal item #" + Integer.toString(i) + ":**\n" +
+                    "Each goal item requires 3 arguments: <activity>/<UserGoal>/<GlobalGoal>.\n" +
+                    "You supplied the following: " + String.join("/",goalitem) + "\n\n";
+        }
+        return message;
+    }
+
     private String editSystem(String[] args) {
         if (args.length == 5) {
 
@@ -200,6 +524,22 @@ public class BGS implements PMCommand, GuildCommand {
             return "Star system updated\n" + getSystems(true);
         } else {
             return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(true);
+        }
+    }
+
+    private String getSystemFullname(String system) {
+        String fullname = null;
+        try {
+            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT fullname FROM bgs_systems WHERE shortname = ? OR fullname = ? LIMIT 1");
+            ps.setString(1, system);
+            ps.setString(2, system);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                fullname = rs.getString("fullname");
+            return fullname;
+        } catch (SQLException e) {
+            //This happens when the system was not found.
+            return "**WARNING STAR SYSTEM DOES NOT EXIST**" + system;
         }
     }
 
@@ -300,12 +640,12 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private static String getUserStats(String userID) {
-        String output = "```";
+
+        String output = "**All Time Totals**\n```";
         for (Entry<Activity, Double> entry : getTotalAmount(userID).entrySet()) {
             output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
         }
-        output += "```";
-
+        output += "```\n";
         return output;
     }
 
@@ -330,10 +670,11 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private static String getSystems(boolean admin) {
-        String message = "```ID   | Short | Full\n";
+        String message = null;
         try {
             // show hidden systems in italics for admins
             if (admin) {
+                message = "```ID   | Short | Full\n";
                 PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC");
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
@@ -345,10 +686,11 @@ public class BGS implements PMCommand, GuildCommand {
 
                 }
             } else { // just show live systems
+                message = "```Short | Full\n";
                 PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems WHERE hidden = 0 ORDER BY fullname ASC");
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
-                    message += String.format("%1$-4s | %2$-6s| %3$s\n", rs.getString("systemid"), rs.getString("shortname"), rs.getString("fullname"));
+                    message += String.format("%1$-6s| %2$s\n", rs.getString("shortname"), rs.getString("fullname"));
                 }
             }
         }
@@ -396,7 +738,7 @@ public class BGS implements PMCommand, GuildCommand {
 
     private static Map<String, Double> getTotalAmount(Date start, int ticks, String system) {
         Map<String, Double> totals = new LinkedHashMap<>();
-        Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
+        Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000L));
 
         Connection connect = new Connections().getConnection();
         try {
@@ -435,12 +777,11 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private static String logActivity(boolean admin, String sActivity, String userid, String username, String sAmount, String system) {
-        /*TODO Logging Improvements List
-        *Split this off into separate function
-        *Support for direct message
-        *Confirmation message that does NOT tag them but is customised per the action logged
-        *If goal is already met direct message once per activity with details on what still needs work.
-        */
+
+        //ToDo Logging: Confirmation message that does NOT tag them but is customised per the action logged
+        //ToDo Logging: If goal is already met direct message once per activity with details on what still needs work.
+
+        int amount = Integer.parseInt(sAmount);
         Activity activity = Activity.from(sActivity);
         int amount = 0;
 
@@ -483,13 +824,12 @@ public class BGS implements PMCommand, GuildCommand {
         if (!DataProvider.isDev())
             Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount, system.toUpperCase());
 
-        //TODO nice output for commander
         return "Your engagement has been noticed. Thanks for your service o7";
     }
 
     private static List<String> getCSVData(Date start, int ticks) {
         List<String> lines = new ArrayList<>();
-        Date end = (ticks == 0) ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000));
+        Date end = (ticks == 0) ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000L));
 
         int tickHour = Integer.parseInt(new SimpleDateFormat("HH").format(start));
         int tickMinute = Integer.parseInt(new SimpleDateFormat("mm").format(start));
@@ -498,7 +838,7 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
                 "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
-                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60))) AS Tick, " +
+                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%D %b %Y') AS Tick, " +
                 "(SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS System, " +
                 "SUM( if( b.activity = 'Bond',      b.amount, 0 ) ) AS Bonds, " +
                 "SUM( if( b.activity = 'Bounty',    b.amount, 0 ) ) AS Bounties, " +
@@ -537,7 +877,7 @@ public class BGS implements PMCommand, GuildCommand {
 
             while (rs.next()) {
                 String rowValues = rs.getString("CMDR") + ",";
-                rowValues += rs.getString("Tick").replace(".0", "").replace("-", "/") + ",";
+                rowValues += rs.getString("Tick") + ",";
                 for (int i = 4; i <= columnCount; i++) {
                     rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i)) + ",";
                 }
@@ -548,5 +888,30 @@ public class BGS implements PMCommand, GuildCommand {
             LogUtil.logErr(e);
         }
         return lines;
+    }
+
+    private static final NavigableMap<Long, String> suffixes = new TreeMap<> ();
+    static {
+        suffixes.put(1_000L, "k");
+        suffixes.put(1_000_000L, "M");
+        suffixes.put(1_000_000_000L, "G");
+        suffixes.put(1_000_000_000_000L, "T");
+        suffixes.put(1_000_000_000_000_000L, "P");
+        suffixes.put(1_000_000_000_000_000_000L, "E");
+    }
+
+    private static String int_format_short(long value) {
+        //Long.MIN_VALUE == -Long.MIN_VALUE so we need an adjustment here
+        if (value == Long.MIN_VALUE) return int_format_short(Long.MIN_VALUE + 1);
+        if (value < 0) return "-" + int_format_short(-value);
+        if (value < 1000) return Long.toString(value); //deal with easy case
+
+        Entry<Long, String> e = suffixes.floorEntry(value);
+        Long divideBy = e.getKey();
+        String suffix = e.getValue();
+
+        long truncated = value / (divideBy / 10); //the number part of the output times 10
+        boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
+        return hasDecimal ? (truncated / 10d) + suffix : (truncated / 10) + suffix;
     }
 }

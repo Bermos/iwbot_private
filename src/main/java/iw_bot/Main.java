@@ -15,12 +15,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class Main {
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
-
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		if (DataProvider.getToken().isEmpty())
 			install();
 
