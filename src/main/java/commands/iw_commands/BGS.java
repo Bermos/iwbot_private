@@ -81,9 +81,18 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
                 messages.add(getUserStats(event.getAuthor().getId()));
-                for (String message : messages){
-                    event.getChannel().sendMessage(message).queue();
+                String messageToSend = "";
+                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                        event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                        messageToSend = "";
+                        messageToSend += message;
+                    }
+                    else { // need the line break if not going to be seperate messages.
+                        messageToSend += "\n" + message;
+                    }
                 }
+                event.getChannel().sendMessage(messageToSend).queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
                 event.getChannel().sendMessage(BGS_LOG_HELP).queue();
@@ -228,9 +237,18 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
                 messages.add(getUserStats(event.getAuthor().getId()));
-                for (String message : messages){
-                    JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(message).queue();
+                String messageToSend = "";
+                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                        JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(messageToSend + "\u0000").queue();
+                        messageToSend = "";
+                        messageToSend += message;
+                    }
+                    else { // need the line break if not going to be seperate messages.
+                        messageToSend += "\n" + message;
+                    }
                 }
+                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(messageToSend).queue();
 
             } else if (args[0].equalsIgnoreCase("total")) {
                 if (DataProvider.isAdmin(event.getMember().getRoles()))
@@ -277,7 +295,8 @@ public class BGS implements PMCommand, GuildCommand {
                         "startts, endts, ticks, note "+
                         "FROM bgs_goal g "+
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
-                message = "**Active Goals**\n";
+                message = "**Active Goals**\n"+
+                    "Please ensure your actions benefit Iridum Wing unless special orders tell you to work for another faction. If you are not sure ask on the #bgs_ops channel.\n\n";
             } else{
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname "+
                                 "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
@@ -319,9 +338,12 @@ public class BGS implements PMCommand, GuildCommand {
                             message += String.format("%1$-9s | %2$-15s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs1.getInt("userfinished") + ")", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         }
                     }
-                    message += ((rs.getString("note").length() > 0) ? "\nSPECIAL ORDERS\n--------------\n" + rs.getString("note") : "\nPlease ensure that your actions benefit Iridum Wing in " + rs.getString("fullname") + ". If you are not sure ask on the #bgs_ops channel.") + "```" + "\u0000";
+                    if (rs.getString("note").length() > 0) {
+                        message += "\nSPECIAL ORDERS\n--------------\n" + rs.getString("note");
+                    }
+                    message += "```";
                 } else {
-                    message += "```There are currently no goals set```" + "\u0000";
+                    message += "```There are currently no goals set```";
                 }
                 messages.add(message);
                 message = "";
