@@ -6,9 +6,9 @@ public class Constants {
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public final static SimpleDateFormat USER_SDF = new SimpleDateFormat("dd/MM/yy HH:mm");
 
-    public final static String BGS_STATS_HELP = "**Help: Produce Statistics on BGS Data\n" + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
+    public final static String BGS_STATS_HELP = "**Help: Produce Statistics on BGS Data**\n" + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
 
-    public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
+    public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems**\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
 
     public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, list}>\n";
     public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/CMDRGoal #/GlobalGoal #>\n"+
