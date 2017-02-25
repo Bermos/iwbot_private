@@ -81,7 +81,7 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
                 messages.add(getUserStats(event.getAuthor().getId()));
-                String messageToSend = "";
+                String messageToSend = ":hotdog:";
                 for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
                     if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
                         event.getChannel().sendMessage(messageToSend + "\u0000").queue();
@@ -93,6 +93,8 @@ public class BGS implements PMCommand, GuildCommand {
                     }
                 }
                 event.getChannel().sendMessage(messageToSend).queue();
+            } else if (args[0].equalsIgnoreCase("mustard")) {  // for the fun of autocorrect added mustard command (mystats gone wrong)
+                event.getChannel().sendMessage(":hotdog:").queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
                 event.getChannel().sendMessage(BGS_LOG_HELP).queue();
@@ -250,6 +252,8 @@ public class BGS implements PMCommand, GuildCommand {
                 }
                 JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(messageToSend).queue();
 
+            } else if (args[0].equalsIgnoreCase("mustard")) { // for the fun of autocorrect added mustard command (mystats gone wrong)
+                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(":hotdog:").queue();
             } else if (args[0].equalsIgnoreCase("total")) {
                 if (DataProvider.isAdmin(event.getMember().getRoles()))
                     event.getChannel().sendMessage(getTotalAmount()).queue();
