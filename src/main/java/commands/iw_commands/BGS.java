@@ -231,7 +231,6 @@ public class BGS implements PMCommand, GuildCommand {
                 for (String message : messages){
                     JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(message).queue();
                 }
-                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(getUserStats(event.getAuthor().getId())).queue();
 
             } else if (args[0].equalsIgnoreCase("total")) {
                 if (DataProvider.isAdmin(event.getMember().getRoles()))
@@ -305,14 +304,19 @@ public class BGS implements PMCommand, GuildCommand {
                 rs1.beforeFirst();
                 message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + rs.getString("ticks") + " ticks)";
                 if(numrows> 0) {
-                    message += String.format("```%1$-9s | %2$-17s | %3$s\n", "Activity", (showUserP) ? "Your Goal" : "Per CMDR Goal", "Iridium Wing Goal");
+                    if (showUserP) {
+                        message += String.format("```%1$-9s | %2$-15s | %3$s\n","","Your Goal", "System Goal");
+                    } else{
+                        message += String.format("```%1$-9s | %2$-15s | %3$s\n","","CMDR (Num Met)", "System Goal");
+                    }
+
                     while (rs1.next()) {
                         double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal")) * 100;
                         double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal")) * 100;
                         if (showUserP) {
-                            message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
+                            message += String.format("%1$-9s | %2$-15s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         } else {
-                            message += String.format("%1$-9s | %2$-17s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs1.getString("userfinished") + " CMDRs)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
+                            message += String.format("%1$-9s | %2$-15s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs1.getInt("userfinished") + ")", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         }
                     }
                     message += ((rs.getString("note").length() > 0) ? "\nSPECIAL ORDERS\n--------------\n" + rs.getString("note") : "\nPlease ensure that your actions benefit Iridum Wing in " + rs.getString("fullname") + ". If you are not sure ask on the #bgs_ops channel.") + "```" + "\u0000";
@@ -623,9 +627,9 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             Date time = USER_SDF.parse(args[3]);
             String output = "Data for " + args[2] + " ticks after " + args[3] + " UTC System Filter: " + system + "\n```";
-            Map<String, Double> entries = getTotalAmount(time, Integer.parseInt(args[2]), system);
-            for (Entry<String, Double> entry : entries.entrySet()) {
-                output += entry.getKey() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+            Map<String, String> entries = getTotalAmount(time, Integer.parseInt(args[2]), system);
+            for (Entry<String, String> entry : entries.entrySet()) {
+                output += entry.getKey() + ": " + entry.getValue() + "\n";
             }
             output += "```";
             if (entries.isEmpty())
@@ -735,8 +739,8 @@ public class BGS implements PMCommand, GuildCommand {
         return output;
     }
 
-    private static Map<String, Double> getTotalAmount(Date start, int ticks, String system) {
-        Map<String, Double> totals = new LinkedHashMap<>();
+    private static Map<String, String> getTotalAmount(Date start, int ticks, String system) {
+        Map<String, String> totals = new LinkedHashMap<>();
         Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000L));
 
         Connection connect = new Connections().getConnection();
@@ -744,7 +748,8 @@ public class BGS implements PMCommand, GuildCommand {
             if (system.equals("all")) {
                 PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS fullname, " +
                         "b.activity, " +
-                        "SUM(b.amount) AS total " +
+                        "SUM(b.amount) AS total," +
+                        "COUNT(DISTINCT(b.userid)) AS numcmdrs " +
                         "FROM bgs_activity b " +
                         "WHERE timestamp > ? AND timestamp < ? " +
                         "GROUP BY fullname, activity " +
@@ -752,12 +757,15 @@ public class BGS implements PMCommand, GuildCommand {
                 ps.setString(1, SQL_SDF.format(start));
                 ps.setString(2, SQL_SDF.format(end));
                 ResultSet rs = ps.executeQuery();
-                while (rs.next())
-                    totals.put((Activity.valueOf(rs.getString("activity" ).toUpperCase()).toString())+ " (" + rs.getString("fullname" ) + ")", rs.getDouble("total"));
+                while (rs.next()) {
+                    double cmdravg = (double) rs.getInt("total") / rs.getInt("numcmdrs");
+                    totals.put((Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + int_format_short((int) cmdravg) + " avg.)");
+                }
             } else {
                 PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS fullname," +
                         "b.activity, " +
-                        "SUM(b.amount) AS total " +
+                        "SUM(b.amount) AS total, " +
+                        "COUNT(DISTINCT(b.userid)) AS numcmdrs " +
                         "FROM bgs_activity b " +
                         "WHERE b.timestamp > ? AND b.timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1) " +
                         "GROUP BY fullname, activity ORDER BY fullname ASC, activity ASC");
@@ -766,8 +774,10 @@ public class BGS implements PMCommand, GuildCommand {
                 ps.setString(3, system);
                 ps.setString(4, system);
                 ResultSet rs = ps.executeQuery();
-                while (rs.next())
-                    totals.put((Activity.valueOf(rs.getString("activity" ).toUpperCase()).toString())+ " (" + rs.getString("fullname" ) + ")", rs.getDouble("total"));
+                while (rs.next()) {
+                    double cmdravg = (double) rs.getInt("total") / rs.getInt("numcmdrs");
+                    totals.put((Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + int_format_short((int)cmdravg) + " avg.)");
+                }
             }
         } catch (SQLException e) {
             LogUtil.logErr(e);
