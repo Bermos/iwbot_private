@@ -314,13 +314,14 @@ public class BGS implements PMCommand, GuildCommand {
                 rows = rows + 1;
 
                 ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
-                        "IFNULL((SELECT COUNT(1) AS tmp FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal ORDER BY tmp DESC LIMIT 1),0) AS userfinished, "+
+                        "IFNULL((SELECT COUNT(*) AS tmp FROM (SELECT i.usergoal FROM bgs_activity a, bgs_goal_item i, bgs_goal g WHERE i.goalid = ? AND a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal) q),0) AS userfinished," +
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
                         "FROM bgs_goal_item i " +
                         "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ?");
-                ps1.setString(1, userid);
-                ps1.setInt(2, rs.getInt("goalid"));
+                ps1.setInt(1, rs.getInt("goalid"));
+                ps1.setString(2, userid);
+                ps1.setInt(3, rs.getInt("goalid"));
                 ResultSet rs1 = ps1.executeQuery();
                 rs1.last();
                 int numrows = rs1.getRow();
@@ -871,7 +872,7 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
                 "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
-                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%D %b %Y') AS Tick, " +
+                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%e %b %Y') AS Tick, " +
                 "(SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS System, " +
                 "SUM( if( b.activity = 'Bond',      b.amount, 0 ) ) AS Bonds, " +
                 "SUM( if( b.activity = 'Bounty',    b.amount, 0 ) ) AS Bounties, " +
@@ -908,8 +909,10 @@ public class BGS implements PMCommand, GuildCommand {
             columnNames += ", System";
             lines.add(columnNames);
 
+            List<String> cmdrNamesList = new ArrayList<>();
             while (rs.next()) {
                 String rowValues = rs.getString("CMDR") + ",";
+                cmdrNamesList.add("@" + rs.getString("CMDR"));
                 rowValues += rs.getString("Tick") + ",";
                 for (int i = 4; i <= columnCount; i++) {
                     rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i)) + ",";
@@ -917,6 +920,10 @@ public class BGS implements PMCommand, GuildCommand {
                 rowValues += rs.getString("System");
                 lines.add(rowValues);
             }
+            String cmdrNames = String.join(", ", cmdrNamesList);
+            cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",")+1," and").toString();
+            lines.add("");
+            lines.add(cmdrNames);
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
