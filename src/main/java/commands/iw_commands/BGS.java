@@ -923,7 +923,9 @@ public class BGS implements PMCommand, GuildCommand {
             List<String> cmdrNamesList = new ArrayList<>();
             while (rs.next()) {
                 String rowValues = rs.getString("CMDR") + ",";
-                cmdrNamesList.add("@" + rs.getString("CMDR"));
+                if(!cmdrNamesList.contains("@" + rs.getString("CMDR"))) {
+                    cmdrNamesList.add("@" + rs.getString("CMDR"));
+                }
                 rowValues += rs.getString("Tick") + ",";
                 for (int i = 4; i <= columnCount; i++) {
                     rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i)) + ",";
