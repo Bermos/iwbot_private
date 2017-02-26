@@ -81,7 +81,7 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
                 messages.add(getUserStats(event.getAuthor().getId()));
-                String messageToSend = ":hotdog:";
+                String messageToSend = "";
                 for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
                     if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
                         event.getChannel().sendMessage(messageToSend + "\u0000").queue();
@@ -227,10 +227,20 @@ public class BGS implements PMCommand, GuildCommand {
                 if(args.length == 3) {
                     recent = args[2];
                 }
+
                 ArrayList<String> messages = listGoal(recent,event.getAuthor().getId(), false);
-                for (String message : messages){
-                    event.getChannel().sendMessage(message).queue();
+                String messageToSend = "";
+                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                        event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                        messageToSend = "";
+                        messageToSend += message;
+                    }
+                    else { // need the line break if not going to be seperate messages.
+                        messageToSend += "\n" + message;
+                    }
                 }
+                event.getChannel().sendMessage(messageToSend).queue();
             }
             else{
                 event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
@@ -319,7 +329,7 @@ public class BGS implements PMCommand, GuildCommand {
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
                         "FROM bgs_goal_item i " +
-                        "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ?");
+                        "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ? ORDER BY activity ASC;");
                 ps1.setInt(1, rs.getInt("goalid"));
                 ps1.setString(2, userid);
                 ps1.setInt(3, rs.getInt("goalid"));
