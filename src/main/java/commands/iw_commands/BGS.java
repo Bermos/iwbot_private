@@ -293,14 +293,12 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             PreparedStatement ps;
             PreparedStatement ps1;
-            String message;
+            String message = "";
             if(Integer.parseInt(recent) == 0) { // get active goals
                 ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname, "+
                         "startts, endts, ticks, note "+
                         "FROM bgs_goal g "+
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
-                message = "**Active Goals**\n"+
-                    "Please ensure your actions benefit Iridum Wing unless special orders tell you to work for another faction. If you are not sure ask on the #bgs_ops channel.\n\n";
             } else{
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname "+
                                 "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
@@ -312,7 +310,10 @@ public class BGS implements PMCommand, GuildCommand {
 
             while (rs.next()) {
                 rows = rows + 1;
-
+                if (rows == 1) {
+                    message = "**Active Goals**\n"+
+                            "Please ensure your actions benefit Iridum Wing unless special orders tell you to work for another faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+                }
                 ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
                         "IFNULL((SELECT COUNT(*) AS tmp FROM (SELECT i.usergoal FROM bgs_activity a, bgs_goal_item i, bgs_goal g WHERE i.goalid = ? AND a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal) q),0) AS userfinished," +
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
@@ -354,7 +355,7 @@ public class BGS implements PMCommand, GuildCommand {
                 message = "";
             }
             if(rows == 0) {
-                message += "No goals found\n";
+                message += "No " + (Integer.parseInt(recent) == 0 ? "Active ":"") + "Goals found\n";
                 messages.add(message);
             }
             return messages;
