@@ -163,7 +163,15 @@ public class BGS implements PMCommand, GuildCommand {
             if (args.length == 1) { // Send help message for goals
                 event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
 
-            } else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
+            }else if (args[1].equalsIgnoreCase("end")) { // end a goal now a new goal.
+                //bgs goals,end,goalid
+                if (args.length >= 3) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
+                    event.getChannel().sendMessage(endGoal(args)).queue();
+                } else{ // show help message for adding a goal as less than 5 arguments
+                    event.getChannel().sendMessage(BGS_GOAL_END_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
                 //bgs goals,add,system,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
                 if (args.length >= 5) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
                     event.getChannel().sendMessage(addGoal(args)).queue();
@@ -298,6 +306,30 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
+    private String endGoal(String[] args) {
+        //bgs goal,end,goalid,endts (optional)
+        Connection connect = new Connections().getConnection();
+        try {
+            Date endtime = new Date();
+            if(args.length == 4) {
+                endtime = USER_SDF.parse(args[3]);
+            }
+            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_goal SET endts = ? WHERE goalid = ?");
+            ps.setString(1, SQL_SDF.format(endtime));
+            ps.setInt(2, Integer.parseInt(args[2]));
+            ps.executeUpdate();
+            return "**End time updated**\nSet to: " + USER_SDF.format(endtime);
+        } catch (SQLException e) {
+            //This happens when the system was not found.
+            return "**SQL Failed!**";
+        } catch (ParseException e) {
+            return "**SQL Date Failed!**";
+        } catch (NumberFormatException e) {
+            return "Parsing error. Make sure 'goalid' is a whole number";
+        }
+
+    }
+
     private static ArrayList<String> listGoal(String recent, String userid, boolean showUserP) {
         Connection connect = new Connections().getConnection();
         ArrayList<String> messages = new ArrayList<>();
@@ -338,7 +370,7 @@ public class BGS implements PMCommand, GuildCommand {
                 rs1.last();
                 int numrows = rs1.getRow();
                 rs1.beforeFirst();
-                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + rs.getString("ticks") + " ticks)";
+                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + dateDiff(new Date(),SQL_SDF.parse(rs.getString("endts")), " left") + ")";
                 if(numrows> 0) {
                     if (showUserP) {
                         message += String.format("```%1$-9s | %2$-15s | %3$s\n","","Your Goal", "System Goal");
@@ -967,5 +999,26 @@ public class BGS implements PMCommand, GuildCommand {
         long truncated = value / (divideBy / 10); //the number part of the output times 10
         boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
         return hasDecimal ? (truncated / 10d) + suffix : (truncated / 10) + suffix;
+    }
+
+    private static String dateDiff(Date date1,Date date2, String append) {
+        //in milliseconds
+        long diff = date2.getTime() - date1.getTime();
+        long diffSeconds = diff / 1000 % 60;
+        long diffMinutes = diff / (60 * 1000) % 60;
+        long diffHours = diff / (60 * 60 * 1000) % 24;
+        long diffDays = diff / (24 * 60 * 60 * 1000);
+        List<String> output = new ArrayList<>();
+        if(diffDays>0)
+            output.add(diffDays + " day" + ((diffDays > 1) ? "s":""));
+        if(diffHours>0)
+            output.add(diffHours + " hr" + ((diffHours > 1) ? "s":""));
+        if(diffMinutes>0)
+            output.add(diffMinutes + " min" + ((diffMinutes > 1) ? "s":""));
+        if(diffSeconds>0 && diffHours==0)
+            output.add(diffSeconds + " sec" + ((diffSeconds > 1) ? "s":""));
+        if(diff < 0)
+            output.add("Finished");
+        return String.join(", ", output) + append;
     }
 }

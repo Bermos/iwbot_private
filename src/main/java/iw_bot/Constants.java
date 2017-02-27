@@ -25,6 +25,9 @@ public class Constants {
             "You can append as many <Activity/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
     public final static String BGS_GOAL_NOTE_HELP = "**Help: List BGS Goals**\n" + Listener.prefix + "bgs goal, note, <goalid>, <text>\n"+
             "Add a note to a goal with specific instructions for CMDRs";
+    public final static String BGS_GOAL_END_HELP = "**Help: END BGS Goal**\n" + Listener.prefix + "bgs goal, end, <goalid>,[<End dd/MM/yy HH:mm>]\n"+
+            "End a BGS goal early. Useful if tick time changes. If you do not specify the end data/time then it will end the goal straight away.";
+
 
 
     public final static String BGS_LOG_HELP = " **BGS Bot Commands:**\n" +
