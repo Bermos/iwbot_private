@@ -1018,7 +1018,8 @@ public class BGS implements PMCommand, GuildCommand {
         if(diffSeconds>0 && diffHours==0)
             output.add(diffSeconds + " sec" + ((diffSeconds > 1) ? "s":""));
         if(diff < 0)
-            output.add("Finished");
-        return String.join(", ", output) + append;
+            return "Finished";
+        else
+            return String.join(", ", output) + append;
     }
 }
