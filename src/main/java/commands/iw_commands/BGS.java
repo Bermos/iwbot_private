@@ -45,6 +45,7 @@ public class BGS implements PMCommand, GuildCommand {
                 case "bounty"    :
                 case "bounties"  : output = Activity.BOUNTY;	break;
                 case "fai"       :
+                case "fail"       :
                 case "failed"    : output = Activity.FAILED;	break;
                 case "fin"       :
                 case "fine"      :
