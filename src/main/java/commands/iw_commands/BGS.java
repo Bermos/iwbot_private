@@ -45,6 +45,7 @@ public class BGS implements PMCommand, GuildCommand {
                 case "bounty"    :
                 case "bounties"  : output = Activity.BOUNTY;	break;
                 case "fai"       :
+                case "fail"       :
                 case "failed"    : output = Activity.FAILED;	break;
                 case "fin"       :
                 case "fine"      :
@@ -81,9 +82,20 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
                 messages.add(getUserStats(event.getAuthor().getId()));
-                for (String message : messages){
-                    event.getChannel().sendMessage(message).queue();
+                String messageToSend = "";
+                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                        event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                        messageToSend = "";
+                        messageToSend += message;
+                    }
+                    else { // need the line break if not going to be seperate messages.
+                        messageToSend += "\n" + message;
+                    }
                 }
+                event.getChannel().sendMessage(messageToSend).queue();
+            } else if (args[0].equalsIgnoreCase("mustard")) {  // for the fun of autocorrect added mustard command (mystats gone wrong)
+                event.getChannel().sendMessage(":hotdog:").queue();
             }
             else if (args[0].equalsIgnoreCase("help")) {
                 event.getChannel().sendMessage(BGS_LOG_HELP).queue();
@@ -151,7 +163,15 @@ public class BGS implements PMCommand, GuildCommand {
             if (args.length == 1) { // Send help message for goals
                 event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
 
-            } else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
+            }else if (args[1].equalsIgnoreCase("end")) { // end a goal now a new goal.
+                //bgs goals,end,goalid
+                if (args.length >= 3) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
+                    event.getChannel().sendMessage(endGoal(args)).queue();
+                } else{ // show help message for adding a goal as less than 5 arguments
+                    event.getChannel().sendMessage(BGS_GOAL_END_HELP).queue();
+                }
+            }
+            else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
                 //bgs goals,add,system,Start Date:Time, Ticks, Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
                 if (args.length >= 5) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
                     event.getChannel().sendMessage(addGoal(args)).queue();
@@ -216,10 +236,20 @@ public class BGS implements PMCommand, GuildCommand {
                 if(args.length == 3) {
                     recent = args[2];
                 }
+
                 ArrayList<String> messages = listGoal(recent,event.getAuthor().getId(), false);
-                for (String message : messages){
-                    event.getChannel().sendMessage(message).queue();
+                String messageToSend = "";
+                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                        event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                        messageToSend = "";
+                        messageToSend += message;
+                    }
+                    else { // need the line break if not going to be seperate messages.
+                        messageToSend += "\n" + message;
+                    }
                 }
+                event.getChannel().sendMessage(messageToSend).queue();
             }
             else{
                 event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
@@ -228,10 +258,21 @@ public class BGS implements PMCommand, GuildCommand {
             if (args[0].equalsIgnoreCase("mystats")) {
                 ArrayList<String> messages = listGoal("0", event.getAuthor().getId(), true);
                 messages.add(getUserStats(event.getAuthor().getId()));
-                for (String message : messages){
-                    JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(message).queue();
+                String messageToSend = "";
+                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                        JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(messageToSend + "\u0000").queue();
+                        messageToSend = "";
+                        messageToSend += message;
+                    }
+                    else { // need the line break if not going to be seperate messages.
+                        messageToSend += "\n" + message;
+                    }
                 }
+                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(messageToSend).queue();
 
+            } else if (args[0].equalsIgnoreCase("mustard")) { // for the fun of autocorrect added mustard command (mystats gone wrong)
+                JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(":hotdog:").queue();
             } else if (args[0].equalsIgnoreCase("total")) {
                 if (DataProvider.isAdmin(event.getMember().getRoles()))
                     event.getChannel().sendMessage(getTotalAmount()).queue();
@@ -265,19 +306,42 @@ public class BGS implements PMCommand, GuildCommand {
         return "For help with BGS bot commands use '/bgs help'";
     }
 
+    private String endGoal(String[] args) {
+        //bgs goal,end,goalid,endts (optional)
+        Connection connect = new Connections().getConnection();
+        try {
+            Date endtime = new Date();
+            if(args.length == 4) {
+                endtime = USER_SDF.parse(args[3]);
+            }
+            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_goal SET endts = ? WHERE goalid = ?");
+            ps.setString(1, SQL_SDF.format(endtime));
+            ps.setInt(2, Integer.parseInt(args[2]));
+            ps.executeUpdate();
+            return "**End time updated**\nSet to: " + USER_SDF.format(endtime);
+        } catch (SQLException e) {
+            //This happens when the system was not found.
+            return "**SQL Failed!**";
+        } catch (ParseException e) {
+            return "**SQL Date Failed!**";
+        } catch (NumberFormatException e) {
+            return "Parsing error. Make sure 'goalid' is a whole number";
+        }
+
+    }
+
     private static ArrayList<String> listGoal(String recent, String userid, boolean showUserP) {
         Connection connect = new Connections().getConnection();
         ArrayList<String> messages = new ArrayList<>();
         try {
             PreparedStatement ps;
             PreparedStatement ps1;
-            String message;
+            String message = "";
             if(Integer.parseInt(recent) == 0) { // get active goals
                 ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname, "+
                         "startts, endts, ticks, note "+
                         "FROM bgs_goal g "+
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
-                message = "**Active Goals**\n";
             } else{
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname "+
                                 "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
@@ -289,20 +353,24 @@ public class BGS implements PMCommand, GuildCommand {
 
             while (rs.next()) {
                 rows = rows + 1;
-
+                if (rows == 1) {
+                    message = "**Active Goals**\n"+
+                            "Please ensure your actions benefit Iridum Wing unless special orders tell you to work for another faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+                }
                 ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
-                        "IFNULL((SELECT COUNT(1) AS tmp FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal ORDER BY tmp DESC LIMIT 1),0) AS userfinished, "+
+                        "IFNULL((SELECT COUNT(*) AS tmp FROM (SELECT i.usergoal FROM bgs_activity a, bgs_goal_item i, bgs_goal g WHERE i.goalid = ? AND a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal) q),0) AS userfinished," +
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
                         "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
                         "FROM bgs_goal_item i " +
-                        "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ?");
-                ps1.setString(1, userid);
-                ps1.setInt(2, rs.getInt("goalid"));
+                        "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ? ORDER BY activity ASC;");
+                ps1.setInt(1, rs.getInt("goalid"));
+                ps1.setString(2, userid);
+                ps1.setInt(3, rs.getInt("goalid"));
                 ResultSet rs1 = ps1.executeQuery();
                 rs1.last();
                 int numrows = rs1.getRow();
                 rs1.beforeFirst();
-                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + rs.getString("ticks") + " ticks)";
+                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + dateDiff(new Date(),SQL_SDF.parse(rs.getString("endts")), " left") + ")";
                 if(numrows> 0) {
                     if (showUserP) {
                         message += String.format("```%1$-9s | %2$-15s | %3$s\n","","Your Goal", "System Goal");
@@ -319,15 +387,18 @@ public class BGS implements PMCommand, GuildCommand {
                             message += String.format("%1$-9s | %2$-15s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs1.getInt("userfinished") + ")", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         }
                     }
-                    message += ((rs.getString("note").length() > 0) ? "\nSPECIAL ORDERS\n--------------\n" + rs.getString("note") : "\nPlease ensure that your actions benefit Iridum Wing in " + rs.getString("fullname") + ". If you are not sure ask on the #bgs_ops channel.") + "```" + "\u0000";
+                    if (rs.getString("note").length() > 0) {
+                        message += "\nSPECIAL ORDERS\n--------------\n" + rs.getString("note");
+                    }
+                    message += "```";
                 } else {
-                    message += "```There are currently no goals set```" + "\u0000";
+                    message += "```There are currently no goals set```";
                 }
                 messages.add(message);
                 message = "";
             }
             if(rows == 0) {
-                message += "No goals found\n";
+                message += "No " + (Integer.parseInt(recent) == 0 ? "Active ":"") + "Goals found\n";
                 messages.add(message);
             }
             return messages;
@@ -845,7 +916,7 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
                 "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
-                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%D %b %Y') AS Tick, " +
+                "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%e %b %Y') AS Tick, " +
                 "(SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS System, " +
                 "SUM( if( b.activity = 'Bond',      b.amount, 0 ) ) AS Bonds, " +
                 "SUM( if( b.activity = 'Bounty',    b.amount, 0 ) ) AS Bounties, " +
@@ -882,8 +953,12 @@ public class BGS implements PMCommand, GuildCommand {
             columnNames += ", System";
             lines.add(columnNames);
 
+            List<String> cmdrNamesList = new ArrayList<>();
             while (rs.next()) {
                 String rowValues = rs.getString("CMDR") + ",";
+                if(!cmdrNamesList.contains("@" + rs.getString("CMDR"))) {
+                    cmdrNamesList.add("@" + rs.getString("CMDR"));
+                }
                 rowValues += rs.getString("Tick") + ",";
                 for (int i = 4; i <= columnCount; i++) {
                     rowValues += (rs.getString(i).equals("0") ? "" : rs.getString(i)) + ",";
@@ -891,6 +966,10 @@ public class BGS implements PMCommand, GuildCommand {
                 rowValues += rs.getString("System");
                 lines.add(rowValues);
             }
+            String cmdrNames = String.join(", ", cmdrNamesList);
+            cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",")+1," and").toString();
+            lines.add("");
+            lines.add(cmdrNames);
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
@@ -920,5 +999,27 @@ public class BGS implements PMCommand, GuildCommand {
         long truncated = value / (divideBy / 10); //the number part of the output times 10
         boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
         return hasDecimal ? (truncated / 10d) + suffix : (truncated / 10) + suffix;
+    }
+
+    private static String dateDiff(Date date1,Date date2, String append) {
+        //in milliseconds
+        long diff = date2.getTime() - date1.getTime();
+        long diffSeconds = diff / 1000 % 60;
+        long diffMinutes = diff / (60 * 1000) % 60;
+        long diffHours = diff / (60 * 60 * 1000) % 24;
+        long diffDays = diff / (24 * 60 * 60 * 1000);
+        List<String> output = new ArrayList<>();
+        if(diffDays>0)
+            output.add(diffDays + " day" + ((diffDays > 1) ? "s":""));
+        if(diffHours>0)
+            output.add(diffHours + " hr" + ((diffHours > 1) ? "s":""));
+        if(diffMinutes>0)
+            output.add(diffMinutes + " min" + ((diffMinutes > 1) ? "s":""));
+        if(diffSeconds>0 && diffHours==0)
+            output.add(diffSeconds + " sec" + ((diffSeconds > 1) ? "s":""));
+        if(diff < 0)
+            return "Finished";
+        else
+            return String.join(", ", output) + append;
     }
 }
