@@ -357,12 +357,12 @@ public class BGS implements PMCommand, GuildCommand {
                     message = "**Active Goals**\n"+
                             "Please ensure your actions benefit Iridum Wing unless special orders tell you to work for another faction. If you are not sure ask on the #bgs_ops channel.\n\n";
                 }
-                ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, " +
-                        "IFNULL((SELECT COUNT(*) AS tmp FROM (SELECT i.usergoal FROM bgs_activity a, bgs_goal_item i, bgs_goal g WHERE i.goalid = ? AND a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING SUM(a.amount) >= i.usergoal) q),0) AS userfinished," +
-                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
-                        "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
-                        "FROM bgs_goal_item i " +
-                        "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ? ORDER BY activity ASC;");
+                ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, \n" +
+                                "IFNULL((SELECT COUNT(*) AS tmp FROM (SELECT i.*,SUM(a.amount) AS total FROM bgs_goal_item i LEFT JOIN bgs_goal g ON g.goalid = i.goalid LEFT JOIN bgs_activity a on a.activity = i.activity WHERE i.goalid = ? AND a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid GROUP BY a.userid HAVING total >= i.usergoal) q),0) AS userfinished,\n" +
+                                "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, \n" +
+                                "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone \n" +
+                                "FROM bgs_goal_item i \n" +
+                                "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ? ORDER BY activity ASC;");
                 ps1.setInt(1, rs.getInt("goalid"));
                 ps1.setString(2, userid);
                 ps1.setInt(3, rs.getInt("goalid"));
