@@ -915,6 +915,7 @@ public class BGS implements PMCommand, GuildCommand {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
+                "b.userid, "+
                 "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
                 "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%e %b %Y') AS Tick, " +
                 "(SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS System, " +
@@ -955,9 +956,9 @@ public class BGS implements PMCommand, GuildCommand {
 
             List<String> cmdrNamesList = new ArrayList<>();
             while (rs.next()) {
-                String rowValues = rs.getString("CMDR") + ",";
-                if(!cmdrNamesList.contains("@" + rs.getString("CMDR"))) {
-                    cmdrNamesList.add("@" + rs.getString("CMDR"));
+                String rowValues = Listener.jda.getUserById(rs.getString("userid")).getName() + ",";
+                if(!cmdrNamesList.contains("@" + Listener.jda.getUserById(rs.getString("userid")).getName())) {
+                    cmdrNamesList.add("@" + Listener.jda.getUserById(rs.getString("userid")).getName());
                 }
                 rowValues += rs.getString("Tick") + ",";
                 for (int i = 4; i <= columnCount; i++) {
@@ -966,10 +967,18 @@ public class BGS implements PMCommand, GuildCommand {
                 rowValues += rs.getString("System");
                 lines.add(rowValues);
             }
-            String cmdrNames = String.join(", ", cmdrNamesList);
-            cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",")+1," and").toString();
-            lines.add("");
-            lines.add(cmdrNames);
+            if (!cmdrNamesList.isEmpty()) {
+                String cmdrNames = String.join(", ", cmdrNamesList);
+                try {
+                    cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",") + 1, " and").toString();
+                } catch(StringIndexOutOfBoundsException e) {
+
+                }
+
+                lines.add("");
+                lines.add(cmdrNames);
+            }
+
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
