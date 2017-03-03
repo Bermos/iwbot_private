@@ -33,7 +33,7 @@ public class Connections {
 		}
 		else {
 			try {
-				if (SQLConnection.isValid(1000)) {
+				if (!SQLConnection.isValid(1000)) {
                     SQLConnection = null;
                     connect();
 				}

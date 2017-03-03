@@ -16,7 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Notes implements PMCommand, GuildCommand{
-	private static Connection connect;
+	private static Connections connections;
 
 	@Override
 	public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
@@ -24,7 +24,7 @@ public class Notes implements PMCommand, GuildCommand{
 		String effName = event.getAuthor().getName();
 		String[] roleIds = {};
 
-		event.getChannel().sendMessage(notes(userId, effName, roleIds, args));
+		event.getChannel().sendMessage(notes(userId, effName, roleIds, args)).queue();
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class Notes implements PMCommand, GuildCommand{
 		String effName = event.getMember().getEffectiveName();
 		String[] roleIds = JDAUtil.getRoleIdStrings(event.getMember());
 
-		event.getChannel().sendMessage(notes(userId, effName, roleIds, args));
+		event.getChannel().sendMessage(notes(userId, effName, roleIds, args)).queue();
 	}
 
     @Override
@@ -99,15 +99,15 @@ public class Notes implements PMCommand, GuildCommand{
 	}
 	
 	private static void connect() {
-		if (connect == null)
-			connect = new Connections().getConnection();
+		if (connections == null)
+			connections = new Connections();
 	}
 
 	private static String get (String name, String id) {
 		connect();
 		
 		try {
-			PreparedStatement ps = connect.prepareStatement("SELECT content FROM notes WHERE (is_public = 1 OR authorid = ?) AND name = ?");
+			PreparedStatement ps = connections.getConnection().prepareStatement("SELECT content FROM notes WHERE (is_public = 1 OR authorid = ?) AND name = ?");
 			ps.setString(1, id);
 			ps.setString(2, name);
 			ResultSet rs = ps.executeQuery();
@@ -129,7 +129,7 @@ public class Notes implements PMCommand, GuildCommand{
 			if ((get (name, id) != null) && !DataProvider.isTest())
 				return false;
 			
-			PreparedStatement ps = connect.prepareStatement("INSERT INTO notes (authorid, name, is_public, content) VALUES (?, ?, ?, ?)");
+			PreparedStatement ps = connections.getConnection().prepareStatement("INSERT INTO notes (authorid, name, is_public, content) VALUES (?, ?, ?, ?)");
 			ps.setString (1, id);
 			ps.setString (2, name);
 			ps.setBoolean(3, isPublic);
@@ -152,7 +152,7 @@ public class Notes implements PMCommand, GuildCommand{
 			if (get (name, id) == null)
 				return false;
 			
-			PreparedStatement ps = connect.prepareStatement("UPDATE notes SET content = ? WHERE (is_public <= ? AND authorid = ?) AND name = ?");
+			PreparedStatement ps = connections.getConnection().prepareStatement("UPDATE notes SET content = ? WHERE (is_public <= ? AND authorid = ?) AND name = ?");
 			ps.setString (1, content);
 			ps.setBoolean(2, canEditPublic);
 			ps.setString (3, id);
@@ -175,7 +175,7 @@ public class Notes implements PMCommand, GuildCommand{
 			if (get (name, id) == null)
 				return false;
 			
-			PreparedStatement ps = connect.prepareStatement("DELETE FROM notes WHERE (is_public <= ? AND authorid = ?) AND name = ?");
+			PreparedStatement ps = connections.getConnection().prepareStatement("DELETE FROM notes WHERE (is_public <= ? AND authorid = ?) AND name = ?");
 			ps.setBoolean(1, canDelPublic);
 			ps.setString (2, id);
 			ps.setString (3, name);
