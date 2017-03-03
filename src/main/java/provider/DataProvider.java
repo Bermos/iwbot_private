@@ -19,6 +19,37 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 public class DataProvider {
 	private static Info info;
+	public static String lastMessageSent;
+
+	public class Info {
+		class Discord {
+			String token;
+			List<String> idOwner;
+			List<String> idRoles;
+			String newMember;
+			String adminChanID;
+			String prefix;
+		}
+
+		Discord discord;
+		Map<String, ConData> connections;
+		String inaraPW;
+		String googleToken;
+		String githubToken;
+		String githubBranch;
+		boolean dev;
+		boolean test;
+	}
+
+	public static Info getInfoBackup() {
+		if (info == null)
+			getInfo();
+		return info;
+	}
+
+	public static void revertToBackup(Info backupInfo) {
+		info = backupInfo;
+	}
 
     public static void setDiscordToken(String discordToken) {
         if (info == null)
@@ -48,26 +79,6 @@ public class DataProvider {
         String US;
         String PW;
     }
-
-	class Info {
-		class Discord {
-			String token;
-			List<String> idOwner;
-			List<String> idRoles;
-			String newMember;
-			String adminChanID;
-			String prefix;
-		}
-
-		Discord discord;
-		Map<String, ConData> connections;
-		String inaraPW;
-		String googleToken;
-		String githubToken;
-		String githubBranch;
-		boolean dev;
-		boolean test;
-	}
 	
 	private static void getInfo() {
 		try {
@@ -133,9 +144,12 @@ public class DataProvider {
 	public static boolean removeOwner(String id) {
 		if (info == null)
 			getInfo();
-		boolean success = !info.discord.idOwner.remove(info.discord.idOwner.indexOf(id)).isEmpty();
+
+		if (info.discord.idOwner.indexOf(id) == -1)
+		    return false;
+		info.discord.idOwner.remove(info.discord.idOwner.indexOf(id));
 		setInfo();
-		return success;
+		return true;
 	}
 	
 	/**

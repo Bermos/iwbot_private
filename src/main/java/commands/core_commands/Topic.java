@@ -6,7 +6,8 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 public class Topic implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(event.getChannel().getTopic()).queue();
+        String topic = event.getChannel().getTopic().isEmpty() ? "This channel has no topic." : event.getChannel().getTopic();
+        event.getChannel().sendMessage(topic).queue();
     }
 
     @Override
