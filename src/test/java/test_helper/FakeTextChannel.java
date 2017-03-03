@@ -1,4 +1,4 @@
-package fake_testing_classes;
+package test_helper;
 
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;

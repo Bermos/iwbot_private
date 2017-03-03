@@ -1,6 +1,6 @@
 package commands.core_commands;
 
-import fake_testing_classes.FakeTextChannel;
+import test_helper.FakeTextChannel;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.impl.JDAImpl;

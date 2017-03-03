@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
         AdminChannelTest.class,
         DebugModeTest.class,
         EditOwnerTest.class,
+        ShutdownTest.class,
         StatusTest.class,
         TopicTest.class,
         UTCTimeTest.class,

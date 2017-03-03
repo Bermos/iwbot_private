@@ -1,6 +1,5 @@
 package test_helper;
 
-import fake_testing_classes.FakeTextChannel;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
