@@ -1,5 +1,6 @@
 package commands.core_commands;
 
+import iw_bot.Listener;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,6 +30,7 @@ public class StatusTest {
             "Version             \\| [0-9]*\\.[0-9]*\\.[0-9]*_[0-9]*```";
 
         tests.add(new TestCase(uptime));
+        Listener.isTest = true;
     }
 
     @Test
@@ -36,8 +38,6 @@ public class StatusTest {
         Status status = new Status();
 
         for (TestCase testCase : tests) {
-            System.out.println(status.status());
-            System.out.println(testCase.output);
             assertTrue(status.status().matches(testCase.output));
         }
     }

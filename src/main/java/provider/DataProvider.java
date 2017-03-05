@@ -21,7 +21,14 @@ public class DataProvider {
 	private static Info info;
 	public static String lastMessageSent;
 
-	public class Info {
+    static class ConData {
+        String IP;
+        String DB;
+        String US;
+        String PW;
+    }
+
+    public class Info {
 		class Discord {
 			String token;
 			List<String> idOwner;
@@ -36,9 +43,8 @@ public class DataProvider {
 		String inaraPW;
 		String googleToken;
 		String githubToken;
-		String githubBranch;
+		String JAVA_HOME;
 		boolean dev;
-		boolean test;
 	}
 
 	public static Info getInfoBackup() {
@@ -73,13 +79,6 @@ public class DataProvider {
         return info.discord.prefix;
     }
 
-    static class ConData {
-        String IP;
-        String DB;
-        String US;
-        String PW;
-    }
-	
 	private static void getInfo() {
 		try {
 			Gson gson = new Gson();
@@ -297,12 +296,6 @@ public class DataProvider {
 	    return info.githubToken;
     }
 
-    public static String getGithubBranch() {
-        if (info == null)
-            getInfo();
-        return info.githubBranch;
-    }
-
     public static void addConnection(String name, String ip, String db, String us, String pw) {
 	    if (info == null)
 	        getInfo();
@@ -314,9 +307,9 @@ public class DataProvider {
 	    setInfo();
     }
 
-    public static boolean isTest() {
+	public static String getJavaHome() {
 		if (info == null)
 			getInfo();
-		return info.test;
+		return info.JAVA_HOME;
 	}
 }

@@ -4,6 +4,7 @@ package commands.misc_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.JDAUtil;
+import iw_bot.Listener;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
@@ -126,7 +127,7 @@ public class Notes implements PMCommand, GuildCommand{
 		connect();
 		
 		try {
-			if ((get (name, id) != null) && !DataProvider.isTest())
+			if ((get (name, id) != null) && !Listener.isTest)
 				return false;
 			
 			PreparedStatement ps = connections.getConnection().prepareStatement("INSERT INTO notes (authorid, name, is_public, content) VALUES (?, ?, ?, ?)");

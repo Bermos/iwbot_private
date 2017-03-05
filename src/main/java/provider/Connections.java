@@ -1,5 +1,6 @@
 package provider;
 
+import iw_bot.Listener;
 import iw_bot.LogUtil;
 
 import java.sql.Connection;
@@ -26,7 +27,7 @@ public class Connections {
 	
 	public Connection getConnection() {
 		if (SQLConnection == null) {
-			if (DataProvider.isTest())
+			if (Listener.isTest)
 				fakeConnect();
 			else
 				connect();
