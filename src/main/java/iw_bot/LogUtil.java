@@ -30,6 +30,11 @@ public class LogUtil {
                 }
             }
 
+            if (stacktrace.length() > 2000) {
+                e.printStackTrace();
+                return;
+            }
+
             //TODO fix url
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(message)

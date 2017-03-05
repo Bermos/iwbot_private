@@ -21,8 +21,7 @@ public class StatusTest {
     public void setUp() throws Exception {
         tests = new ArrayList<>();
 
-        String uptime = "```" +
-            "Uptime              \\| ([0-9]*d )?[0-9]{2}:[0-9]{2}:[0-9]{2}\n" +
+        String uptime = "```Uptime              \\| ([0-9]*d )?[0-9]{2}:[0-9]{2}:[0-9]{2}\n" +
             "# Threads           \\| [0-9]*\n" +
             "Memory usage        \\| [0-9]*\\.[0-9]{2}\\/[0-9]*\\.[0-9]{2} MB\n" +
             "Unique AI Datasets  \\| ([0-9]{1,3}('[0-9]{3})*)\n" +
@@ -37,6 +36,8 @@ public class StatusTest {
         Status status = new Status();
 
         for (TestCase testCase : tests) {
+            System.out.println(status.status());
+            System.out.println(testCase.output);
             assertTrue(status.status().matches(testCase.output));
         }
     }
