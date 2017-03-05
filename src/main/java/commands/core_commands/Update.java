@@ -58,7 +58,7 @@ public class Update implements GuildCommand, PMCommand {
 
             // Download source code from GitHub
             chan.sendMessage("Downloading new sources...").queue();
-            rt.exec("git clone https://" + token + "@github.com/Bermos/iwbot_private.git");
+            rt.exec("git clone https://" + token + "@github.com/Bermos/iwbot_private.git").waitFor();
 
             // Switch to specified branch
             p = rt.exec("git branch -a", envp, WORKDIR);
@@ -71,11 +71,10 @@ public class Update implements GuildCommand, PMCommand {
                 chan.sendMessage("Branch not found, these are available:\n" + String.join("\n", branches)).queue();
                 return;
             }
-            rt.exec("git checkout origin/" + branch, envp, WORKDIR);
+            rt.exec("git checkout origin/" + branch, envp, WORKDIR).waitFor();
 
             // Compile code and make sure it works
             chan.sendMessage("Download finished, compiling...").queue();
-            System.out.println(WORKDIR.exists());
             p = rt.exec("mvn package", new String[]{"JAVA_HOME=" + DataProvider.getJavaHome()}, WORKDIR);
             fw.write("------Build log " + new Date() + "------\n");
             new BufferedReader(new InputStreamReader(p.getInputStream())).lines().forEach( l -> {
