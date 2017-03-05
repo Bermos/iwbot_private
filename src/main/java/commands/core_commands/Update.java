@@ -12,8 +12,21 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Update implements GuildCommand, PMCommand {
+
+    @Override
+    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+        //Permission check
+        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
+            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            return;
+        }
+
+        String branch = args.length == 0 ? "master" : args[0];
+        update(event.getChannel(), branch);
+    }
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -37,7 +50,7 @@ public class Update implements GuildCommand, PMCommand {
             // Declare constants & variables
             final String[] envp = new String[]{};
             final FileWriter fw = new FileWriter(new File("build.log"));
-            final File WORKDIR  = new File("./testing/iwbot_private");
+            final File WORKDIR  = new File("./iwbot_private");
             final String token  = DataProvider.getGithubToken();
             final Runtime rt    = Runtime.getRuntime();
 
@@ -45,13 +58,14 @@ public class Update implements GuildCommand, PMCommand {
 
             // Download source code from GitHub
             chan.sendMessage("Downloading new sources...").queue();
-            rt.exec("git clone https://" + token + "@github.com/Bermos/iwbot_private.git", envp, new File("./testing"));
+            rt.exec("git clone https://" + token + "@github.com/Bermos/iwbot_private.git");
 
             // Switch to specified branch
             p = rt.exec("git branch -a", envp, WORKDIR);
-            List<String> branches = new ArrayList<>();
-            new BufferedReader(new InputStreamReader(p.getInputStream())).lines().forEach( l ->
-                    branches.add(l.replace("remotes/origin/", "").replace(" -> origin/master", "").trim()));
+            List<String> branches = new BufferedReader(new InputStreamReader(p.getInputStream())).lines()
+                    .filter(l -> !l.contains("detached"))
+                    .map(i -> i.replace("remotes/origin/", "").replace(" -> origin/master", "").trim())
+                    .collect(Collectors.toList());
 
             if (!branches.contains(branch)) {
                 chan.sendMessage("Branch not found, these are available:\n" + String.join("\n", branches)).queue();
@@ -61,6 +75,7 @@ public class Update implements GuildCommand, PMCommand {
 
             // Compile code and make sure it works
             chan.sendMessage("Download finished, compiling...").queue();
+            System.out.println(WORKDIR.exists());
             p = rt.exec("mvn package", new String[]{"JAVA_HOME=" + DataProvider.getJavaHome()}, WORKDIR);
             fw.write("------Build log " + new Date() + "------\n");
             new BufferedReader(new InputStreamReader(p.getInputStream())).lines().forEach( l -> {
@@ -99,17 +114,5 @@ public class Update implements GuildCommand, PMCommand {
         } catch (Exception e) {
             LogUtil.logErr(e);
         }
-    }
-
-    @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
-            return;
-        }
-
-        String branch = args.length == 0 ? "master" : args[0];
-        update(event.getChannel(), branch);
     }
 }
