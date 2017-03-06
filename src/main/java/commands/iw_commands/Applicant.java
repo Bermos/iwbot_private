@@ -23,7 +23,7 @@ import java.util.Arrays;
  * TODO
  */
 public class Applicant implements GuildCommand {
-    private final Connection connection = DataProvider.isDev() ? null : new Connections().getConnection();
+    private final Connections con = new Connections();
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -64,7 +64,7 @@ public class Applicant implements GuildCommand {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
-            PreparedStatement ps = connection.prepareStatement("DELETE FROM applicants WHERE id = ?");
+            PreparedStatement ps = con.getConnection().prepareStatement("DELETE FROM applicants WHERE id = ?");
             ps.setString(1, uApplicant.getId());
 
             if (ps.executeUpdate() == 1) {
@@ -84,7 +84,7 @@ public class Applicant implements GuildCommand {
         Member mApplicant = event.getGuild().getMember(uApplicant);
 
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM applicants WHERE id = ?");
+            PreparedStatement ps = con.getConnection().prepareStatement("SELECT * FROM applicants WHERE id = ?");
             ps.setString(1, uApplicant.getId());
             ResultSet rs = ps.executeQuery();
 
@@ -108,7 +108,7 @@ public class Applicant implements GuildCommand {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE applicants SET missions = missions + 1 WHERE id = ? AND missions < 2");
+            PreparedStatement ps = con.getConnection().prepareStatement("UPDATE applicants SET missions = missions + 1 WHERE id = ? AND missions < 2");
             ps.setString(1, uApplicant.getId());
 
             if (ps.executeUpdate() == 1) {
@@ -126,7 +126,7 @@ public class Applicant implements GuildCommand {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE applicants SET eval = eval + 1 WHERE id = ? AND eval < 1");
+            PreparedStatement ps = con.getConnection().prepareStatement("UPDATE applicants SET eval = eval + 1 WHERE id = ? AND eval < 1");
             ps.setString(1, uApplicant.getId());
 
             if (ps.executeUpdate() == 1) {
@@ -143,7 +143,7 @@ public class Applicant implements GuildCommand {
         User applicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO applicants (id) VALUES (?)");
+            PreparedStatement ps = con.getConnection().prepareStatement("INSERT INTO applicants (id) VALUES (?)");
             ps.setString(1, applicant.getId());
             ps.executeUpdate();
 

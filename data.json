@@ -22,7 +22,6 @@
   "inaraPW": "1",
   "googleToken": "1",
   "githubToken": "1",
-  "githubBranch": "1",
-  "dev": true,
-  "test": true
+  "JAVA_HOME": "/home/bermos/bin/Java/jdk1.8.0_121",
+  "dev": true
 }
