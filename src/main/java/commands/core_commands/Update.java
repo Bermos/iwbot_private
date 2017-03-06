@@ -9,7 +9,6 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,9 +55,16 @@ public class Update implements GuildCommand, PMCommand {
 
             Process p;
 
+            // Make sure we are not in a detached state
+            if (WORKDIR.exists())
+                rt.exec("git checkout master", envp, WORKDIR).waitFor();
+
             // Download source code from GitHub
             chan.sendMessage("Downloading new sources...").queue();
-            rt.exec("git clone https://" + token + "@github.com/Bermos/iwbot_private.git").waitFor();
+            if (WORKDIR.exists())
+                rt.exec("git fetch", envp, WORKDIR).waitFor();
+            else
+                rt.exec("git clone https://" + token + "@github.com/Bermos/iwbot_private.git").waitFor();
 
             // Switch to specified branch
             p = rt.exec("git branch -a", envp, WORKDIR);
@@ -67,6 +73,7 @@ public class Update implements GuildCommand, PMCommand {
                     .map(i -> i.replace("remotes/origin/", "").replace(" -> origin/master", "").trim())
                     .collect(Collectors.toList());
 
+            p.waitFor();
             if (!branches.contains(branch)) {
                 chan.sendMessage("Branch not found, these are available:\n" + String.join("\n", branches)).queue();
                 return;
@@ -101,7 +108,7 @@ public class Update implements GuildCommand, PMCommand {
                     }
                 }
                 else if (l.contains("BUILD SUCCESS"))
-                    chan.sendMessage("Build successful, updating now...").queue();
+                    chan.sendMessage("Build successful, updating now...").complete();
 
                 else if (l.contains("COMPILATION ERROR")) {
                     chan.sendMessage("**Compilation failed. Update aborted**").queue();
@@ -109,7 +116,9 @@ public class Update implements GuildCommand, PMCommand {
                 }
             });
             fw.close();
-            //System.exit(1);
+            p.waitFor();
+            rt.exec("git checkout master", envp, WORKDIR).waitFor();
+            System.exit(1);
         } catch (Exception e) {
             LogUtil.logErr(e);
         }
