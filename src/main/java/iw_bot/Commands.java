@@ -21,6 +21,8 @@ class Commands {
 		pmCommands.put("ping", (event, args) -> event.getChannel().sendMessage("pong").queue());
 
 		pmCommands.put("version", (event, args) -> event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue());
+
+        pmCommands.put("update", new Update());
 		
 		pmCommands.put("bgs", new commands.iw_commands.BGS());
 		
@@ -73,6 +75,8 @@ class Commands {
 		});
 
 		guildCommands.put("debug", new DebugMode());
+
+		guildCommands.put("update", new Update());
 
 		guildCommands.put("setavatar", new Setavatar());
 

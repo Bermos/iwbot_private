@@ -1,15 +1,16 @@
 package provider;
 
+import iw_bot.Listener;
 import iw_bot.LogUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class Connections {
 	private static Connection SQLConnection;
 
 	private void connect() {
-		
 		try {
 			DataProvider.ConData info = DataProvider.getConData("mysql");
 
@@ -26,10 +27,20 @@ public class Connections {
 	
 	public Connection getConnection() {
 		if (SQLConnection == null) {
-			if (DataProvider.isTest())
+			if (Listener.isTest)
 				fakeConnect();
 			else
 				connect();
+		}
+		else {
+			try {
+				if (!SQLConnection.isValid(1000)) {
+                    SQLConnection = null;
+                    connect();
+				}
+			} catch (SQLException e) {
+				//This can't possibly happen, why do I even have to catch it Oo
+			}
 		}
 		
 		return SQLConnection;

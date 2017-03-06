@@ -106,12 +106,12 @@ public class Reminder implements PMCommand, GuildCommand {
 
     private class CheckTask extends TimerTask {
         private JDA jda;
-        private Connection connect;
+        private Connections con;
 
         CheckTask(JDA jda) {
             this.jda = jda;
-            this.connect = new Connections().getConnection();
-            boolean initialised = jda != null && connect != null;
+            this.con = new Connections();
+            boolean initialised = jda != null;
             if (initialised)
                 System.out.println("[Info] reminder initialised");
             else
@@ -125,7 +125,7 @@ public class Reminder implements PMCommand, GuildCommand {
 
         private void checkTimer() {
             try {
-                PreparedStatement ps = connect.prepareStatement("SELECT userid, reason FROM reminders WHERE reminded = 0 AND time < ?");
+                PreparedStatement ps = con.getConnection().prepareStatement("SELECT userid, reason FROM reminders WHERE reminded = 0 AND time < ?");
                 ps.setLong(1, new Date().getTime());
                 ResultSet rs = ps.executeQuery();
 
@@ -133,7 +133,7 @@ public class Reminder implements PMCommand, GuildCommand {
                     jda.getUserById(rs.getString("userid")).getPrivateChannel().sendMessage("REMINDED!\n" + rs.getString("reason")).queue();
                 }
                 ps.close();
-                ps = connect.prepareStatement("UPDATE reminders SET reminded = 1 WHERE reminded = 0 AND time < ?");
+                ps = con.getConnection().prepareStatement("UPDATE reminders SET reminded = 1 WHERE reminded = 0 AND time < ?");
                 ps.setLong(1, new Date().getTime());
                 ps.executeUpdate();
 
