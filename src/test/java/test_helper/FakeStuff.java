@@ -1,8 +1,10 @@
 package test_helper;
 
 import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.SelfUser;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.impl.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -57,6 +59,17 @@ public class FakeStuff {
             return new MessageImpl(mesId, getTextChannel(chanId), true).setContent(content).setAuthor(new UserImpl(userId, getJDA()));
     }
 
+    public static Message getMessage(String userId, String content, String effName, boolean isPrivate) {
+        JDAImpl jda = getJDA();
+        GuildImpl guild = new GuildImpl(jda, "0");
+        User user = new UserImpl(userId, jda).setName(effName);
+        guild.getMembersMap().put(userId, new MemberImpl(guild, user));
+        if (isPrivate)
+            return new MessageImpl("0", getPrivateChannel("0", userId), true).setContent(content).setAuthor(user);
+        else
+            return new MessageImpl("0", new FakeTextChannel("0", guild), true).setContent(content).setAuthor(user);
+    }
+
     public static Message getMessage(String mesId, String chanId, String content) {
         return new MessageImpl(mesId, getTextChannel(chanId), true).setContent(content);
     }
@@ -77,12 +90,20 @@ public class FakeStuff {
         return new GuildMessageReceivedEvent(getJDA(), 0, getMessage("0", content, isOwner));
     }
 
+    public static GuildMessageReceivedEvent getGMREvent(boolean isOwner, String dunno, String content) {
+        return new GuildMessageReceivedEvent(getJDA(), 0, getMessage(isOwner ? "1" : "0", content, "generic user", false));
+    }
+
     public static GuildMessageReceivedEvent getGMREvent(String userId, String channelId, String content) {
         return new GuildMessageReceivedEvent(getJDA(), 0, getMessage("0", channelId, content, userId, false));
     }
 
     public static PrivateMessageReceivedEvent getPMREvent(String userId, String chanId, String content) {
         return new PrivateMessageReceivedEvent(getJDA(), 0, getMessage("0", chanId, content, userId, true));
+    }
+
+    public static PrivateMessageReceivedEvent getPMREvent(String userId, String content) {
+        return new PrivateMessageReceivedEvent(getJDA(), 0, getMessage(userId, content, "generic user", true));
     }
 
     public static String[] getArgs() {

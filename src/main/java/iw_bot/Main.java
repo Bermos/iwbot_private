@@ -85,10 +85,8 @@ public class Main {
 			sql += sc.nextLine() + "\n";
 
 		String[] statements = sql.split(";");
-		for (int i = 0; i < statements.length - 1; i++) {
-			System.out.println(statements[i]);
+		for (int i = 0; i < statements.length - 1; i++)
 			con.prepareStatement(statements[i]).execute();
-		}
 
 
 		System.out.println("Database set up.");

@@ -26,7 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Listener extends ListenerAdapter {
-	private Commands commands;
+	private static final Commands commands = new Commands();
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 	public static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
@@ -39,7 +39,6 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onReady(ReadyEvent event) {
-		this.commands = new Commands();
 		new AutoUpdate();
 
 		//Initial parsing of the memes.json file
@@ -137,6 +136,10 @@ public class Listener extends ListenerAdapter {
                 args[i] = args[i].trim();
         }
 		return args;
+	}
+
+	public static Commands getCommands() {
+		return commands;
 	}
 
 	@Override
