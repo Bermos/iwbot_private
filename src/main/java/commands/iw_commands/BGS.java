@@ -335,8 +335,6 @@ public class BGS implements PMCommand, GuildCommand {
         ArrayList<String> messages = new ArrayList<>();
         try {
             PreparedStatement ps;
-            PreparedStatement ps1;
-            PreparedStatement ps2;
             String message = "";
             if(Integer.parseInt(recent) == 0) { // get active goals
                 ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname, "+
@@ -358,14 +356,14 @@ public class BGS implements PMCommand, GuildCommand {
                     message = "**Active Goals**\n"+
                             "Please ensure your actions benefit Iridum Wing unless special orders tell you to work for another faction. If you are not sure ask on the #bgs_ops channel.\n\n";
                 }
-                ps1 = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, g.systemid, g.endts, g.startts, " +
+                ps = connect.prepareStatement("SELECT i.activity, i.usergoal, i.globalgoal, g.systemid, g.endts, g.startts, " +
                                 "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid) AS globaldone, " +
                                 "(SELECT SUM(a.amount) FROM bgs_activity a WHERE a.activity = i.activity AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND a.systemid = g.systemid AND a.userid = ?) AS userdone " +
                                 "FROM bgs_goal_item i " +
                                 "LEFT JOIN bgs_goal g ON i.goalid = g.goalid WHERE i.goalid = ? ORDER BY activity ASC;");
-                ps1.setString(1, userid);
-                ps1.setInt(2, rs.getInt("goalid"));
-                ResultSet rs1 = ps1.executeQuery();
+                ps.setString(1, userid);
+                ps.setInt(2, rs.getInt("goalid"));
+                ResultSet rs1 = ps.executeQuery();
                 rs1.last();
                 int numrows = rs1.getRow();
                 rs1.beforeFirst();
@@ -383,13 +381,13 @@ public class BGS implements PMCommand, GuildCommand {
                         if (showUserP) {
                             message += String.format("%1$-9s | %2$-15s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         } else {
-                            ps2 = connect.prepareStatement("SELECT IFNULL(COUNT(*),0) AS userfinished FROM (SELECT SUM(a.amount) AS total FROM bgs_activity a WHERE a.activity = ? AND a.timestamp >= ? AND a.timestamp <= ? AND a.systemid = ? GROUP BY userid HAVING total >= ?) AS tmp");
-                            ps2.setString(1, rs1.getString("activity"));
-                            ps2.setString(2, SQL_SDF.format(SQL_SDF.parse(rs1.getString("startts"))));
-                            ps2.setString(3, SQL_SDF.format(SQL_SDF.parse(rs1.getString("endts"))));
-                            ps2.setInt(4, rs1.getInt("systemid"));
-                            ps2.setInt(5, rs1.getInt("usergoal"));
-                            ResultSet rs2 = ps2.executeQuery();
+                            ps = connect.prepareStatement("SELECT IFNULL(COUNT(*),0) AS userfinished FROM (SELECT SUM(a.amount) AS total FROM bgs_activity a WHERE a.activity = ? AND a.timestamp >= ? AND a.timestamp <= ? AND a.systemid = ? GROUP BY userid HAVING total >= ?) AS tmp");
+                            ps.setString(1, rs1.getString("activity"));
+                            ps.setString(2, SQL_SDF.format(SQL_SDF.parse(rs1.getString("startts"))));
+                            ps.setString(3, SQL_SDF.format(SQL_SDF.parse(rs1.getString("endts"))));
+                            ps.setInt(4, rs1.getInt("systemid"));
+                            ps.setInt(5, rs1.getInt("usergoal"));
+                            ResultSet rs2 = ps.executeQuery();
                             rs2.first();
                             message += String.format("%1$-9s | %2$-15s | %3$s\n", rs1.getString("activity"), int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs2.getString("userfinished") + ")", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         }
@@ -955,7 +953,7 @@ public class BGS implements PMCommand, GuildCommand {
             // We already know those 3 columns for sure. Don't check for them, just append all the uncertain ones afterwards
             String columnNames = "CMDR, Tick";
             int columnCount = rs.getMetaData().getColumnCount();
-            for (int i = 4; i <= columnCount; i++) {
+            for (int i = 5; i <= columnCount; i++) {
                 columnNames = String.join(", ", columnNames, rs.getMetaData().getColumnName(i));
             }
             columnNames += ", System";
