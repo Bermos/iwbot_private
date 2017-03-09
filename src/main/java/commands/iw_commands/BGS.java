@@ -953,7 +953,7 @@ public class BGS implements PMCommand, GuildCommand {
             // We already know those 3 columns for sure. Don't check for them, just append all the uncertain ones afterwards
             String columnNames = "CMDR, Tick";
             int columnCount = rs.getMetaData().getColumnCount();
-            for (int i = 4; i <= columnCount; i++) {
+            for (int i = 5; i <= columnCount; i++) {
                 columnNames = String.join(", ", columnNames, rs.getMetaData().getColumnName(i));
             }
             columnNames += ", System";
