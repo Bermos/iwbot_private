@@ -979,7 +979,7 @@ public class BGS implements PMCommand, GuildCommand {
                 try {
                     cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",") + 1, " and").toString();
                 } catch(StringIndexOutOfBoundsException e) {
-                    c
+
                 }
 
                 lines.add("");
