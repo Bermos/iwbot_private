@@ -1,5 +1,6 @@
 package commands.misc_commands;
 
+import iw_bot.Listener;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,6 +32,7 @@ public class ReminderTest {
         tests.add(new TestCase("0", new String[] {"10d"}, "Reminder set"));
         tests.add(new TestCase("0", new String[] {"10d", "a reason"}, "Reminder set"));
         tests.add(new TestCase("0", new String[] {"10d", "a reason", "with a comma"}, "Reminder set"));
+        Listener.isTest = true;
     }
 
     @Test

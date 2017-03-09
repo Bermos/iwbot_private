@@ -61,6 +61,9 @@ public class Statistics extends Thread {
 		Thread.currentThread().setName("BOT - PROVIDER - Statistics");
 		while (true) {
 			try {
+				if (influxDB.ping().getVersion().equalsIgnoreCase("unknown"))
+					connect(jda);
+
 				//update statistics
 				int onlineUser = 0;
 				for(Member member : jda.getGuildById("142749481530556416").getMembers()) {
@@ -82,7 +85,7 @@ public class Statistics extends Thread {
 						.build();
 				influxDB.write(dbName, "default", system);
 				
-				Thread.sleep(1000);
+				Thread.sleep(5000);
 				
 			} catch (Exception e) {
 				LogUtil.logErr(e);
