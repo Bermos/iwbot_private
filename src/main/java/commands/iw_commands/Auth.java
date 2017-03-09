@@ -2,8 +2,9 @@ package commands.iw_commands;
 
 import commands.PMCommand;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -15,7 +16,7 @@ import java.sql.SQLException;
 
 public class Auth implements PMCommand {
 
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
         SecureRandom sRandom = new SecureRandom();
         final char[] hexArray = "0123456789abcdef".toCharArray();
         byte [] bytehash;
@@ -40,16 +41,16 @@ public class Auth implements PMCommand {
             hashedpw = new String(hexChars);
             PreparedStatement ps = new Connections().getConnection()
                     .prepareStatement("UPDATE user SET sessionkey = ?, salt = ?, password = ? WHERE iduser = ?");
-            ps.setString		(1, new BigInteger(40, sRandom).toString(32));
-            ps.setString		(2, salt);
-            ps.setString		(3, hashedpw);
-            ps.setLong		(4, Long.parseLong(event.getAuthor().getId()));
+            ps.setString(1, new BigInteger(40, sRandom).toString(32));
+            ps.setString(2, salt);
+            ps.setString(3, hashedpw);
+            ps.setLong	(4, Long.parseLong(event.getAuthor().getId()));
             ps.executeUpdate();
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException | SQLException e) {
             LogUtil.logErr(e);
         }
 
-        event.getChannel().sendMessage("Account created. You have been issued the following password. Change it on the website by clicking on your avatar in the top right corner.").queue();
-        event.getChannel().sendMessage(password).queue();
+        event.replyAsync("Account created. You have been issued the following password. Change it on the website by clicking on your avatar in the top right corner.");
+        event.replyAsync(password);
     }
 }

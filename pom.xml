@@ -73,7 +73,6 @@
             <version>3.0.BETA2_122</version>
         </dependency>
         <dependency>
-            <!-- jsoup HTML parser library @ http://jsoup.org/ -->
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.10.2</version>
@@ -102,6 +101,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.7.13</version>
         </dependency>
     </dependencies>
 

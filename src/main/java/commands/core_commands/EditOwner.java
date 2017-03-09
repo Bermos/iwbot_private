@@ -1,36 +1,40 @@
 package commands.core_commands;
 
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
+import commands.PMCommand;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
-public class EditOwner implements commands.PMCommand {
+public class EditOwner implements PMCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
+        String[] args = event.getArgs();
+
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
         if (args.length != 2) {
-            event.getChannel().sendMessage("[Error] unexpected/no arguments provided").queue();
+            event.replyAsync("[Error] unexpected/no arguments provided");
             return;
         }
 
         if (args[0].equalsIgnoreCase("add")) {
             DataProvider.addOwner(args[1]);
-            event.getChannel().sendMessage("Owner added").queue();
+            event.replyAsync("Owner added");
         }
         else if (args[0].equalsIgnoreCase("del")) {
             boolean success = DataProvider.removeOwner(args[1]);
 
             if (success)
-                event.getChannel().sendMessage("Owner removed").queue();
+                event.replyAsync("Owner removed");
             else
-                event.getChannel().sendMessage("Id not found. Nothing changed").queue();
+                event.replyAsync("Id not found. Nothing changed");
         }
         else {
-            event.getChannel().sendMessage("[Error] unexpected arguments provided").queue();
+            event.replyAsync("[Error] unexpected arguments provided");
         }
     }
 }

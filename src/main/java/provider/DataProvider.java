@@ -1,31 +1,27 @@
 package provider;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+
 public class DataProvider {
 	private static Info info = getInfo();
 	public static String lastMessageSent;
 
-    static class ConData {
-        String IP;
-        String DB;
-        String US;
-        String PW;
+    public static class ConData {
+        public String IP;
+        public String DB;
+        public String US;
+        public String PW;
     }
 
     public class Info {
@@ -45,6 +41,10 @@ public class DataProvider {
 		String githubToken;
 		String JAVA_HOME;
 		boolean dev;
+	}
+
+	public static boolean exists() {
+		return new File("./data.json").exists();
 	}
 
 	public static Info getInfoBackup() {
@@ -243,8 +243,8 @@ public class DataProvider {
 	}
 
 	/**
-	 *
-	 * @return if the bot runs in development
+	 * Get if the bot runs in development
+	 * @return true if the bot runs in development
 	 */
 	public static boolean isDev () {
 		return info.dev;

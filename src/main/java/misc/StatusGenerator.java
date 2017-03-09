@@ -1,13 +1,12 @@
 package misc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.managers.Presence;
 import provider.Connections;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class StatusGenerator extends Thread {
 	private Presence presence;

@@ -1,23 +1,25 @@
 package misc;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class DankMemes {
 	private class Meme {
@@ -31,11 +33,7 @@ public class DankMemes {
 		long lastUsed;
 	}
 
-	private static List<Meme> memes;
-	
-	public DankMemes() {
-		update();
-	}
+	private static List<Meme> memes = update();
 	
 	public static void check(GuildMessageReceivedEvent event) {
 		List<String> mentionedUsers = new ArrayList<>();
@@ -112,15 +110,16 @@ public class DankMemes {
 		saveChanges();
 	}
 
-	public static void update() {
+	public static List<Meme> update() {
 		try {
 			Type listType = new TypeToken<ArrayList<Meme>>(){}.getType();
 			Gson gson = new Gson();
 			JsonReader jReader = new JsonReader(new FileReader("./memes.json"));
-			memes = gson.fromJson(jReader, listType);
+			return gson.fromJson(jReader, listType);
 		} catch (FileNotFoundException e) {
 			LogUtil.logErr(e);
 		}
+		return null;
 	}
 
 	private static void saveChanges() {

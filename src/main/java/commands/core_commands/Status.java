@@ -5,8 +5,9 @@ import commands.PMCommand;
 import iw_bot.Listener;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Status implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(status()).queue();
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
+        event.replyAsync(status(discord.getListener()));
     }
 
     @Override
@@ -32,8 +33,8 @@ public class Status implements PMCommand, GuildCommand {
         return "Shows information about the bot";
     }
 
-    String status() {
-        Long diff 			 = (new Date().getTime() - Listener.startupTime);
+    String status(Listener listener) {
+        Long diff 			 = (new Date().getTime() - listener.getStarupTime());
         int days			 = (int) TimeUnit.MILLISECONDS.toDays(diff);
         int hours			 = (int) TimeUnit.MILLISECONDS.toHours(diff) % 24;
         int minutes			 = (int) TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
@@ -64,7 +65,7 @@ public class Status implements PMCommand, GuildCommand {
                 + "Memory usage        | " + usedMemory + "/" + totalMemory	+ " MB\n"
                 + "Unique AI Datasets  | " + uniqueSets						+ "\n"
                 + "Total AI Datasets   | " + totalSets						+ "\n"
-                + "Version             | " + Listener.VERSION_NUMBER		+ "```";
+                + "Version             | " + listener.getVersion()          + "```";
 
         return contOut;
     }

@@ -4,7 +4,6 @@ import commands.misc_commands.Reminder;
 import iw_core.Users;
 import misc.DankMemes;
 import misc.StatusGenerator;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
@@ -18,43 +17,52 @@ import net.dv8tion.jda.core.events.user.UserAvatarUpdateEvent;
 import net.dv8tion.jda.core.events.user.UserNameUpdateEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import provider.Connections;
 import provider.DataProvider;
 import provider.Statistics;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static iw_bot.Constants.TIME_SDF;
+
 public class Listener extends ListenerAdapter {
-	private static final Commands commands = new Commands();
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+	private Commands commands;
+	private String   version;
+	private String   prefix;
+	private Discord discord;
 
-	public static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
-    public static final String VERSION_NUMBER = Main.class.getPackage().getImplementationVersion();
-	public static final long startupTime = new Date().getTime();
+	private final long STARTUP_TIME = new Date().getTime();
 
-    public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
+    public static boolean isDebug; //Default setting but can be changed on runtime if need be
     public static boolean isTest = false; // Will be changed by JUnit when running a test
-	public static JDA jda;
-	
-	@Override
+
+	public Listener(Commands commands,
+                    String version,
+                    String prefix) {
+		this.commands = commands;
+		this.version  = version;
+		this.prefix   = prefix;
+	}
+
+    public long getStarupTime() {
+        return STARTUP_TIME;
+    }
+
+    @Override
 	public void onReady(ReadyEvent event) {
-		new AutoUpdate();
 
 		//Initial parsing of the memes.json file
 		DankMemes.update();
 
 		//Print out startup info
-		System.out.println("[" + sdf.format(new Date()) + "][Info] Listener v" + VERSION_NUMBER + " ready!");
-		System.out.println("[" + sdf.format(new Date()) + "][Info] Connected to:");
+		System.out.println("[" + TIME_SDF.format(new Date()) + "][Info] Listener v" + version + " ready!");
+		System.out.println("[" + TIME_SDF.format(new Date()) + "][Info] Connected to:");
 		for (Guild guild : event.getJDA().getGuilds()) {
 			System.out.println("	" + guild.getName());
 		}
 
-		//I'm not sure this is actually needed but it's here so whatever
-		new Connections().getConnection();
-
-		jda = event.getJDA();
+		discord = new Discord(event.getJDA(), this);
 
 		if (!DataProvider.isDev()) {
 			//Start metadata statistics logging
@@ -77,7 +85,7 @@ public class Listener extends ListenerAdapter {
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
 		//Print out message to console if debug
 		if (isDebug) {
-			System.out.printf("[" + sdf.format(new Date()) + "][PM][%s] %s: %s\n",
+			System.out.printf("[" + TIME_SDF.format(new Date()) + "][PM][%s] %s: %s\n",
 					event.getChannel().getUser().getName(),
 					event.getAuthor().getName(),
 					event.getMessage().getContent());
@@ -91,7 +99,7 @@ public class Listener extends ListenerAdapter {
 
             if (commands.pmCommands.containsKey(commandName)) {
                 event.getChannel().sendTyping();
-                commands.pmCommands.get(commandName).runCommand(event, args);
+                commands.pmCommands.get(commandName).runCommand(new PrivateMessageEvent(event, discord, args), discord);
             }
         }
 	}
@@ -99,7 +107,7 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		if (isDebug) {
-			System.out.printf("[" + sdf.format(new Date()) + "][%s][%s] %s: %s\n", event.getGuild().getName(),
+			System.out.printf("[" + TIME_SDF.format(new Date()) + "][%s][%s] %s: %s\n", event.getGuild().getName(),
 					event.getChannel().getName(),
 					event.getMember().getEffectiveName(),
 					event.getMessage().getContent());
@@ -128,7 +136,7 @@ public class Listener extends ListenerAdapter {
         event.getAuthor().isFake();
 	}
 
-	private static String[] getArgs(String content, String commandName) {
+	private String[] getArgs(String content, String commandName) {
 		String[] args = {};
 		if (content.replaceFirst(prefix + commandName, "").trim().length() > 0) {
             args = content.replaceFirst(prefix + commandName, "").trim().split(",");
@@ -138,8 +146,12 @@ public class Listener extends ListenerAdapter {
 		return args;
 	}
 
-	public static Commands getCommands() {
+	Commands getCommands() {
 		return commands;
+	}
+
+	public String getVersion() {
+		return version;
 	}
 
 	@Override
@@ -174,7 +186,7 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
 	    if (isDebug)
-            System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
+            System.out.printf("[" + TIME_SDF.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
 
         Users.setOnlineStatus(event);
 	}

@@ -17,8 +17,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static test_helper.FakeStuff.*;
+import static org.junit.Assert.assertEquals;
+import static test_helper.FakeStuff.getGMREvent;
+import static test_helper.FakeStuff.getPMREvent;
 
 public class ListenerTest {
     List<PTestCase> pTestCases = new ArrayList<>();

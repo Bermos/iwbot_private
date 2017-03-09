@@ -3,20 +3,21 @@ package commands.core_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 public class Shutdown implements GuildCommand, PMCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        event.getChannel().sendMessage("Goodbye, master.").complete();
-        event.getJDA().shutdown();
+        event.replyNow("Goodbye, master.");
+        discord.shutdown();
         System.exit(0);
     }
 

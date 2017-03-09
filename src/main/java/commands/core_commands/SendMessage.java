@@ -1,19 +1,21 @@
 package commands.core_commands;
 
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 public class SendMessage implements commands.PMCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        if (!DataProvider.isOwner(event)){
-            event.getChannel().sendMessage("You ain't allowed to do that").queue();
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
+        if (!DataProvider.isOwner(event.getAuthor().getId())){
+            event.replyAsync("You ain't allowed to do that");
             return;
         }
 
-        if (args.length == 3) {
-            event.getJDA().getGuildById(args[0]).getTextChannelById(args[1]).sendMessage(args[2]).queue();
-            event.getChannel().sendMessage("Sent").queue();
+        String[] args = event.getArgs();
+        if (args.length == 2) {
+            discord.sendGMessageAsync(args[1], args[2]);
+            event.replyAsync("Sent");
         }
     }
 }

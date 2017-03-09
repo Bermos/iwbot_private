@@ -1,7 +1,8 @@
 package commands;
 
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 public interface PMCommand {
-    void runCommand(PrivateMessageReceivedEvent event, String[] args);
+    void runCommand(PrivateMessageEvent event, Discord discord);
 }

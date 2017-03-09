@@ -3,6 +3,7 @@ package iw_bot;
 import commands.GuildCommand;
 import commands.PMCommand;
 import commands.core_commands.*;
+import commands.core_commands.Shutdown;
 import commands.ed_commands.CMDRLookup;
 import commands.ed_commands.Distance;
 import commands.iw_commands.*;
@@ -18,13 +19,13 @@ class Commands {
 	
 	Commands() {
 		//Private message commands
-		pmCommands.put("ping", (event, args) -> event.getChannel().sendMessage("pong").queue());
+		pmCommands.put("ping", (event, discord) -> discord.sendPMessageAsync(event.getChannel().getId(), "pong"));
 
-		pmCommands.put("version", (event, args) -> event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue());
+		pmCommands.put("version", (event, discord) -> discord.sendPMessageAsync(event.getChannel().getId(), discord.getListener().getVersion()));
 
         pmCommands.put("update", new Update());
 		
-		pmCommands.put("bgs", new commands.iw_commands.BGS());
+		pmCommands.put("bgs", new BGS());
 		
 		pmCommands.put("time", new UTCTime());
 		
@@ -65,7 +66,7 @@ class Commands {
 		guildCommands.put("version", new GuildCommand() {
 			@Override
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue();
+				event.getChannel().sendMessage(Listener.prefix).queue();
 			}
 
 			@Override

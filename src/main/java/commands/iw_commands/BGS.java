@@ -4,7 +4,6 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.JDAUtil;
-import iw_bot.Listener;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -24,7 +23,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static iw_bot.Constants.*;
-
 
 public class BGS implements PMCommand, GuildCommand {
     enum Activity {
@@ -145,7 +143,7 @@ public class BGS implements PMCommand, GuildCommand {
                     event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
 
                 } else { // show system help if wrong number of arguments
-                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide|show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
+                    event.getChannel().sendMessage("Help: " + DataProvider.getPrefix() + "bgs system, hide|show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
                 }
 
             } else if (args[1].equalsIgnoreCase("add")) { // add a new system to the database
@@ -283,7 +281,7 @@ public class BGS implements PMCommand, GuildCommand {
                 JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(BGS_LOG_HELP).queue();
             }
         } else if (args.length == 2) {
-            String message = "**WARNING ACTION NOT LOGGED**\nStar system not specified? Enter '" + Listener.prefix + "bgs help' or use one of the star system names below:\n";
+            String message = "**WARNING ACTION NOT LOGGED**\nStar system not specified? Enter '" + DataProvider.getPrefix() + "bgs help' or use one of the star system names below:\n";
             message += getSystems(DataProvider.isAdmin(event));
             event.getChannel().sendMessage(message).queue();
 
@@ -533,7 +531,7 @@ public class BGS implements PMCommand, GuildCommand {
             ps.executeUpdate();
         }
         catch(SQLException e) {
-            return "**Failed deleting Goal Item**\n" + Listener.prefix + "bgs goal,{deleteitem,delitem},<goalid>";
+            return "**Failed deleting Goal Item**\n" + DataProvider.getPrefix() + "bgs goal,{deleteitem,delitem},<goalid>";
         }
         return "**Goal Item Deleted**";
     }
@@ -597,7 +595,7 @@ public class BGS implements PMCommand, GuildCommand {
             }
             return "Star system updated\n" + getSystems(true);
         } else {
-            return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(true);
+            return "Help: " + DataProvider.getPrefix() + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(true);
         }
     }
 
@@ -631,7 +629,7 @@ public class BGS implements PMCommand, GuildCommand {
             }
             return "New star system added to BGS logging.\n" + getSystems(true);
         } else{
-            return "Help: " + Listener.prefix + "bgs system, add, <shortname>, <fullname>";
+            return "Help: " + DataProvider.getPrefix() + "bgs system, add, <shortname>, <fullname>";
         }
     }
 

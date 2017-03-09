@@ -1,6 +1,5 @@
 package commands.core_commands;
 
-import test_helper.FakeTextChannel;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.impl.JDAImpl;
@@ -11,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import provider.DataProvider;
 import test_helper.FakeStuff;
+import test_helper.FakeTextChannel;
 import test_helper.GTestCase;
 
 import java.util.ArrayList;

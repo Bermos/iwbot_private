@@ -9,7 +9,6 @@ import test_helper.GTestCase;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import static test_helper.FakeStuff.getGMREvent;
 
 public class AdminChannelTest {

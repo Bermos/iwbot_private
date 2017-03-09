@@ -3,10 +3,11 @@ package commands.core_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
+import provider.jda.channel.Channel;
 
 import java.io.*;
 import java.util.Date;
@@ -16,14 +17,14 @@ import java.util.stream.Collectors;
 public class Update implements GuildCommand, PMCommand {
 
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        String branch = args.length == 0 ? "master" : args[0];
+        String branch = event.getArgs().length == 0 ? "master" : event.getArgs()[0];
         update(event.getChannel(), branch);
     }
 
@@ -44,7 +45,7 @@ public class Update implements GuildCommand, PMCommand {
         return "Updates the bot from the desired branch";
     }
 
-    public static void update(final MessageChannel chan, String branch) {
+    public static void update(final Channel chan, String branch) {
         try {
             // Declare constants & variables
             final String[] envp = new String[]{};
@@ -60,7 +61,7 @@ public class Update implements GuildCommand, PMCommand {
                 rt.exec("git checkout master", envp, WORKDIR).waitFor();
 
             // Download source code from GitHub
-            chan.sendMessage("Downloading new sources...").queue();
+            chan.sendMessageAsync("Downloading new sources...");
             if (WORKDIR.exists())
                 rt.exec("git fetch", envp, WORKDIR).waitFor();
             else
@@ -75,13 +76,13 @@ public class Update implements GuildCommand, PMCommand {
 
             p.waitFor();
             if (!branches.contains(branch)) {
-                chan.sendMessage("Branch not found, these are available:\n" + String.join("\n", branches)).queue();
+                chan.sendMessageAsync("Branch not found, these are available:\n" + String.join("\n", branches));
                 return;
             }
             rt.exec("git checkout origin/" + branch, envp, WORKDIR).waitFor();
 
             // Compile code and make sure it works
-            chan.sendMessage("Download finished, compiling...").queue();
+            chan.sendMessageAsync("Download finished, compiling...");
             p = rt.exec("mvn package", new String[]{"JAVA_HOME=" + DataProvider.getJavaHome()}, WORKDIR);
             fw.write("------Build log " + new Date() + "------\n");
             BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -90,10 +91,10 @@ public class Update implements GuildCommand, PMCommand {
                 try { fw.append(line).append("\n"); } catch (IOException ignored) {}
 
                 if (line.contains("Building iwbot"))
-                    chan.sendMessage(line.replace("[INFO] ", "")).queue();
+                    chan.sendMessageAsync(line.replace("[INFO] ", ""));
 
                 else if (line.contains("T E S T S"))
-                    chan.sendMessage("Build complete, running tests...").queue();
+                    chan.sendMessageAsync("Build complete, running tests...");
 
                 else if (line.contains("Tests run:") && line.split(", ").length == 4) {
                     String[] tests = line.split(", ");
@@ -103,17 +104,17 @@ public class Update implements GuildCommand, PMCommand {
                     int errors   = Integer.parseInt(tests[2].replace("Errors: ", ""));
 
                     if (failures == 0 && errors == 0 && skipped == 0)
-                        chan.sendMessage(total + " tests successful").queue();
+                        chan.sendMessageAsync(total + " tests successful");
                     else {
-                        chan.sendMessage("**" + line + "**\n**Abort update**").queue();
+                        chan.sendMessageAsync("**" + line + "**\n**Abort update**");
                         return;
                     }
                 }
                 else if (line.contains("BUILD SUCCESS"))
-                    chan.sendMessage("Build successful, updating now...").complete();
+                    chan.sendMessage("Build successful, updating now...");
 
                 else if (line.contains("COMPILATION ERROR")) {
-                    chan.sendMessage("**Compilation failed. Update aborted**").queue();
+                    chan.sendMessageAsync("**Compilation failed. Update aborted**");
                     return;
                 }
             }

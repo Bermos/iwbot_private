@@ -2,22 +2,23 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.Member;
+import provider.jda.PrivateMessageEvent;
 
 public class Restart implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
         //Permission check
-        Member author = event.getJDA().getGuildById("142749481530556416").getMember(event.getAuthor());
-        if ( !( DataProvider.isOwner(event) || (author != null && DataProvider.isAdmin(author.getRoles())) ) ) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        Member author = event.getDiscord().getMember("142749481530556416", event.getAuthor().getId());
+        if ( !( DataProvider.isOwner(event.getAuthor().getId()) || (author != null && DataProvider.isAdmin(author.getRoles())) ) ) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        event.getChannel().sendMessage("Restarting...").queue();
+        event.replyAsync("Restarting...");
         System.exit(1);
     }
 

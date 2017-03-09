@@ -3,14 +3,15 @@ package commands.misc_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 import java.util.Random;
 
 public class RollDice implements PMCommand, GuildCommand{
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(roll(args)).queue();
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
+        event.replyAsync(roll(event.getArgs()));
     }
 
     @Override

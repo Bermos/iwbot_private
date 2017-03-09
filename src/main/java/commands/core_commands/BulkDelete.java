@@ -77,6 +77,7 @@ public class BulkDelete implements GuildCommand {
 
             event.getChannel().sendMessage("Last " + deleted + " messages deleted").queue();
         }
+
         //Channel clear part
         else if (args[0].equalsIgnoreCase("all")) {
             //Save all channel metadata
@@ -109,6 +110,7 @@ public class BulkDelete implements GuildCommand {
 
             channel.sendMessage(event.getAuthor().getAsMention() + " Here's your new channel. You might need to put it in it's old place.").queue();
         }
+
         //Number based clearing
         else {
             int number = Integer.parseInt(args[0]);

@@ -10,14 +10,11 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
-import provider.DataProvider;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 
 class AutoUpdate {
     class Author {
@@ -32,11 +29,14 @@ class AutoUpdate {
         String after;
         Commit commits[];
     }
+    private JDA jda;
 
-    AutoUpdate() {
+    public AutoUpdate(JDA jda) {
+        this.jda = jda;
+    }
+
+    public void start(int port) {
         try {
-            int port = 1701;
-
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/update", new GitHookHandler());
             server.setExecutor(null); // creates a default executor
@@ -46,10 +46,9 @@ class AutoUpdate {
         }
     }
 
-    static class GitHookHandler implements HttpHandler {
+    class GitHookHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            JDA jda = Listener.jda;
             TextChannel chan = jda.getGuildById("142749481530556416").getTextChannelById("217344072111620096");
 
             Gson gson = new Gson();

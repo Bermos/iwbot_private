@@ -3,7 +3,8 @@ package commands.core_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,8 +12,8 @@ import java.util.TimeZone;
 
 public class UTCTime implements PMCommand, GuildCommand {
     @Override //PM part
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(time()).queue();
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
+        event.replyAsync(time());
     }
 
     @Override //Guild part

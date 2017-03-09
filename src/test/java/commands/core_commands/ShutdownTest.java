@@ -6,11 +6,12 @@ import provider.DataProvider;
 import test_helper.GTestCase;
 import test_helper.PTestCase;
 
-import static org.junit.Assert.assertEquals;
-import static test_helper.FakeStuff.*;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static test_helper.FakeStuff.getGMREvent;
+import static test_helper.FakeStuff.getPMREvent;
 
 public class ShutdownTest {
     private List<GTestCase> gtests = new ArrayList<>();

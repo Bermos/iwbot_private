@@ -1,17 +1,16 @@
 package provider;
 
-import java.util.concurrent.TimeUnit;
-
 import iw_bot.LogUtil;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Pong;
 
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import java.util.concurrent.TimeUnit;
 
 public class Statistics extends Thread {
 	private static Statistics instance;

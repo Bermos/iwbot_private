@@ -1,5 +1,6 @@
 package commands.core_commands;
 
+import commands.GuildCommand;
 import iw_bot.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
@@ -8,7 +9,7 @@ import provider.DataProvider;
  * This class is for switching debug mode
  * on and off. Just use debug to do it.
  */
-public class DebugMode implements commands.GuildCommand {
+public class DebugMode implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check

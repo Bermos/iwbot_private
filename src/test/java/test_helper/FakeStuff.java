@@ -1,10 +1,8 @@
 package test_helper;
 
 import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.SelfUser;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.impl.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;

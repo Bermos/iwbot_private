@@ -1,11 +1,11 @@
 package commands.iw_commands;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.impl.TextChannelImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class MissionChannel extends TextChannelImpl {
 	private Message message;

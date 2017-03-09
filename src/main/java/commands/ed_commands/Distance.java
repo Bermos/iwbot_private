@@ -6,9 +6,10 @@ import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import provider.jda.Discord;
+import provider.jda.PrivateMessageEvent;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -18,15 +19,15 @@ public class Distance implements PMCommand, GuildCommand {
         public String name;
         Coords coords;
         class Coords {
-            public float x;
-            public float y;
-            public float z;
+            float x;
+            float y;
+            float z;
         }
     }
 
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(distance(args)).queue();
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
+        event.replyAsync(distance(event.getArgs()));
     }
 
     @Override
