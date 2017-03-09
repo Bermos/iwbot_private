@@ -30,8 +30,9 @@ public class Listener extends ListenerAdapter {
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 	public static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
+    public static final String VERSION_NUMBER = Main.class.getPackage().getImplementationVersion();
 	public static final long startupTime = new Date().getTime();
-	public static final String VERSION_NUMBER = Main.class.getPackage().getImplementationVersion() == null ? "0.0.0_0" : Main.class.getPackage().getImplementationVersion();
+
     public static boolean isDebug = DataProvider.isDev(); //Default setting but can be changed on runtime if need be
     public static boolean isTest = false; // Will be changed by JUnit when running a test
 	public static JDA jda;
