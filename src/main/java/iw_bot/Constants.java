@@ -10,7 +10,7 @@ public class Constants {
 
     public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems**\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
 
-    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, list}>\n";
+    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list}>\n";
     public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/CMDRGoal #/GlobalGoal #>\n"+
             "You can append as many <Activity/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
     public final static String BGS_GOAL_DEL_HELP = "**Help: Delete BGS Goal**\n" + Listener.prefix + "bgs goal, {delete,del}, <goalid #>\n"+
@@ -23,7 +23,7 @@ public class Constants {
             "To add an activity target to a goal use " + Listener.prefix + "bgs goal, addactivity";
     public final static String BGS_GOAL_EDITACT_HELP = "**Help: Add/Edit BGS Goal Activity Targets**\n" + Listener.prefix + "bgs goal, {addactivity, addact, editactivity, editact}, <goalid> <Activity/CMDRGoal #/GlobalGoal #>\n"+
             "You can append as many <Activity/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
-    public final static String BGS_GOAL_NOTE_HELP = "**Help: List BGS Goals**\n" + Listener.prefix + "bgs goal, note, <goalid>, <text>\n"+
+    public final static String BGS_GOAL_NOTE_HELP = "**Help: BGS Goal Notes**\n" + Listener.prefix + "bgs goal, note, <goalid>, <text>\n"+
             "Add a note to a goal with specific instructions for CMDRs";
     public final static String BGS_GOAL_END_HELP = "**Help: END BGS Goal**\n" + Listener.prefix + "bgs goal, end, <goalid>,[<End dd/MM/yy HH:mm>]\n"+
             "End a BGS goal early. Useful if tick time changes. If you do not specify the end data/time then it will end the goal straight away.";
