@@ -132,6 +132,43 @@ public class BGS implements PMCommand, GuildCommand {
 
             }
         }
+        // admin functions for system factions
+        else if ((args[0].equalsIgnoreCase("faction") || args[0].equalsIgnoreCase("factions") || args[0].equalsIgnoreCase("fac")) && DataProvider.isAdmin(event)){
+            if (args.length == 1) { // send default help message for system admin
+                event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
+            } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the factions available
+                //bgs faction, list, <system>
+                if (args.length == 2) {
+                    event.getChannel().sendMessage(getFactions(true, 0)).queue();
+                } else if (args.length == 3) {
+                    event.getChannel().sendMessage(getFactions(DataProvider.isAdmin(event), systemExists(args[2], args[2], 0))).queue();
+                } else {
+                    event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
+                }
+            } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) { // show or hide a faction
+                //bgs faction, <show | hide>, faction, system
+                if (args.length == 4) {
+                    event.getChannel().sendMessage(setFactionVisibility(args[1].equalsIgnoreCase("show"), args[2], args[3])).queue();
+                } else { // show system help if wrong number of arguments
+                    event.getChannel().sendMessage(BGS_FACTION_HIDE_HELP + "\n" + getFactions(DataProvider.isAdmin(event),0) + getSystems(true)).queue();
+                }
+
+            } else if (args[1].equalsIgnoreCase("add")) { // add a new faction to the database
+                //bgs faction, add, <shortname>, <fullname>
+                event.getChannel().sendMessage(addFaction(args)).queue();
+
+            } else if (args[1].equalsIgnoreCase("edit")) { // edit a faction in the database
+                //bgs faction, edit, <factionid>, <shortname>, <fullname>
+                event.getChannel().sendMessage(editFaction(args)).queue();
+
+            } else if (args[1].equalsIgnoreCase("assign") || args[1].equalsIgnoreCase("ass")) { // assign a faction to a system
+                //bgs faction, assign, <factionname>, <systemname>
+                event.getChannel().sendMessage(assignFaction(args)).queue();
+
+            } else{ // if got this far something went wrong. Show system help
+                event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
+            }
+        }
         // admin functions for systems
         else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems") || args[0].equalsIgnoreCase("sys")) && DataProvider.isAdmin(event)){
             if (args.length == 1) { // send default help message for system admin
@@ -145,13 +182,15 @@ public class BGS implements PMCommand, GuildCommand {
                     event.getChannel().sendMessage(setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
 
                 } else { // show system help if wrong number of arguments
-                    event.getChannel().sendMessage("Help: " + Listener.prefix + "bgs system, hide|show, <systemid>\n" + getSystems(DataProvider.isAdmin(event))).queue();
+                    event.getChannel().sendMessage(BGS_SYSTEM_HIDE_HELP + "\n" + getSystems(DataProvider.isAdmin(event))).queue();
                 }
 
             } else if (args[1].equalsIgnoreCase("add")) { // add a new system to the database
+                //bgs system, add, <shortname>, <fullname>
                 event.getChannel().sendMessage(addSystem(args)).queue();
 
             } else if (args[1].equalsIgnoreCase("edit")) { // edit a system in the database
+                //bgs system, edit, <systemid>, <shortname>, <fullname>
                 event.getChannel().sendMessage(editSystem(args)).queue();
 
             } else{ // if got this far something went wrong. Show system help
@@ -337,12 +376,12 @@ public class BGS implements PMCommand, GuildCommand {
             PreparedStatement ps;
             String message = "";
             if(Integer.parseInt(recent) == 0) { // get active goals
-                ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname, "+
+                ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname, "+
                         "startts, endts, ticks, note "+
                         "FROM bgs_goal g "+
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
             } else{
-                ps = connect.prepareStatement("SELECT *, (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = g.systemid) AS fullname "+
+                ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname "+
                                 "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(recent));
                 message = "**" + recent + " Most Recent Goals**\n";
@@ -367,7 +406,7 @@ public class BGS implements PMCommand, GuildCommand {
                 rs1.last();
                 int numrows = rs1.getRow();
                 rs1.beforeFirst();
-                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + dateDiff(new Date(),SQL_SDF.parse(rs.getString("endts")), " left") + ")";
+                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + dateDiff(new Date(),SQL_SDF.parse(rs.getString("endts")), " left") + ")";
                 if(numrows> 0) {
                     if (showUserP) {
                         message += String.format("```%1$-9s | %2$-15s | %3$s\n","","Your Goal", "System Goal");
@@ -439,7 +478,7 @@ public class BGS implements PMCommand, GuildCommand {
         try {
             Date starttime = USER_SDF.parse(args[4]);
             Date endtime = new Date(starttime.getTime() + (Integer.parseInt(args[5]) * 24 * 60 * 60 * 1000L));
-            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_goal SET systemid = (SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) LIMIT 1), " +
+            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_goal SET systemid = (SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) LIMIT 1), " +
                     "startts = ?, " +
                     "endts = ?, " +
                     "ticks = ? " +
@@ -470,7 +509,7 @@ public class BGS implements PMCommand, GuildCommand {
                 Date starttime = USER_SDF.parse(args[3]);
                 Date endtime = new Date(starttime.getTime() + (Integer.parseInt(args[4])*24*60*60*1000L));
                 PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_goal (systemid, startts, endts, ticks, note) VALUES ("+
-                        "(SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1), ?, ?, ?, '')",PreparedStatement.RETURN_GENERATED_KEYS);
+                        "(SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) AND s_hidden = '0' LIMIT 1), ?, ?, ?, '')",PreparedStatement.RETURN_GENERATED_KEYS);
                 ps.setString(1, args[2]);
                 ps.setString(2, args[2]);
                 ps.setString(3, SQL_SDF.format(starttime));
@@ -587,29 +626,34 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private String editSystem(String[] args) {
+        //bgs system, edit, <systemid>, <shortname>, <fullname>
         if (args.length == 5) {
-
-            Connection connect = new Connections().getConnection();
-            try {
-                PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET shortname = ?, fullname = ? WHERE systemid = ?");
-                ps.setString(1, args[3]);
-                ps.setString(2, args[4]);
-                ps.setInt   (3, Integer.parseInt(args[2]));
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                //This happens when the system was not found.
-                return "**WARNING STAR SYSTEM NOT UPDATED**";
+            if (systemExists(args[3], args[4], Integer.parseInt(args[2])) == Integer.parseInt(args[2])) {
+                Connection connect = new Connections().getConnection();
+                try {
+                    PreparedStatement ps = connect.prepareStatement("UPDATE bgs_system SET s_shortname = ?, s_fullname = ? WHERE systemid = ?");
+                    ps.setString(1, args[3]);
+                    ps.setString(2, args[4]);
+                    ps.setInt(3, Integer.parseInt(args[2]));
+                    ps.executeUpdate();
+                } catch (SQLException e) {
+                    //This happens when the system was not found.
+                    return "**WARNING STAR SYSTEM NOT UPDATED**";
+                }
+                return "Star system updated\n" + getSystems(true);
+            } else {
+                return "**WARNING STAR SYSTEM NOT UPDATED**\nA system with a shortname/fullname of '" + args[3] + "' or '" + args[4] + "' already exists!\n" + getSystems(true);
             }
-            return "Star system updated\n" + getSystems(true);
         } else {
-            return "Help: " + Listener.prefix + "bgs system,edit,<systemid>, <shortname>, <fullname>\n" + getSystems(true);
+            return BGS_SYSTEM_EDIT_HELP + "\n" + getSystems(true);
         }
     }
 
-    private String getSystemFullname(String system) {
+
+    private static String getSystemFullname(String system) {
         String fullname = null;
         try {
-            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT fullname FROM bgs_systems WHERE shortname = ? OR fullname = ? LIMIT 1");
+            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT s_fullname FROM bgs_system WHERE s_shortname = ? OR s_fullname = ? LIMIT 1");
             ps.setString(1, system);
             ps.setString(2, system);
             ResultSet rs = ps.executeQuery();
@@ -623,28 +667,176 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private String addSystem(String[] args) {
+        //bgs system, add, <shortname>, <fullname>
         if (args.length == 4) {
             Connection connect = new Connections().getConnection();
             try {
-                PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_systems (shortname, fullname) VALUES (?, ?)");
-                ps.setString(1, args[1]);
-                ps.setString(2, args[2]);
-                ps.executeUpdate();
+                if (systemExists(args[2], args[3], 0) == 0) {
+                    PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_system (s_shortname, s_fullname) VALUES (?, ?)");
+                    ps.setString(1, args[2]);
+                    ps.setString(2, args[3]);
+                    ps.executeUpdate();
+                } else {
+                    return "**WARNING STAR SYSTEM NOT ADDED**\nA system with a shortname/fullname of '" + args[2] + "' or '" + args[3] + "' already exists!\n" + getSystems(true);
+                }
             } catch (SQLException e) {
                 //This only happens when there's a serious issue with mysql or the connection to it
                 return "**WARNING STAR SYSTEM NOT ADDED**";
             }
             return "New star system added to BGS logging.\n" + getSystems(true);
         } else{
-            return "Help: " + Listener.prefix + "bgs system, add, <shortname>, <fullname>";
+            return BGS_SYSTEM_ADD_HELP;
         }
     }
+
+    private int systemExists(String shortname, String fullname, int ignore) {
+        // make sure that system with same short or fullname does not already exist
+        Connection connect = new Connections().getConnection();
+        try {
+            PreparedStatement ps;
+            if(ignore > 0) {
+                ps = connect.prepareStatement("SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_shortname = ? OR s_fullname = ? OR s_fullname = ?) AND systemid <> ?;");
+                ps.setString(1, shortname);
+                ps.setString(2, fullname);
+                ps.setString(3, shortname);
+                ps.setString(4, fullname);
+                ps.setInt(5, ignore);
+            }
+            else {
+                ps = connect.prepareStatement("SELECT systemid FROM bgs_system WHERE s_shortname = ? OR s_shortname = ? OR s_fullname = ? OR s_fullname = ?;");
+                ps.setString(1, shortname);
+                ps.setString(2, fullname);
+                ps.setString(3, shortname);
+                ps.setString(4, fullname);
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("systemid");
+            }
+            else {
+                return 0;
+            }
+        } catch (SQLException e){
+            return -1;
+        }
+    }
+
+    private int factionExists(String shortname, String fullname, int ignore) {
+        // make sure that faction with same short or fullname does not already exist
+        Connection connect = new Connections().getConnection();
+        try {
+            PreparedStatement ps;
+            if(ignore > 0) {
+                ps = connect.prepareStatement("SELECT factionid FROM bgs_faction WHERE (f_shortname = ? OR f_shortname = ? OR f_fullname = ? OR f_fullname = ?) AND factionid <> ?;");
+                ps.setString(1, shortname);
+                ps.setString(2, fullname);
+                ps.setString(3, shortname);
+                ps.setString(4, fullname);
+                ps.setInt(5, ignore);
+            }
+            else {
+                ps = connect.prepareStatement("SELECT factionid FROM bgs_faction WHERE f_shortname = ? OR f_shortname = ? OR f_fullname = ? OR f_fullname = ?");
+                ps.setString(1, shortname);
+                ps.setString(2, fullname);
+                ps.setString(3, shortname);
+                ps.setString(4, fullname);
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("factionid");
+            }
+            else {
+                return 0;
+            }
+        } catch (SQLException e){
+            return -1;
+        }
+    }
+
+    private String editFaction(String[] args) {
+        //bgs faction, edit, <factionid>, <shortname>, <fullname>
+        if (args.length == 5) {
+            if (factionExists(args[3], args[4], Integer.parseInt(args[2])) == Integer.parseInt(args[2])) {
+                Connection connect = new Connections().getConnection();
+                try {
+                    PreparedStatement ps = connect.prepareStatement("UPDATE bgs_faction SET f_shortname = ?, f_fullname = ? WHERE factionid = ?");
+                    ps.setString(1, args[3]);
+                    ps.setString(2, args[4]);
+                    ps.setInt(3, Integer.parseInt(args[2]));
+                    ps.executeUpdate();
+                } catch (SQLException e) {
+                    //This happens when the system was not found.
+                    return "**WARNING FACTION NOT UPDATED**";
+                }
+                return "Faction updated\n" + getFactions(true,0);
+            } else {
+                return "**WARNING FACTION NOT UPDATED**\nA faction with a shortname/fullname of '" + args[3] + "' or '" + args[4] + "' already exists!\n" + getFactions(true,0);
+            }
+        } else {
+            return BGS_FACTION_EDIT_HELP + "\n" + getFactions(true,0);
+        }
+    }
+
+    private String assignFaction(String[] args) {
+        //bgs faction, edit, <factionname>, <systemname>
+        if (args.length == 4) {
+            int factionid = factionExists(args[2], args[2],0);
+            int systemid = systemExists(args[3], args[3], 0);
+            if (factionid > 0) {
+                if (systemid > 0) {
+                    Connection connect = new Connections().getConnection();
+                    try {
+                        PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_system_faction SET factionid = ?, systemid = ?;");
+                        ps.setInt(1, factionid);
+                        ps.setInt(2, systemid);
+                        ps.executeUpdate();
+                    } catch (SQLException e) {
+                        //This happens when the system was not found.
+                        return "**WARNING FACTION NOT ASSIGNED**\nIs it already assigned to that system?\n" + getFactions(true,systemid);
+                    }
+                    return "Faction Assigned\n" + getFactions(true,systemid);
+                }
+                else {
+                    return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + getSystems(true);
+                }
+            } else {
+                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + getFactions(true,0);
+            }
+        } else {
+            return BGS_FACTION_ASSIGN_HELP + "\n" + getFactions(true,0) + getSystems(true);
+        }
+    }
+
+    private String addFaction(String[] args) {
+        //bgs faction, add, <shortname>, <fullname>
+        if (args.length == 4) {
+            Connection connect = new Connections().getConnection();
+            try {
+                // make sure that faction with same short or fullname does not already exist
+                if (factionExists(args[2], args[3], 0) == 0) {
+                    PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_faction (f_shortname, f_fullname) VALUES (?, ?)");
+                    ps.setString(1, args[2]);
+                    ps.setString(2, args[3]);
+                    ps.executeUpdate();
+                }
+                else
+                    return "**WARNING FACTION NOT ADDED**\nFaction with shortname/fullname set to either: '" + args[2] + "' or '" + args[3] + "' already exists!\n" + getFactions(true,0);
+            } catch (SQLException e) {
+                //This only happens when there's a serious issue with mysql or the connection to it
+                return "**WARNING FACTION NOT ADDED**";
+            }
+            return "New faction added to BGS logging.\n" + getFactions(true,0);
+        } else{
+            return BGS_FACTION_ADD_HELP;
+        }
+    }
+
 
     private String setSystemVisibility(boolean show, String system) {
         int systemid = Integer.parseInt(system);
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_systems SET hidden = ? WHERE systemid = ?");
+            PreparedStatement ps = connect.prepareStatement("UPDATE bgs_system SET s_hidden = ? WHERE systemid = ?");
             ps.setInt(1, show ? 0 : 1);
             ps.setInt(2, systemid);
 
@@ -660,6 +852,40 @@ public class BGS implements PMCommand, GuildCommand {
         } catch (SQLException e) {
             //This only happens when there's a serious issue with mysql or the connection to it
             return "**WARNING SYSTEM VISIBILITY NOT CHANGED**";
+        }
+    }
+
+    private String setFactionVisibility(boolean show, String faction, String system) {
+        //bgs faction, show|hide, faction, system
+        int factionid = factionExists(faction, faction,0);
+        int systemid = systemExists(system, system, 0);
+        if (factionid > 0) {
+            if (systemid > 0) {
+                Connection connect = new Connections().getConnection();
+                try {
+                    PreparedStatement ps = connect.prepareStatement("UPDATE bgs_system_faction SET f_hidden = ? WHERE factionid = ? AND systemid = ?");
+                    ps.setInt(1, show ? 0 : 1);
+                    ps.setInt(2, factionid);
+                    ps.setInt(3, systemid);
+
+                    // if one row was altered
+                    if (ps.executeUpdate() == 1) {
+                        if (show)
+                            return "BGS faction **VISIBLE** in " + system + ". Logging possible for this system and faction.\n" + getFactions(true, systemid);
+                        else
+                            return "BGS faction **HIDDEN** in " + system + ". Logging no longer possible for this system and faction.\n" + getFactions(true, systemid);
+                    } else { // if no row was altered the system wasn't found
+                        return "**WARNING FACTION VISIBILITY NOT CHANGED**\nSystem not found.\n" + getSystems(true);
+                    }
+                } catch (SQLException e) {
+                    //This only happens when there's a serious issue with mysql or the connection to it
+                    return "**WARNING SYSTEM VISIBILITY NOT CHANGED**";
+                }
+            } else {
+                return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + getSystems(true);
+            }
+        } else {
+            return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + getFactions(true,0);
         }
     }
 
@@ -754,22 +980,77 @@ public class BGS implements PMCommand, GuildCommand {
             // show hidden systems in italics for admins
             if (admin) {
                 message = "```ID   | Short | Full\n";
-                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems ORDER BY fullname ASC");
+                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_system ORDER BY s_fullname ASC");
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
-                    if (rs.getString("hidden").equals("1")) {
-                        message += String.format("%1$-4s | %2$-5s | %3$s (hidden system)\n", rs.getString("systemid"), rs.getString("shortname"), rs.getString("fullname"));
+                    if (rs.getString("s_hidden").equals("1")) {
+                        message += String.format("%1$-4s | %2$-5s | %3$s (hidden system)\n", rs.getString("systemid"), rs.getString("s_shortname"), rs.getString("s_fullname"));
                     } else {
-                        message += String.format("%1$-4s | %2$-5s | %3$s\n", rs.getString("systemid"), rs.getString("shortname"), rs.getString("fullname"));
+                        message += String.format("%1$-4s | %2$-5s | %3$s\n", rs.getString("systemid"), rs.getString("s_shortname"), rs.getString("s_fullname"));
                     }
 
                 }
             } else { // just show live systems
                 message = "```Short | Full\n";
-                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_systems WHERE hidden = 0 ORDER BY fullname ASC");
+                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_system WHERE s_hidden = 0 ORDER BY s_fullname ASC");
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
-                    message += String.format("%1$-6s| %2$s\n", rs.getString("shortname"), rs.getString("fullname"));
+                    message += String.format("%1$-6s| %2$s\n", rs.getString("s_shortname"), rs.getString("s_fullname"));
+                }
+            }
+        }
+        catch (SQLException e) {
+            LogUtil.logErr(e);
+        }
+        message +="```\n";
+        return message;
+    }
+
+    private static String getSystemFullname(int systemid, boolean admin) {
+        try {
+            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT s_fullname FROM bgs_system WHERE systemid = ?");
+            ps.setInt(1,systemid);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) {
+                return rs.getString("s_fullname");
+            } else {
+                return "Missing!";
+            }
+        } catch (SQLException e) {
+            return "SQL ERROR!";
+        }
+    }
+
+
+    private static String getFactions(boolean admin, int systemid) {
+        String message = "";
+        try {
+            // show hidden factions in italics for admins
+            if (admin) {
+                PreparedStatement ps;
+                if (systemid > 0) {
+                    message += "**Factions assigned to " + getSystemFullname(systemid,admin) + "**\n";
+                    ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
+                    ps.setInt(1,systemid);
+                } else {
+                    ps = new Connections().getConnection().prepareStatement("SELECT *, 0 AS f_hidden FROM bgs_faction ORDER BY f_fullname ASC");
+                }
+                message += "```ID   | Short | Full\n";
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    if (rs.getString("f_hidden").equals("1")) {
+                        message += String.format("%1$-4s | %2$-5s | %3$s (hidden faction)\n", rs.getString("factionid"), rs.getString("f_shortname"), rs.getString("f_fullname"));
+                    } else {
+                        message += String.format("%1$-4s | %2$-5s | %3$s\n", rs.getString("factionid"), rs.getString("f_shortname"), rs.getString("f_fullname"));
+                    }
+
+                }
+            } else { // just show live systems
+                message = "```Short | Full\n";
+                PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_faction WHERE f_hidden = 0 ORDER BY f_fullname ASC");
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    message += String.format("%1$-6s| %2$s\n", rs.getString("f_shortname"), rs.getString("f_fullname"));
                 }
             }
         }
@@ -822,29 +1103,29 @@ public class BGS implements PMCommand, GuildCommand {
         Connection connect = new Connections().getConnection();
         try {
             if (system.equals("all")) {
-                PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS fullname, " +
+                PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = b.systemid) AS s_fullname, " +
                         "b.activity, " +
                         "SUM(b.amount) AS total," +
                         "COUNT(DISTINCT(b.userid)) AS numcmdrs " +
                         "FROM bgs_activity b " +
                         "WHERE timestamp > ? AND timestamp < ? " +
-                        "GROUP BY fullname, activity " +
-                        "ORDER BY fullname ASC, activity ASC");
+                        "GROUP BY s_fullname, activity " +
+                        "ORDER BY s_fullname ASC, activity ASC");
                 ps.setString(1, SQL_SDF.format(start));
                 ps.setString(2, SQL_SDF.format(end));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     double cmdravg = (double) rs.getInt("total") / rs.getInt("numcmdrs");
-                    totals.put((Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + int_format_short((int) cmdravg) + " avg.)");
+                    totals.put((Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("s_fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + int_format_short((int) cmdravg) + " avg.)");
                 }
             } else {
-                PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS fullname," +
+                PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = b.systemid) AS s_fullname," +
                         "b.activity, " +
                         "SUM(b.amount) AS total, " +
                         "COUNT(DISTINCT(b.userid)) AS numcmdrs " +
                         "FROM bgs_activity b " +
-                        "WHERE b.timestamp > ? AND b.timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1) " +
-                        "GROUP BY fullname, activity ORDER BY fullname ASC, activity ASC");
+                        "WHERE b.timestamp > ? AND b.timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) AND s_hidden = '0' LIMIT 1) " +
+                        "GROUP BY s_fullname, activity ORDER BY s_fullname ASC, activity ASC");
                 ps.setString(1, SQL_SDF.format(start));
                 ps.setString(2, SQL_SDF.format(end));
                 ps.setString(3, system);
@@ -852,7 +1133,7 @@ public class BGS implements PMCommand, GuildCommand {
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     double cmdravg = (double) rs.getInt("total") / rs.getInt("numcmdrs");
-                    totals.put((Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + int_format_short((int)cmdravg) + " avg.)");
+                    totals.put((Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("s_fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + int_format_short((int)cmdravg) + " avg.)");
                 }
             }
         } catch (SQLException e) {
@@ -882,7 +1163,7 @@ public class BGS implements PMCommand, GuildCommand {
 
             PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_activity (username, userid, amount, activity, systemid) " +
                     "VALUES (?, ?, ?, ?, " +
-                    "(SELECT systemid FROM bgs_systems WHERE (shortname = ? OR fullname = ?) AND hidden = '0' LIMIT 1))");
+                    "(SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) AND s_hidden = '0' LIMIT 1))");
             ps.setString(1, username);
             ps.setString(2, userid);
             ps.setInt(3, amount);
@@ -923,7 +1204,7 @@ public class BGS implements PMCommand, GuildCommand {
                 "b.userid, "+
                 "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
                 "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%e %b %Y') AS Tick, " +
-                "(SELECT bgs_systems.fullname FROM bgs_systems WHERE bgs_systems.systemid = b.systemid) AS System, " +
+                "(SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = b.systemid) AS System, " +
                 "SUM( if( b.activity = 'Bond',      b.amount, 0 ) ) AS Bonds, " +
                 "SUM( if( b.activity = 'Bounty',    b.amount, 0 ) ) AS Bounties, " +
                 "SUM( if( b.activity = 'Failed',    b.amount, 0 ) ) AS Failed, " +
@@ -976,9 +1257,8 @@ public class BGS implements PMCommand, GuildCommand {
                 String cmdrNames = String.join(", ", cmdrNamesList);
                 try {
                     cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",") + 1, " and").toString();
-                } catch(StringIndexOutOfBoundsException e) {
+                } catch(StringIndexOutOfBoundsException ignored){}
 
-                }
 
                 lines.add("");
                 lines.add(cmdrNames);

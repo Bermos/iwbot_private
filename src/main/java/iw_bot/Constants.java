@@ -8,7 +8,18 @@ public class Constants {
 
     public final static String BGS_STATS_HELP = "**Help: Produce Statistics on BGS Data**\n" + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
 
-    public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems**\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show}>";
+    public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems**\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show, list}>";
+    public final static String BGS_SYSTEM_HIDE_HELP = "**Help: Show/Hide BGS Star Systems**\n" + Listener.prefix + "bgs system, hide|show <systemid>";
+    public final static String BGS_SYSTEM_ADD_HELP = "**Help: Add BGS Star Systems**\n" + Listener.prefix + "bgs system, add, <shortname>, <fullname>";
+    public final static String BGS_SYSTEM_EDIT_HELP = "**Help: Edit BGS Star Systems**\n" + Listener.prefix + "bgs system, edit, <systemid>, <shortname>, <fullname>";
+
+    public final static String BGS_FACTION_HELP = "**Help: Manage BGS Factions**\n" + Listener.prefix + "bgs faction, <command modifier {add, edit, hide, show, list, assign}>";
+    public final static String BGS_FACTION_HIDE_HELP = "**Help: Show/Hide BGS Faction in a System**\n" + Listener.prefix + "bgs faction, hide|show <factionname>, <systemname>";
+    public final static String BGS_FACTION_ADD_HELP = "**Help: Add BGS  Faction**\n" + Listener.prefix + "bgs faction, add, <shortname>, <fullname>";
+    public final static String BGS_FACTION_ASSIGN_HELP = "**Help: Assign BGS Faction to a System**\n" + Listener.prefix + "bgs faction, assign, <factionname>, <systemname>";
+    public final static String BGS_FACTION_EDIT_HELP = "**Help: Edit BGS Faction**\n" + Listener.prefix + "bgs faction, edit, <factionid>, <shortname>, <fullname>";
+
+
 
     public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list}>\n";
     public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/CMDRGoal #/GlobalGoal #>\n"+
