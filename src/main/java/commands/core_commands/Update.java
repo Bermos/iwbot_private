@@ -44,7 +44,7 @@ public class Update implements GuildCommand, PMCommand {
         return "Updates the bot from the desired branch";
     }
 
-    public static void update(final MessageChannel chan, String branch) {
+    public static void update(MessageChannel chan, String branch) {
         try {
             // Declare constants & variables
             final String[] envp = new String[]{};
@@ -84,39 +84,37 @@ public class Update implements GuildCommand, PMCommand {
             chan.sendMessage("Download finished, compiling...").queue();
             p = rt.exec("mvn package", new String[]{"JAVA_HOME=" + DataProvider.getJavaHome()}, WORKDIR);
             fw.write("------Build log " + new Date() + "------\n");
-            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line;
-            while((line = br.readLine()) != null) {
-                try { fw.append(line).append("\n"); } catch (IOException ignored) {}
+            new BufferedReader(new InputStreamReader(p.getInputStream())).lines().forEach( l -> {
+                try { fw.append(l + "\n"); } catch (IOException ignored) {}
 
-                if (line.contains("Building iwbot"))
-                    chan.sendMessage(line.replace("[INFO] ", "")).queue();
+                if (l.contains("Building iwbot"))
+                    chan.sendMessage(l.replace("[INFO] ", "")).queue();
 
-                else if (line.contains("T E S T S"))
+                else if (l.contains("T E S T S"))
                     chan.sendMessage("Build complete, running tests...").queue();
 
-                else if (line.contains("Tests run:") && line.split(", ").length == 4) {
-                    String[] tests = line.split(", ");
+                else if (l.contains("Tests run:") && l.split(", ").length == 4) {
+                    String[] tests = l.split(", ");
                     int total    = Integer.parseInt(tests[0].replace("Tests run: ", ""));
                     int failures = Integer.parseInt(tests[1].replace("Failures: ", ""));
-                    int skipped  = Integer.parseInt(tests[3].replace("Skipped: ", ""));
                     int errors   = Integer.parseInt(tests[2].replace("Errors: ", ""));
+                    int skipped  = Integer.parseInt(tests[3].replace("Skipped: ", ""));
 
                     if (failures == 0 && errors == 0 && skipped == 0)
                         chan.sendMessage(total + " tests successful").queue();
                     else {
-                        chan.sendMessage("**" + line + "**\n**Abort update**").queue();
+                        chan.sendMessage("**" + l + "**\n**Abort update**").queue();
                         return;
                     }
                 }
-                else if (line.contains("BUILD SUCCESS"))
+                else if (l.contains("BUILD SUCCESS"))
                     chan.sendMessage("Build successful, updating now...").complete();
 
-                else if (line.contains("COMPILATION ERROR")) {
+                else if (l.contains("COMPILATION ERROR")) {
                     chan.sendMessage("**Compilation failed. Update aborted**").queue();
                     return;
                 }
-            }
+            });
             fw.close();
             p.waitFor();
             rt.exec("git checkout master", envp, WORKDIR).waitFor();
