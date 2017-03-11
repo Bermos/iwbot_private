@@ -6,7 +6,7 @@ import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 import provider.jda.Discord;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 import provider.jda.channel.Channel;
 
 import java.io.*;

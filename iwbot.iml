@@ -10,7 +10,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="junit" level="project" />
+    <orderEntry type="library" name="Maven: org.mockito:mockito-core:2.7.13" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: net.bytebuddy:byte-buddy:1.6.9" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: net.bytebuddy:byte-buddy-agent:1.6.9" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.objenesis:objenesis:2.5" level="project" />
     <orderEntry type="library" name="Maven: net.dv8tion:JDA:3.0.BETA2_122" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.commons:commons-collections4:4.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.json:json:20160810" level="project" />

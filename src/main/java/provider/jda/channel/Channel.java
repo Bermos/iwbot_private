@@ -6,16 +6,18 @@ import provider.jda.Discord;
 
 public interface Channel {
 
-    public String getId();
+    String getId();
 
-    public Discord getDiscord();
+    Discord getDiscord();
 
-    public void sendMessageAsync(String message);
+    void sendMessageAsync(String message);
 
-    public void sendMessageAsync(MessageEmbed embed);
+    void sendMessageAsync(MessageEmbed embed);
 
-    public Message sendMessage(String message);
+    Message sendMessage(String message);
 
-    public Message sendMessage(MessageEmbed embed);
+    Message sendMessage(MessageEmbed embed);
+
+    void sendTyping();
 
 }

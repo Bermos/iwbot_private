@@ -5,6 +5,9 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.Role;
+import provider.jda.channel.Channel;
+import provider.jda.channel.GuildChannel;
+import provider.jda.channel.PrivateChannel;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,10 +75,46 @@ public class Discord {
         return new Member(id, this, guildId);
     }
 
-    public String[] getRolesForMember(String id, String guildId) {
+    public String[] getRoleIdsForMember(String id, String guildId) {
         List<Role> roles = jda.getGuildById(guildId).getMember(jda.getUserById(id)).getRoles();
         return (String[]) roles.stream().map(role -> role.getId()).collect(Collectors.toList()).toArray();
     }
 
+    public String getName(String id) {
+        return jda.getUserById(id).getName();
+    }
+
+    public String getEffectiveName(String id, String guildId) {
+        return jda.getGuildById(guildId).getMemberById(id).getEffectiveName();
+    }
+
+    public void sendPTyping(String id) {
+        jda.getPrivateChannelById(id).sendTyping().queue();
+    }
+
+    public void sendGTyping(String id) {
+        jda.getTextChannelById(id).sendTyping().queue();
+    }
+
+    public Iterable<? extends provider.jda.Role> getRolesByName(String id, String name, boolean exact) {
+        return jda.getGuildById(id).getRolesByName(name, !exact).stream().map(role -> new provider.jda.Role(role.getId(), id, this)).collect(Collectors.toList());
+    }
+
     // Other stuff
+
+    public String getRoleName(String id, String guildId) {
+        return jda.getGuildById(guildId).getRoleById(id).getName();
+    }
+
+    public void deleteRoleAsync(String id, String guildId) {
+        jda.getGuildById(guildId).getRoleById(id).delete().queue();
+    }
+
+    public List<Channel> getMentionedChannels(String id, Channel channel) {
+        if (channel instanceof PrivateChannel)
+            return null;
+
+        return jda.getTextChannelById(channel.getId()).getMessageById(id).complete().getMentionedChannels().stream()
+                    .map(chan -> new GuildChannel(chan.getId(), this)).collect(Collectors.toList());
+    }
 }

@@ -9,7 +9,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import provider.jda.Discord;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.io.IOException;
 import java.net.SocketException;

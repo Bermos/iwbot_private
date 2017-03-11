@@ -7,7 +7,7 @@ import iw_bot.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.Connections;
 import provider.jda.Discord;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

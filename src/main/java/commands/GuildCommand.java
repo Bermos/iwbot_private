@@ -1,8 +1,9 @@
 package commands;
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
 
 public interface GuildCommand {
-    void runCommand(GuildMessageReceivedEvent event, String[] args);
-    String getHelp(GuildMessageReceivedEvent event);
+    void runCommand(GuildMessageEvent event, Discord discord);
+    String getHelp(GuildMessageEvent event);
 }

@@ -4,7 +4,7 @@ import commands.GuildCommand;
 import commands.PMCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.jda.Discord;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

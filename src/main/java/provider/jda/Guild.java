@@ -12,4 +12,12 @@ public class Guild {
     public Member getMember(User user) {
         return discord.getMember(id, user.getId());
     }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public Iterable<? extends Role> getRolesByName(String name, boolean exact) {
+        return discord.getRolesByName(id, name, exact);
+    }
 }

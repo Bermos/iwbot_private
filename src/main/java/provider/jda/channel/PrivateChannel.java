@@ -42,4 +42,9 @@ public class PrivateChannel implements Channel {
     public Message sendMessage(MessageEmbed embed) {
         return discord.sendPMessageNow(id, embed);
     }
+
+    @Override
+    public void sendTyping() {
+        discord.sendPTyping(id);
+    }
 }

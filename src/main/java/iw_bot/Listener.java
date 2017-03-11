@@ -20,7 +20,8 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import provider.DataProvider;
 import provider.Statistics;
 import provider.jda.Discord;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.GuildMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.util.Date;
 
@@ -124,7 +125,7 @@ public class Listener extends ListenerAdapter {
                     Statistics.getInstance().logCommandReceived(commandName, event.getMember().getEffectiveName());
 
 				event.getChannel().sendTyping();
-				commands.guildCommands.get(commandName).runCommand(event, args);
+				commands.guildCommands.get(commandName).runCommand(new GuildMessageEvent(event, discord, args), discord);
 			}
 		}
 		//Check for dankness
@@ -132,8 +133,6 @@ public class Listener extends ListenerAdapter {
 
         if (!DataProvider.isDev())
 		    Statistics.getInstance().logMessage(event);
-
-        event.getAuthor().isFake();
 	}
 
 	private String[] getArgs(String content, String commandName) {

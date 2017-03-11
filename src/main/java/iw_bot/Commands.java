@@ -85,7 +85,7 @@ class Commands {
 
 		guildCommands.put("setgame", new Setgame());
 
-		guildCommands.put("role", new Role());
+		guildCommands.put("role", new RoleManipulator());
 
 		guildCommands.put("dist", new Distance());
 

@@ -4,7 +4,7 @@ import commands.PMCommand;
 import iw_bot.LogUtil;
 import provider.Connections;
 import provider.jda.Discord;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;

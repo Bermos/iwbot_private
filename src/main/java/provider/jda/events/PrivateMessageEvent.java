@@ -1,13 +1,16 @@
-package provider.jda;
+package provider.jda.events;
 
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
+import provider.jda.Discord;
+import provider.jda.User;
 import provider.jda.channel.PrivateChannel;
 
-public class PrivateMessageEvent {
+public class PrivateMessageEvent implements MessageEvent {
     private Discord discord;
     private PrivateChannel channel;
+    private Message message;
     private User author;
     private String[] args;
 
@@ -16,6 +19,7 @@ public class PrivateMessageEvent {
                                String[] args) {
         this.discord = discord;
         this.channel = new PrivateChannel(event.getChannel().getId(), discord);
+        this.message = new Message(event.getMessage().getId(), this.channel, discord);
         this.author = new User(event.getAuthor().getId(), discord);
         this.args = args;
     }
@@ -64,6 +68,11 @@ public class PrivateMessageEvent {
      */
     public String[] getArgs() {
         return args;
+    }
+
+    @Override
+    public Message getMessage() {
+        return message;
     }
 
     /**

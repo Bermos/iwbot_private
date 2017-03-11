@@ -6,10 +6,11 @@ import commands.PMCommand;
 import iw_bot.JDAUtil;
 import iw_bot.Listener;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,25 +20,27 @@ public class Notes implements PMCommand, GuildCommand{
 	private static Connections connections;
 
 	@Override
-	public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+	public void runCommand(PrivateMessageEvent event, Discord discord) {
 		String userId = event.getAuthor().getId();
 		String effName = event.getAuthor().getName();
+		String[] args = event.getArgs();
 		String[] roleIds = {};
 
-		event.getChannel().sendMessage(notes(userId, effName, roleIds, args)).queue();
+		event.replyAsync(notes(userId, effName, roleIds, args));
 	}
 
 	@Override
-	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+	public void runCommand(GuildMessageEvent event, Discord discord) {
 		String userId = event.getAuthor().getId();
 		String effName = event.getMember().getEffectiveName();
-		String[] roleIds = JDAUtil.getRoleIdStrings(event.getMember());
+		String[] roleIds = event.getMember().getRoles();
+		String[] args = event.getArgs();
 
-		event.getChannel().sendMessage(notes(userId, effName, roleIds, args)).queue();
+		event.replyAsync(notes(userId, effName, roleIds, args));
 	}
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         return "Relatively complicated. Refer to the guide linked below";
     }
 

@@ -8,6 +8,8 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.managers.PermOverrideManagerUpdatable;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import java.util.List;
  */
 public class BulkDelete implements GuildCommand {
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
@@ -145,7 +147,7 @@ public class BulkDelete implements GuildCommand {
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
             return "";

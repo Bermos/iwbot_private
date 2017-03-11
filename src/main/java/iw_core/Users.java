@@ -130,19 +130,19 @@ public class Users {
 	}
 	
 	public static void roleUpdate(GuildMemberRoleAddEvent event) {
-		System.out.printf("[Role Added] %s: %s\n", event.getMember().getNickname(), event.getRoles().get(0).getName());
+		System.out.printf("[RoleManipulator Added] %s: %s\n", event.getMember().getNickname(), event.getRoles().get(0).getName());
 		roleUpdate(event.getMember());
 	}
 	
 	public static void roleUpdate(GuildMemberRoleRemoveEvent event) {
-		System.out.printf("[Role Removed] %s: %s\n", event.getMember().getNickname(), event.getRoles().get(0).getName());
+		System.out.printf("[RoleManipulator Removed] %s: %s\n", event.getMember().getNickname(), event.getRoles().get(0).getName());
 		roleUpdate(event.getMember());
 		
 	}
 	
 	private static void roleUpdate(Member member) {
 		String rName = member.getRoles().isEmpty() ? "none" : member.getRoles().get(0).getName();
-		System.out.printf("[Role Display] %s: %s\n", member.getNickname(), rName);
+		System.out.printf("[RoleManipulator Display] %s: %s\n", member.getNickname(), rName);
 		
 		try {
 			PreparedStatement ps = connections.getConnection().prepareStatement("UPDATE user SET role = ? WHERE iduser = ?");

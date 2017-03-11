@@ -1,64 +1,68 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.Role;
+import provider.jda.events.GuildMessageEvent;
 
 import java.awt.*;
 
-public class Role implements GuildCommand {
+public class RoleManipulator implements GuildCommand {
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         event.getChannel().sendTyping();
+        String[] args = event.getArgs();
+
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
         if (args.length == 0) {
-            event.getChannel().sendMessage("[Error] No name stated").queue();
+            event.replyAsync("[Error] No name stated");
         } else if (args.length == 1) {
-            event.getChannel().sendMessage("[Error] No action selected").queue();
+            event.replyAsync("[Error] No action selected");
         } else {
             if (args[0].equalsIgnoreCase("add")) {
                 event.getGuild().getController().createRole().setName(args[1]).queue();
-                event.getChannel().sendMessage("[Success] role '" + args[1] + "' created").queue();
+                event.replyAsync("[Success] role '" + args[1] + "' created");
             }
             if (args[0].equalsIgnoreCase("del")) {
-                for (net.dv8tion.jda.core.entities.Role role : event.getGuild().getRolesByName(args[1], true)) {
+                for (Role role : event.getGuild().getRolesByName(args[1], false)) {
                     String oldName = role.getName();
-                    role.delete().queue();
-                    event.getChannel().sendMessage("[Success] role '" + oldName + "' deleted").queue();
+                    role.deleteAsync();
+                    event.replyAsync("[Success] role '" + oldName + "' deleted");
                 }
             }
             if (args[0].equalsIgnoreCase("color") || args[0].equalsIgnoreCase("colour")) {
                 if (args.length < 5) {
-                    event.getChannel().sendMessage("[Error] you need to specify the RGB values for the new color. '0, 0, 0' for example").queue();
+                    event.replyAsync("[Error] you need to specify the RGB values for the new color. '0, 0, 0' for example");
                     return;
                 }
 
-                for (net.dv8tion.jda.core.entities.Role role : event.getGuild().getRolesByName(args[1], true)) {
+                for (Role role : event.getGuild().getRolesByName(args[1], false)) {
                     role.getManager().setColor(new Color(Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]))).queue();
-                    event.getChannel().sendMessage("[Success] colour of role '" + args[1] + "' changed").queue();
+                    event.replyAsync("[Success] colour of role '" + args[1] + "' changed");
                 }
             }
             if (args[0].equalsIgnoreCase("rename")) {
                 if (args.length < 3) {
-                    event.getChannel().sendMessage("[Error] no new name set").queue();
+                    event.replyAsync("[Error] no new name set");
                     return;
                 }
-                for (net.dv8tion.jda.core.entities.Role role : event.getGuild().getRolesByName(args[1], true)) {
+                for (Role role : event.getGuild().getRolesByName(args[1], false)) {
                     String oldName = role.getName();
                     role.getManager().setName(args[2]).queue();
-                    event.getChannel().sendMessage("[Success] role '" + oldName + "' renamed to '" + args[2] + "'").queue();
+                    event.replyAsync("[Success] role '" + oldName + "' renamed to '" + args[2] + "'");
                 }
             }
         }
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
             return "";

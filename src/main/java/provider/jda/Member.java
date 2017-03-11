@@ -9,6 +9,10 @@ public class Member extends User {
     }
 
     public String[] getRoles() {
-        return super.getDiscord().getRolesForMember(super.getId(), guildId);
+        return super.getDiscord().getRoleIdsForMember(super.getId(), guildId);
+    }
+
+    public String getEffectiveName() {
+        return super.getDiscord().getEffectiveName(super.getId(), guildId);
     }
 }

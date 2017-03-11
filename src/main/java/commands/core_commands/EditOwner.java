@@ -3,7 +3,7 @@ package commands.core_commands;
 import commands.PMCommand;
 import provider.DataProvider;
 import provider.jda.Discord;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 public class EditOwner implements PMCommand {
     @Override

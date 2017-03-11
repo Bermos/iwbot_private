@@ -6,7 +6,8 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 import provider.jda.Discord;
 import provider.jda.Member;
-import provider.jda.PrivateMessageEvent;
+import provider.jda.events.GuildMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 public class Restart implements PMCommand, GuildCommand {
     @Override
@@ -23,20 +24,20 @@ public class Restart implements PMCommand, GuildCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getMember().getRoles()))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        event.getChannel().sendMessage("Restarting...").queue();
+        event.replyAsync("Restarting...");
         System.exit(1);
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+    public String getHelp(GuildMessageEvent event) {
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getMember().getRoles()))) {
             return "";
         }
         return "Restarts the bot. Use when he behaves strangely or throws a fit";

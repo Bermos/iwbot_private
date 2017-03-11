@@ -42,4 +42,9 @@ public class GuildChannel implements Channel {
     public Message sendMessage(MessageEmbed embed) {
         return discord.sendGMessageNow(id, embed);
     }
+
+    @Override
+    public void sendTyping() {
+        discord.sendGTyping(id);
+    }
 }

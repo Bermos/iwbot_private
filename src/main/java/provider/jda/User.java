@@ -16,4 +16,8 @@ public class User {
     public Discord getDiscord() {
         return discord;
     }
+
+    public String getName() {
+        return discord.getName(id);
+    }
 }
