@@ -413,7 +413,7 @@ public class BGS implements PMCommand, GuildCommand {
                 message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + dateDiff(new Date(),SQL_SDF.parse(rs.getString("endts")), " left") + ")";
                 if(numrows> 0) {
                     if (showUserP) {
-                        message += String.format("```%1$-17s | %2$-15s | %2$s\n","", "Your Goal", "System Goal");
+                        message += String.format("```%1$-17s | %2$-15s | %3$s\n","", "Your Goal", "System Goal");
                     } else{
                         message += String.format("```%1$-17s | %2$-15s | %3$s\n","", "CMDR (Num Met)", "System Goal");
                     }
@@ -612,7 +612,7 @@ public class BGS implements PMCommand, GuildCommand {
         if (goalitem.length == 4) {
             Activity activity = Activity.from(goalitem[0]);
             int systemid = getGoalSystemid(Integer.parseInt(goalid));
-            int factionid = checkFactionInSystem(goalitem[1],getSystemFullname(systemid,true));
+            int factionid = checkFactionInSystem(goalitem[1],getSystemFullname(systemid));
             if (factionid <= 0) {
                 return "Incorrect faction (" + goalitem[1] + ") for goal item #" + Integer.toString(i) + ". Try one of these:\n" + getFactions(true ,systemid);
             } else if (activity == null) {
@@ -679,22 +679,6 @@ public class BGS implements PMCommand, GuildCommand {
             }
         } else {
             return BGS_SYSTEM_EDIT_HELP + "\n" + getSystems(true);
-        }
-    }
-
-    private static String getSystemFullname(String system) {
-        String fullname = null;
-        try {
-            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT s_fullname FROM bgs_system WHERE s_shortname = ? OR s_fullname = ? LIMIT 1");
-            ps.setString(1, system);
-            ps.setString(2, system);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                fullname = rs.getString("s_fullname");
-            return fullname;
-        } catch (SQLException e) {
-            //This happens when the system was not found.
-            return "**WARNING STAR SYSTEM DOES NOT EXIST**";
         }
     }
 
@@ -834,7 +818,7 @@ public class BGS implements PMCommand, GuildCommand {
         }
     }
 
-    private static String getSystemFullname(int systemid, boolean admin) {
+    private static String getSystemFullname(int systemid) {
         try {
             PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT s_fullname FROM bgs_system WHERE systemid = ?");
             ps.setInt(1,systemid);
@@ -1052,7 +1036,7 @@ public class BGS implements PMCommand, GuildCommand {
                     ps = connect.prepareStatement("SELECT systemid FROM bgs_system ORDER BY s_fullname ASC");
                     ResultSet rs = ps.executeQuery();
                     while (rs.next()) {
-                        message += "**Factions assigned to " + getSystemFullname(rs.getInt("systemid"),admin) + "**\n";
+                        message += "**Factions assigned to " + getSystemFullname(rs.getInt("systemid")) + "**\n";
                         ps = connect.prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
                         ps.setInt(1,rs.getInt("systemid"));
                         ResultSet rs1 = ps.executeQuery();
@@ -1071,7 +1055,7 @@ public class BGS implements PMCommand, GuildCommand {
                     }
                 } else {
                     if (systemid > 0) { // list factions in one system
-                        message += "**Factions assigned to " + getSystemFullname(systemid, admin) + "**\n";
+                        message += "**Factions assigned to " + getSystemFullname(systemid) + "**\n";
                         ps = connect.prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
                         ps.setInt(1, systemid);
                     } else { // list factions
