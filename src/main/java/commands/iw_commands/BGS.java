@@ -438,7 +438,9 @@ public class BGS implements PMCommand, GuildCommand {
                     while (rs1.next()) {
                         double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal")) * 100;
                         double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal")) * 100;
-                        factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"));
+                        if(!factionNamesList.contains(factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname")))) {
+                            factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"));
+                        }
                         if (showUserP) {
                             message += String.format("%1$-17s | %2$-15s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         } else {
@@ -1390,9 +1392,9 @@ public class BGS implements PMCommand, GuildCommand {
     // logging stuff starts
     private static String logActivity(boolean admin, String sActivity, String userid, String username, String sAmount, String system, String faction) {
 
-        //ToDo Logging: Confirmation message that does NOT tag them but is customised per the action logged
         //ToDo Logging: If goal is already met direct message once per activity with details on what still needs work.
-        //ToDo Logging: Automatically choose the faction unless more than one faction has a goal for that activity
+        //ToDo Logging: Consider automatically choose the faction unless more than one faction has a goal for that activity
+        //ToDo Logging: Consider default to IW if no goals for that activity and no faction specified.
         int amount = 0;
         int systemid = 0;
         int factionid = 0;
