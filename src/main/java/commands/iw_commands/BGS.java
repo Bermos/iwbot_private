@@ -166,6 +166,10 @@ public class BGS implements PMCommand, GuildCommand {
                 //bgs faction, assign, <factionname>, <systemname>
                 event.getChannel().sendMessage(assignFaction(args)).queue();
 
+            } else if (args[1].equalsIgnoreCase("remove") || args[1].equalsIgnoreCase("rem")) { // remove a faction from a system
+                //bgs faction, remove, <factionname>, <systemname>
+                event.getChannel().sendMessage(removeFaction(args)).queue();
+
             } else{ // if got this far something went wrong. Show system help
                 event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
             }
@@ -376,8 +380,6 @@ public class BGS implements PMCommand, GuildCommand {
             ps.executeUpdate();
             return "**End time updated**\nSet to: " + USER_SDF.format(endtime);
         } catch (SQLException e) {
-            //This happens when the system was not found.
-            LogUtil.logErr(e);
             return "**SQL Failed!**";
         } catch (ParseException e) {
             return "**SQL Date Failed!**";
@@ -497,7 +499,6 @@ public class BGS implements PMCommand, GuildCommand {
             }
 
         } catch (SQLException e) {
-            LogUtil.logErr(e);
             return "**Failed to delete goal!**";
         }
         return "**Goal and all Items Deleted**";
@@ -523,7 +524,6 @@ public class BGS implements PMCommand, GuildCommand {
             ps.executeUpdate();
         } catch (SQLException e) {
             //This only happens when there's a serious issue with mysql or the connection to it
-            LogUtil.logErr(e);
             return "**Warning goal not updated**";
         } catch (ParseException e) {
             return "Parsing error. Make sure the start date follows the pattern 'dd/MM/yy HH:mm'";
@@ -567,7 +567,6 @@ public class BGS implements PMCommand, GuildCommand {
                 }
             } catch (SQLException e) {
                 //This only happens when there's a serious issue with mysql or the connection to it
-                LogUtil.logErr(e);
                 return "**Warning goal not created**";
             } catch (ParseException e) {
                 return "Parsing error. Make sure the start date follows the pattern 'dd/MM/yy HH:mm'";
@@ -596,7 +595,6 @@ public class BGS implements PMCommand, GuildCommand {
                 return "**Failed to add Note**\nCheck you have specified a valid goalid";
             }
         } catch (SQLException e){
-            LogUtil.logErr(e);
             return "**SQL ERROR NOTE NOT ADDED**\n";
         }
         return "**Note added to goal**";
@@ -610,7 +608,6 @@ public class BGS implements PMCommand, GuildCommand {
             ps.executeUpdate();
         }
         catch(SQLException e) {
-            LogUtil.logErr(e);
             return "**Failed deleting Goal Item**\n" + Listener.prefix + "bgs goal,{deleteitem,delitem},<goalid>";
         }
         return "**Goal Item Deleted**";
@@ -628,7 +625,6 @@ public class BGS implements PMCommand, GuildCommand {
             }
             return systemid;
         } catch (SQLException e) {
-            LogUtil.logErr(e);
             return -1;
         }
     }
@@ -672,7 +668,6 @@ public class BGS implements PMCommand, GuildCommand {
                     return "Parsing error. Make sure 'UserGoal' and 'GlobalGoal' are whole numbers for goal item #" + Integer.toString(i) + ".\n" + String.join("/",goalitem);
                 } catch (SQLException e) {
                     //This only happens when there's a serious issue with mysql or the connection to it
-                    LogUtil.logErr(e);
                     return "**Failed adding Goal Item #" + Integer.toString(i) + "**\n"+
                             "Check goalid (" + goalid + ") is valid. Check format of goal item (" + String.join("/",goalitem) + ")\n";
                 }
@@ -706,7 +701,6 @@ public class BGS implements PMCommand, GuildCommand {
                     ps.executeUpdate();
                 } catch (SQLException e) {
                     //This happens when the system was not found.
-                    LogUtil.logErr(e);
                     return "**WARNING STAR SYSTEM NOT UPDATED**";
                 }
                 return "Star system updated\n" + getSystems(true);
@@ -733,7 +727,6 @@ public class BGS implements PMCommand, GuildCommand {
                 }
             } catch (SQLException e) {
                 //This only happens when there's a serious issue with mysql or the connection to it
-                LogUtil.logErr(e);
                 return "**WARNING STAR SYSTEM NOT ADDED**";
             }
             return "New star system added to BGS logging.\n" + getSystems(true);
@@ -758,7 +751,6 @@ public class BGS implements PMCommand, GuildCommand {
                 return 0;
             }
         } catch (SQLException e){
-            LogUtil.logErr(e);
             return -1;
         }
     }
@@ -793,7 +785,6 @@ public class BGS implements PMCommand, GuildCommand {
                 return 0;
             }
         } catch (SQLException e){
-            LogUtil.logErr(e);
             return -1;
         }
     }
@@ -871,7 +862,6 @@ public class BGS implements PMCommand, GuildCommand {
                 return "Missing!";
             }
         } catch (SQLException e) {
-            LogUtil.logErr(e);
             return "SQL ERROR!";
         }
     }
@@ -889,7 +879,6 @@ public class BGS implements PMCommand, GuildCommand {
                 return "Missing!";
             }
         } catch (SQLException e) {
-            LogUtil.logErr(e);
             return "SQL ERROR!";
         }
     }
@@ -910,7 +899,6 @@ public class BGS implements PMCommand, GuildCommand {
                 return 0;
             }
         } catch (SQLException e){
-            LogUtil.logErr(e);
             return -1;
         }
     }
@@ -933,7 +921,6 @@ public class BGS implements PMCommand, GuildCommand {
             }
             return factionid;
         } catch (SQLException e){
-            LogUtil.logErr(e);
             return -1;
         }
     }
@@ -966,7 +953,6 @@ public class BGS implements PMCommand, GuildCommand {
                 return 0;
             }
         } catch (SQLException e){
-            LogUtil.logErr(e);
             return -1;
         }
     }
@@ -983,8 +969,6 @@ public class BGS implements PMCommand, GuildCommand {
                     ps.setInt(3, Integer.parseInt(args[2]));
                     ps.executeUpdate();
                 } catch (SQLException e) {
-                    //This happens when the system was not found.
-                    LogUtil.logErr(e);
                     return "**WARNING FACTION NOT UPDATED**";
                 }
                 return "Faction updated\n" + getFactions(true,0);
@@ -997,24 +981,26 @@ public class BGS implements PMCommand, GuildCommand {
     }
 
     private static String assignFaction(String[] args) {
-        //bgs faction, edit, <factionname>, <systemname>
+        //bgs faction, assign, <factionname>, <systemname>
         if (args.length == 4) {
             int factionid = factionExists(args[2], args[2],0);
             int systemid = systemExists(args[3], args[3], 0, true);
             if (factionid > 0) {
                 if (systemid > 0) {
-                    Connection connect = new Connections().getConnection();
-                    try {
-                        PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_system_faction SET factionid = ?, systemid = ?;");
-                        ps.setInt(1, factionid);
-                        ps.setInt(2, systemid);
-                        ps.executeUpdate();
-                    } catch (SQLException e) {
-                        //This happens when the system was not found.
-                        LogUtil.logErr(e);
-                        return "**WARNING FACTION NOT ASSIGNED**\nIs it already assigned to that system?\n" + getFactions(true,systemid);
+                    if(checkFactionInSystem(args[2], args[3], true) > 0) {
+                        return "**WARNING FACTION NOT ASSIGNED**\n" + getFactionFullname(factionid) + " is already assigned to " + getSystemFullname(systemid) + "!";
+                    } else {
+                        Connection connect = new Connections().getConnection();
+                        try {
+                            PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_system_faction SET factionid = ?, systemid = ?;");
+                            ps.setInt(1, factionid);
+                            ps.setInt(2, systemid);
+                            ps.executeUpdate();
+                        } catch (SQLException e) {
+                            return "**WARNING FACTION NOT ASSIGNED**\nSQL Error";
+                        }
+                        return "Faction Assigned\n" + getFactions(true, systemid);
                     }
-                    return "Faction Assigned\n" + getFactions(true,systemid);
                 }
                 else {
                     return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + getSystems(true);
@@ -1026,6 +1012,40 @@ public class BGS implements PMCommand, GuildCommand {
             return BGS_FACTION_ASSIGN_HELP + "\n" + getFactions(true,0) + getSystems(true);
         }
     }
+
+    private static String removeFaction(String[] args) {
+        //bgs faction, remove, <factionname>, <systemname>
+        if (args.length == 4) {
+            int factionid = factionExists(args[2], args[2],0);
+            int systemid = systemExists(args[3], args[3], 0, true);
+            if (factionid > 0) {
+                if (systemid > 0) {
+                    if(checkFactionInSystem(args[2], args[3], true) <= 0) {
+                        return "**WARNING FACTION NOT REMOVED**\n" + getFactionFullname(factionid) + " is not assigned to " + getSystemFullname(systemid) + "!";
+                    } else {
+                        Connection connect = new Connections().getConnection();
+                        try {
+                            PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_system_faction WHERE factionid = ? AND systemid = ?;");
+                            ps.setInt(1, factionid);
+                            ps.setInt(2, systemid);
+                            ps.executeUpdate();
+                        } catch (SQLException e) {
+                            return "**WARNING FACTION NOT REMOVED**\nSQL Error";
+                        }
+                        return "Faction Removed\n" + getFactions(true, systemid);
+                    }
+                }
+                else {
+                    return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + getSystems(true);
+                }
+            } else {
+                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + getFactions(true,0);
+            }
+        } else {
+            return BGS_FACTION_REMOVE_HELP + "\n" + getFactions(true,0) + getSystems(true);
+        }
+    }
+
 
     private static String addFaction(String[] args) {
         //bgs faction, add, <shortname>, <fullname>
@@ -1043,7 +1063,6 @@ public class BGS implements PMCommand, GuildCommand {
                     return "**WARNING FACTION NOT ADDED**\nFaction with shortname/fullname set to either: '" + args[2] + "' or '" + args[3] + "' already exists!\n" + getFactions(true,0);
             } catch (SQLException e) {
                 //This only happens when there's a serious issue with mysql or the connection to it
-                LogUtil.logErr(e);
                 return "**WARNING FACTION NOT ADDED**";
             }
             return "New faction added to BGS logging.\n" + getFactions(true,0);
@@ -1077,7 +1096,6 @@ public class BGS implements PMCommand, GuildCommand {
                         }
                     } catch (SQLException e) {
                         //This only happens when there's a serious issue with mysql or the connection to it
-                        LogUtil.logErr(e);
                         return "**WARNING SYSTEM VISIBILITY NOT CHANGED**";
                     }
                 } else{
@@ -1103,10 +1121,10 @@ public class BGS implements PMCommand, GuildCommand {
                     ps = connect.prepareStatement("SELECT systemid FROM bgs_system ORDER BY s_fullname ASC");
                     ResultSet rs = ps.executeQuery();
                     while (rs.next()) {
-                        message += "**Factions assigned to " + getSystemFullname(rs.getInt("systemid")) + "**\n";
                         ps = connect.prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
                         ps.setInt(1,rs.getInt("systemid"));
                         ResultSet rs1 = ps.executeQuery();
+                        message += "**" + getRows(rs1) + " Factions assigned to " + getSystemFullname(rs.getInt("systemid")) + "**\n";
                         message += "```ID   | Short | Full\n";
                         if(!rs1.isBeforeFirst()) {
                             message += "No Factions";
@@ -1122,14 +1140,17 @@ public class BGS implements PMCommand, GuildCommand {
                     }
                 } else {
                     if (systemid > 0) { // list factions in one system
-                        message += "**Factions assigned to " + getSystemFullname(systemid) + "**\n";
                         ps = connect.prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
                         ps.setInt(1, systemid);
                     } else { // list factions
                         ps = connect.prepareStatement("SELECT *, 0 AS f_hidden FROM bgs_faction ORDER BY f_fullname ASC");
                     }
-                    message += "```ID   | Short | Full\n";
+
                     ResultSet rs = ps.executeQuery();
+                    if (systemid > 0) {
+                        message += "**" + getRows(rs) + " Factions assigned to " + getSystemFullname(systemid) + "**\n";
+                    }
+                    message += "```ID   | Short | Full\n";
                     if(!rs.isBeforeFirst()) {
                         message += "No Factions";
                     }
@@ -1534,6 +1555,17 @@ public class BGS implements PMCommand, GuildCommand {
     private static String getRandom(String[] array) {
         int rnd = new Random().nextInt(array.length);
         return array[rnd];
+    }
+
+    private static int getRows(ResultSet rs) {
+        try {
+            rs.last();
+            int rows = rs.getRow();
+            rs.beforeFirst();
+            return rows;
+        } catch (SQLException e) {
+            return 0;
+        }
     }
     // other stuff ends
 }
