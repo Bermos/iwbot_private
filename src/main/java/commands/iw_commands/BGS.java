@@ -1121,10 +1121,10 @@ public class BGS implements PMCommand, GuildCommand {
                     ps = connect.prepareStatement("SELECT systemid FROM bgs_system ORDER BY s_fullname ASC");
                     ResultSet rs = ps.executeQuery();
                     while (rs.next()) {
-                        message += "**Factions assigned to " + getSystemFullname(rs.getInt("systemid")) + "**\n";
                         ps = connect.prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
                         ps.setInt(1,rs.getInt("systemid"));
                         ResultSet rs1 = ps.executeQuery();
+                        message += "**" + getRows(rs1) + " Factions assigned to " + getSystemFullname(rs.getInt("systemid")) + "**\n";
                         message += "```ID   | Short | Full\n";
                         if(!rs1.isBeforeFirst()) {
                             message += "No Factions";
@@ -1140,14 +1140,17 @@ public class BGS implements PMCommand, GuildCommand {
                     }
                 } else {
                     if (systemid > 0) { // list factions in one system
-                        message += "**Factions assigned to " + getSystemFullname(systemid) + "**\n";
                         ps = connect.prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
                         ps.setInt(1, systemid);
                     } else { // list factions
                         ps = connect.prepareStatement("SELECT *, 0 AS f_hidden FROM bgs_faction ORDER BY f_fullname ASC");
                     }
-                    message += "```ID   | Short | Full\n";
+
                     ResultSet rs = ps.executeQuery();
+                    if (systemid > 0) {
+                        message += "**" + getRows(rs) + " Factions assigned to " + getSystemFullname(systemid) + "**\n";
+                    }
+                    message += "```ID   | Short | Full\n";
                     if(!rs.isBeforeFirst()) {
                         message += "No Factions";
                     }
@@ -1552,6 +1555,17 @@ public class BGS implements PMCommand, GuildCommand {
     private static String getRandom(String[] array) {
         int rnd = new Random().nextInt(array.length);
         return array[rnd];
+    }
+
+    private static int getRows(ResultSet rs) {
+        try {
+            rs.last();
+            int rows = rs.getRow();
+            rs.beforeFirst();
+            return rows;
+        } catch (SQLException e) {
+            return 0;
+        }
     }
     // other stuff ends
 }
