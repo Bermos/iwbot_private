@@ -438,7 +438,7 @@ public class BGS implements PMCommand, GuildCommand {
                     while (rs1.next()) {
                         double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal")) * 100;
                         double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal")) * 100;
-                        if(!factionNamesList.contains(factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname")))) {
+                        if(!factionNamesList.contains(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"))) {
                             factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"));
                         }
                         if (showUserP) {
