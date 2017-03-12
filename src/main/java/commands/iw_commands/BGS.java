@@ -329,7 +329,7 @@ public class BGS implements PMCommand, GuildCommand {
 
         }
         else if (args.length == 3) {
-            String message = "";
+            String message;
             int systemid = systemExists(args[2],args[2],0,false);
             if(systemid > 0) {
                 message = "**WARNING ACTION NOT LOGGED**\nFaction not specified? Enter '" + Listener.prefix + "bgs help' or use one of the factions below:\n";
