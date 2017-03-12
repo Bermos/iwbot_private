@@ -1,8 +1,23 @@
 package iw_bot;
 
+import com.sun.xml.internal.fastinfoset.util.StringArray;
+
 import java.text.SimpleDateFormat;
 
 public class Constants {
+    public final static String[] QUOTE = {"The true soldier fights not because he hates what is in front of him, but because he loves what is behind him. (G. K. Chesterton)",
+            "I do not know with what weapons World War III will be fought, but I do know that World War IV will be fought with rocks. (Albert Einstein)",
+            "War is like love, it always finds a way. (Bertolt Brecht)",
+            "War makes rattling good history; but Peace is poor reading. (Thomas Hardy)",
+            "War is a severe doctor; but it sometimes heals grievances. (Edward Counsel)",
+            "They who can give up essential liberty to obtain a little temporary safety deserve neither liberty nor safety. (Benjamin Franklin)",
+            "If you have built castles in the air, your work need not be lost; that is where they should be. Now put the foundations under them. (Henry David Thoreau)",
+            "The good we secure for ourselves is precarious and uncertain until it is secured for all of us and incorporated into our common life. (Jane Addams)",
+            "Those who surrender freedom for security will not have, nor do they deserve, either one. (Benjamin Franklin)",
+            "Don't cry because it's over, smile because it happened. (Dr. Seuss)",
+            "Insanity is doing the same thing, over and over again, but expecting different results. (Narcotics Anonymous)"
+    };
+
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public final static SimpleDateFormat USER_SDF = new SimpleDateFormat("dd/MM/yy HH:mm");
 
@@ -44,8 +59,8 @@ public class Constants {
     public final static String BGS_LOG_HELP = " **BGS Bot Commands:**\n" +
             "Enter '" + Listener.prefix + "bgs' to add or remove BGS role\n" +
             "\n" +
-            "Format for entering bgs commands is:\n"+
-            Listener.prefix + "bgs <activity>, <amount with no seperators>, <system identifier>\n" +
+            "Format for logging BGS actions is:\n"+
+            Listener.prefix + "bgs <activity>, <amount with no seperators>, <system identifier>, <faction identifier>\n" +
             "\n" +
             "\n" +
             "**BGS Activities:**\n" +
