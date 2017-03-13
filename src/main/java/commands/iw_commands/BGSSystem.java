@@ -55,7 +55,7 @@ class BGSSystem {
                 return "**WARNING STAR SYSTEM NOT ADDED**";
             }
             return "New star system added to BGS logging.\n" + getSystems(true);
-        } else{
+        } else {
             return BGS_SYSTEM_ADD_HELP;
         }
     }
@@ -71,11 +71,10 @@ class BGSSystem {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt("systemid");
-            }
-            else {
+            } else {
                 return 0;
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             return -1;
         }
     }
@@ -85,31 +84,29 @@ class BGSSystem {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps;
-            if(ignore > 0) {
+            if (ignore > 0) {
                 ps = connect.prepareStatement("SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_shortname = ? OR s_fullname = ? OR s_fullname = ?) AND systemid <> ? AND s_hidden <= ?;");
                 ps.setString(1, shortname);
                 ps.setString(2, fullname);
                 ps.setString(3, shortname);
                 ps.setString(4, fullname);
                 ps.setInt(5, ignore);
-                ps.setInt(6,(showhidden) ? 1 : 0);
-            }
-            else {
+                ps.setInt(6, (showhidden) ? 1 : 0);
+            } else {
                 ps = connect.prepareStatement("SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_shortname = ? OR s_fullname = ? OR s_fullname = ?) AND s_hidden <= ?;");
                 ps.setString(1, shortname);
                 ps.setString(2, fullname);
                 ps.setString(3, shortname);
                 ps.setString(4, fullname);
-                ps.setInt(5,(showhidden) ? 1 : 0);
+                ps.setInt(5, (showhidden) ? 1 : 0);
             }
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt("systemid");
-            }
-            else {
+            } else {
                 return 0;
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             return -1;
         }
     }
@@ -122,7 +119,7 @@ class BGSSystem {
                 message = "```ID   | Short | Full\n";
                 PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_system ORDER BY s_fullname ASC");
                 ResultSet rs = ps.executeQuery();
-                if(!rs.isBeforeFirst()) {
+                if (!rs.isBeforeFirst()) {
                     message += "No Systems";
                 }
                 while (rs.next()) {
@@ -136,7 +133,7 @@ class BGSSystem {
                 message = "```Short | Full\n";
                 PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM bgs_system WHERE s_hidden = 0 ORDER BY s_fullname ASC");
                 ResultSet rs = ps.executeQuery();
-                if(!rs.isBeforeFirst()) {
+                if (!rs.isBeforeFirst()) {
                     message += "No Systems";
                 }
                 while (rs.next()) {
@@ -144,11 +141,10 @@ class BGSSystem {
                 }
             }
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             LogUtil.logErr(e);
         }
-        message +="```\n";
+        message += "```\n";
         return message;
     }
 
@@ -163,9 +159,9 @@ class BGSSystem {
             // if one row was altered
             if (ps.executeUpdate() == 1) {
                 if (show)
-                    return "BGS star system '" + system + "' **VISIBLE**. Logging possible for this system.\n"  + getSystems(true);
+                    return "BGS star system '" + system + "' **VISIBLE**. Logging possible for this system.\n" + getSystems(true);
                 else
-                    return "BGS star system '" + system + "' **HIDDEN**. Logging no longer possible for this system.\n"  + getSystems(true);
+                    return "BGS star system '" + system + "' **HIDDEN**. Logging no longer possible for this system.\n" + getSystems(true);
             } else { // if no row was altered the system wasn't found
                 return "**WARNING SYSTEM VISIBILITY NOT CHANGED**\nSystem '" + system + "' not found.\n" + getSystems(true);
             }
@@ -179,9 +175,9 @@ class BGSSystem {
     static String getSystemFullname(int systemid) {
         try {
             PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT s_fullname FROM bgs_system WHERE systemid = ?");
-            ps.setInt(1,systemid);
+            ps.setInt(1, systemid);
             ResultSet rs = ps.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 return rs.getString("s_fullname");
             } else {
                 return "Missing!";

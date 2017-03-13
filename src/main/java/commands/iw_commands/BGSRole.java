@@ -12,7 +12,7 @@ class BGSRole {
             if (role.getName().equals("BGS"))
                 rBGS = role;
             if (role.getName().equals("Iridium Wing"))
-                rIW  = role;
+                rIW = role;
         }
 
         if (event.getMember().getRoles().contains(rBGS)) {
@@ -22,8 +22,7 @@ class BGSRole {
             } catch (PermissionException e) {
                 event.getChannel().sendMessage("**BGS ROLE CAN NOT BE MANAGED!**\nThe bot does not have the required permissions.").queue();
             }
-        }
-        else if (event.getMember().getRoles().contains(rIW)) {
+        } else if (event.getMember().getRoles().contains(rIW)) {
             try {
                 event.getGuild().getController().addRolesToMember(event.getMember(), rBGS).queue();
                 event.getChannel().sendMessage("BGS role added").queue();

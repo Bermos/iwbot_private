@@ -53,7 +53,7 @@ class BGSStats {
     static String getTick(String[] args) {
         String system = "all";
 
-        if (args.length == 5){
+        if (args.length == 5) {
             system = args[4];
         }
         try {
@@ -120,7 +120,7 @@ class BGSStats {
 
     private static Map<String, String> getTotalAmount(Date start, int ticks, String system) {
         Map<String, String> totals = new LinkedHashMap<>();
-        Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000L));
+        Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks * 24 * 60 * 60 * 1000L));
 
         Connection connect = new Connections().getConnection();
         try {
@@ -155,7 +155,7 @@ class BGSStats {
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     double cmdravg = (double) rs.getInt("total") / rs.getInt("numcmdrs");
-                    totals.put((BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("s_fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int)cmdravg) + " avg.)");
+                    totals.put((BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("s_fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
                 }
             }
         } catch (SQLException e) {
@@ -166,7 +166,7 @@ class BGSStats {
 
     private static List<String> getCSVData(Date start, int ticks) {
         List<String> lines = new ArrayList<>();
-        Date end = (ticks == 0) ? new Date() : new Date(start.getTime() + (ticks*24*60*60*1000L));
+        Date end = (ticks == 0) ? new Date() : new Date(start.getTime() + (ticks * 24 * 60 * 60 * 1000L));
 
         int tickHour = Integer.parseInt(new SimpleDateFormat("HH").format(start));
         int tickMinute = Integer.parseInt(new SimpleDateFormat("mm").format(start));
@@ -174,7 +174,7 @@ class BGSStats {
         Connection connect = new Connections().getConnection();
         try {
             PreparedStatement ps = connect.prepareStatement("SELECT " +
-                    "b.userid, "+
+                    "b.userid, " +
                     "(SELECT user.username FROM user WHERE user.iduser = b.userid) AS CMDR, " +
                     "from_unixtime(floor((unix_timestamp(timestamp) - ((?*60*60) + (?*60)))/(24*60*60)) * (24*60*60) + ((?*60*60) + (?*60) + (24*60*60)), '%e %b %Y') AS Tick, " +
                     "(SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = b.systemid) AS System, " +
@@ -216,7 +216,7 @@ class BGSStats {
             List<String> cmdrNamesList = new ArrayList<>();
             while (rs.next()) {
                 String rowValues = Listener.jda.getUserById(rs.getString("userid")).getName() + ",";
-                if(!cmdrNamesList.contains("@" + Listener.jda.getUserById(rs.getString("userid")).getName())) {
+                if (!cmdrNamesList.contains("@" + Listener.jda.getUserById(rs.getString("userid")).getName())) {
                     cmdrNamesList.add("@" + Listener.jda.getUserById(rs.getString("userid")).getName());
                 }
                 rowValues += rs.getString("Tick") + ",";
@@ -230,7 +230,8 @@ class BGSStats {
                 String cmdrNames = String.join(", ", cmdrNamesList);
                 try {
                     cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",") + 1, " and").toString();
-                } catch(StringIndexOutOfBoundsException ignored){}
+                } catch (StringIndexOutOfBoundsException ignored) {
+                }
 
 
                 lines.add("");

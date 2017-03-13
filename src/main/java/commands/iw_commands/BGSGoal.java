@@ -26,7 +26,7 @@ class BGSGoal {
         Connection connect = new Connections().getConnection();
         try {
             Date endtime = new Date();
-            if(args.length == 4) {
+            if (args.length == 4) {
                 endtime = USER_SDF.parse(args[3]);
             }
             PreparedStatement ps = connect.prepareStatement("UPDATE bgs_goal SET endts = ? WHERE goalid = ?");
@@ -50,13 +50,13 @@ class BGSGoal {
         try {
             PreparedStatement ps;
             String message = "";
-            if(Integer.parseInt(recent) == 0) { // get active goals
-                ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname, "+
-                        "startts, endts, ticks, note "+
-                        "FROM bgs_goal g "+
+            if (Integer.parseInt(recent) == 0) { // get active goals
+                ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname, " +
+                        "startts, endts, ticks, note " +
+                        "FROM bgs_goal g " +
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
-            } else{
-                ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname "+
+            } else {
+                ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
                         "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(recent));
                 message = "**" + recent + " Most Recent Goals**\n";
@@ -67,7 +67,7 @@ class BGSGoal {
             while (rs.next()) {
                 rows = rows + 1;
                 if (rows == 1) {
-                    message = "**Active Goals**\n"+
+                    message = "**Active Goals**\n" +
                             "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
                 }
                 ps = connect.prepareStatement("SELECT i.activity, i.factionid, i.usergoal, i.globalgoal, g.systemid, g.endts, g.startts, " +
@@ -84,18 +84,18 @@ class BGSGoal {
                 rs1.last();
                 int numrows = rs1.getRow();
                 rs1.beforeFirst();
-                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + BGS.dateDiff(new Date(),SQL_SDF.parse(rs.getString("endts"))) + ")";
-                if(numrows> 0) {
+                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + BGS.dateDiff(new Date(), SQL_SDF.parse(rs.getString("endts"))) + ")";
+                if (numrows > 0) {
                     if (showUserP) {
-                        message += String.format("```%1$-17s | %2$-15s | %3$s\n","", "Your Goal", "System Goal");
-                    } else{
-                        message += String.format("```%1$-17s | %2$-15s | %3$s\n","", "CMDR (Num Met)", "System Goal");
+                        message += String.format("```%1$-17s | %2$-15s | %3$s\n", "", "Your Goal", "System Goal");
+                    } else {
+                        message += String.format("```%1$-17s | %2$-15s | %3$s\n", "", "CMDR (Num Met)", "System Goal");
                     }
                     List<String> factionNamesList = new ArrayList<>();
                     while (rs1.next()) {
                         double userP = ((double) rs1.getInt("userdone") / rs1.getInt("usergoal")) * 100;
                         double globalP = ((double) rs1.getInt("globaldone") / rs1.getInt("globalgoal")) * 100;
-                        if(!factionNamesList.contains(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"))) {
+                        if (!factionNamesList.contains(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"))) {
                             factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"));
                         }
                         if (showUserP) {
@@ -127,8 +127,8 @@ class BGSGoal {
                 messages.add(message);
                 message = "";
             }
-            if(rows == 0) {
-                message += "No " + (Integer.parseInt(recent) == 0 ? "Active ":"") + "Goals found\n";
+            if (rows == 0) {
+                message += "No " + (Integer.parseInt(recent) == 0 ? "Active " : "") + "Goals found\n";
                 messages.add(message);
             }
             return messages;
@@ -149,7 +149,7 @@ class BGSGoal {
         try {
             PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal WHERE goalid = ?");
             ps.setInt(1, Integer.parseInt(goalid));
-            if(ps.executeUpdate() == 0) {
+            if (ps.executeUpdate() == 0) {
                 return "**Failed to delete goal!**\nDid you specify a correct goalid?";
             }
 
@@ -194,14 +194,14 @@ class BGSGoal {
             Connection connect = new Connections().getConnection();
             try {
                 Date starttime = USER_SDF.parse(args[3]);
-                Date endtime = new Date(starttime.getTime() + (Integer.parseInt(args[4])*24*60*60*1000L));
-                PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_goal (systemid, startts, endts, ticks, note) VALUES ("+
-                        "(SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) AND s_hidden = '0' LIMIT 1), ?, ?, ?, '')",PreparedStatement.RETURN_GENERATED_KEYS);
+                Date endtime = new Date(starttime.getTime() + (Integer.parseInt(args[4]) * 24 * 60 * 60 * 1000L));
+                PreparedStatement ps = connect.prepareStatement("INSERT INTO bgs_goal (systemid, startts, endts, ticks, note) VALUES (" +
+                        "(SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) AND s_hidden = '0' LIMIT 1), ?, ?, ?, '')", PreparedStatement.RETURN_GENERATED_KEYS);
                 ps.setString(1, args[2]);
                 ps.setString(2, args[2]);
                 ps.setString(3, SQL_SDF.format(starttime));
                 ps.setString(4, SQL_SDF.format(endtime));
-                ps.setInt(5,  Integer.parseInt(args[4]));
+                ps.setInt(5, Integer.parseInt(args[4]));
                 ps.executeUpdate();
 
                 ResultSet rs = ps.getGeneratedKeys();
@@ -210,13 +210,13 @@ class BGSGoal {
                     goalid = rs.getInt(1);
                 }
 
-                String message = "**New goal added to BGS logging**\n"+
+                String message = "**New goal added to BGS logging**\n" +
                         "*Start:* " + starttime + "\n" +
                         "*End:* " + endtime + " (" + args[4] + " ticks)\n";
                 if (args.length >= 6) {
                     for (int i = 5; i < args.length; i++) {
                         String[] goalitem = args[i].split("/");
-                        message += addGoalItem(goalitem, i-4, Integer.toString(goalid));
+                        message += addGoalItem(goalitem, i - 4, Integer.toString(goalid));
                     }
                     return message;
                 }
@@ -230,15 +230,16 @@ class BGSGoal {
             }
 
             return "New goal added to BGS logging.";
-        } else{
+        } else {
             return BGS_GOAL_ADD_HELP;
         }
     }
+
     static String addGoalNote(String[] args) {
         //bgs goals, goalid, note
-        try{
+        try {
             int goalid = Integer.parseInt(args[2]);
-            String note = String.join(", ", Arrays.copyOfRange(args, 3,args.length)); // join notes back together in case the note string contained a comma
+            String note = String.join(", ", Arrays.copyOfRange(args, 3, args.length)); // join notes back together in case the note string contained a comma
 
             Connection connect = new Connections().getConnection();
 
@@ -246,14 +247,15 @@ class BGSGoal {
             ps.setString(1, note);
             ps.setInt(2, goalid);
             int updated = ps.executeUpdate();
-            if (updated==0) {
+            if (updated == 0) {
                 return "**Failed to add Note**\nCheck you have specified a valid goalid";
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             return "**SQL ERROR NOTE NOT ADDED**\n";
         }
         return "**Note added to goal**";
     }
+
     static String deleteGoalItem(BGS.Activity activity, String goalid) {
         Connection connect = new Connections().getConnection();
         try {
@@ -261,8 +263,7 @@ class BGSGoal {
             ps.setInt(1, Integer.parseInt(goalid));
             ps.setString(2, activity.toString());
             ps.executeUpdate();
-        }
-        catch(SQLException e) {
+        } catch (SQLException e) {
             return "**Failed deleting Goal Item**\n" + Listener.prefix + "bgs goal,{deleteitem,delitem},<goalid>";
         }
         return "**Goal Item Deleted**";
@@ -289,12 +290,12 @@ class BGSGoal {
         if (goalitem.length == 4) {
             BGS.Activity activity = BGS.Activity.from(goalitem[0]);
             int systemid = getGoalSystemid(Integer.parseInt(goalid));
-            if(systemid < 0){
+            if (systemid < 0) {
                 return "Invalid goal!";
             }
-            int factionid = BGSFaction.checkFactionInSystem(goalitem[1],BGSSystem.getSystemFullname(systemid),false);
+            int factionid = BGSFaction.checkFactionInSystem(goalitem[1], BGSSystem.getSystemFullname(systemid), false);
             if (factionid <= 0) {
-                factionid = BGSFaction.checkFactionInSystem(goalitem[1],BGSSystem.getSystemFullname(systemid),true);
+                factionid = BGSFaction.checkFactionInSystem(goalitem[1], BGSSystem.getSystemFullname(systemid), true);
                 if (factionid > 0) {
                     return "Faction (" + BGSFaction.getFactionFullname(factionid) + ") is currently hidden in " + BGSSystem.getSystemFullname(systemid) + ". Make the faction visible or try use of these:\n" + BGSFaction.getFactions(true, systemid);
                 } else {
@@ -320,11 +321,11 @@ class BGSGoal {
 
                     ps.executeUpdate();
                 } catch (NumberFormatException e) {
-                    return "Parsing error. Make sure 'UserGoal' and 'GlobalGoal' are whole numbers for goal item #" + Integer.toString(i) + ".\n" + String.join("/",goalitem);
+                    return "Parsing error. Make sure 'UserGoal' and 'GlobalGoal' are whole numbers for goal item #" + Integer.toString(i) + ".\n" + String.join("/", goalitem);
                 } catch (SQLException e) {
                     //This only happens when there's a serious issue with mysql or the connection to it
-                    return "**Failed adding Goal Item #" + Integer.toString(i) + "**\n"+
-                            "Check goalid (" + goalid + ") is valid. Check format of goal item (" + String.join("/",goalitem) + ")\n";
+                    return "**Failed adding Goal Item #" + Integer.toString(i) + "**\n" +
+                            "Check goalid (" + goalid + ") is valid. Check format of goal item (" + String.join("/", goalitem) + ")\n";
                 }
             }
 
@@ -336,9 +337,10 @@ class BGSGoal {
         } else {
             message = "**Failed adding goal item #" + Integer.toString(i) + ":**\n" +
                     "Each goal item requires 4 arguments: <activity>/<faction>/<UserGoal>/<GlobalGoal>.\n" +
-                    "You supplied the following: " + String.join("/",goalitem) + "\n\n";
+                    "You supplied the following: " + String.join("/", goalitem) + "\n\n";
         }
         return message;
     }
+
     // goal stuff end
 }

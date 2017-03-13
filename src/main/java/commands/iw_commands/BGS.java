@@ -28,38 +28,62 @@ public class BGS implements PMCommand, GuildCommand {
             input = input.toLowerCase();
             Activity output;
             switch (input) {
-                case "bon"       :
-                case "bond"      :
-                case "bonds" 	 : output = Activity.BOND;	    break;
-                case "bou"       :
-                case "bounty"    :
-                case "bounties"  : output = Activity.BOUNTY;	break;
-                case "fai"       :
-                case "fail"       :
-                case "failed"    : output = Activity.FAILED;	break;
-                case "fin"       :
-                case "fine"      :
-                case "fines"     : output = Activity.FINE;	    break;
-                case "int"       :
-                case "intel"     : output = Activity.INTEL;	    break;
-                case "min"       :
-                case "mining" 	 : output = Activity.MINING;	break;
-                case "mis"       :
-                case "mission"   :
-                case "missions"  : output = Activity.MISSION;   break;
-                case "mur"	     :
-                case "murder"	 : output = Activity.MURDER;	break;
-                case "exploration" :
-                case "sca"       :
-                case "scan"      :
-                case "scans"	 : output = Activity.SCAN;      break;
-                case "smu"       :
-                case "smuggle"   :
-                case "smuggling" : output = Activity.SMUGGLING; break;
-                case "tra"       :
-                case "trading"   :
-                case "trade"	 : output = Activity.TRADE;	    break;
-                default          : output = null;               break;
+                case "bon":
+                case "bond":
+                case "bonds":
+                    output = Activity.BOND;
+                    break;
+                case "bou":
+                case "bounty":
+                case "bounties":
+                    output = Activity.BOUNTY;
+                    break;
+                case "fai":
+                case "fail":
+                case "failed":
+                    output = Activity.FAILED;
+                    break;
+                case "fin":
+                case "fine":
+                case "fines":
+                    output = Activity.FINE;
+                    break;
+                case "int":
+                case "intel":
+                    output = Activity.INTEL;
+                    break;
+                case "min":
+                case "mining":
+                    output = Activity.MINING;
+                    break;
+                case "mis":
+                case "mission":
+                case "missions":
+                    output = Activity.MISSION;
+                    break;
+                case "mur":
+                case "murder":
+                    output = Activity.MURDER;
+                    break;
+                case "exploration":
+                case "sca":
+                case "scan":
+                case "scans":
+                    output = Activity.SCAN;
+                    break;
+                case "smu":
+                case "smuggle":
+                case "smuggling":
+                    output = Activity.SMUGGLING;
+                    break;
+                case "tra":
+                case "trading":
+                case "trade":
+                    output = Activity.TRADE;
+                    break;
+                default:
+                    output = null;
+                    break;
             }
 
             return output;
@@ -73,21 +97,19 @@ public class BGS implements PMCommand, GuildCommand {
                 ArrayList<String> messages = BGSGoal.listGoal("0", event.getAuthor().getId(), true);
                 messages.add(BGSStats.getUserStats(event.getAuthor().getId()));
                 String messageToSend = "";
-                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
-                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
                         event.getChannel().sendMessage(messageToSend + "\u0000").queue();
                         messageToSend = "";
                         messageToSend += message;
-                    }
-                    else { // need the line break if not going to be seperate messages.
+                    } else { // need the line break if not going to be seperate messages.
                         messageToSend += "\n" + message;
                     }
                 }
                 event.getChannel().sendMessage(messageToSend).queue();
             } else if (args[0].equalsIgnoreCase("mustard")) {  // for the fun of autocorrect added mustard command (mystats gone wrong)
                 event.getChannel().sendMessage(":hotdog:").queue();
-            }
-            else if (args[0].equalsIgnoreCase("help")) {
+            } else if (args[0].equalsIgnoreCase("help")) {
                 event.getChannel().sendMessage(BGS_LOG_HELP).queue();
             }
         }
@@ -103,9 +125,9 @@ public class BGS implements PMCommand, GuildCommand {
             if (args.length == 1) { // send default help message for stats admin
                 event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
-            } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")){ // summary stats
+            } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")) { // summary stats
                 // Two options. No system filter and filtering for a system
-                if(args.length == 4 || args.length == 5 ) {
+                if (args.length == 4 || args.length == 5) {
                     event.getChannel().sendMessage(BGSStats.getTick(args)).queue();
 
                 } else { // send help for summary stats
@@ -114,7 +136,7 @@ public class BGS implements PMCommand, GuildCommand {
                 }
             }
             // CSV output
-            else if (args[1].equalsIgnoreCase("csv") && args.length >= 4){
+            else if (args[1].equalsIgnoreCase("csv") && args.length >= 4) {
                 JDAUtil.sendMultipleMessages(event.getChannel(), BGSStats.getFullTick(args));
 
             } else { // If got this far something went wrong so show help for stats
@@ -123,7 +145,7 @@ public class BGS implements PMCommand, GuildCommand {
             }
         }
         // admin commands for system factions
-        else if ((args[0].equalsIgnoreCase("faction") || args[0].equalsIgnoreCase("factions") || args[0].equalsIgnoreCase("fac")) && DataProvider.isAdmin(event)){
+        else if ((args[0].equalsIgnoreCase("faction") || args[0].equalsIgnoreCase("factions") || args[0].equalsIgnoreCase("fac")) && DataProvider.isAdmin(event)) {
             if (args.length == 1) { // send default help message for system admin
                 event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
             } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the factions available
@@ -131,7 +153,7 @@ public class BGS implements PMCommand, GuildCommand {
                 if (args.length == 2) {
                     event.getChannel().sendMessage("**BGS Factions**\n" + BGSFaction.getFactions(true, 0) + BGSFaction.getFactions(true, -1)).queue();
                 } else if (args.length == 3) {
-                    event.getChannel().sendMessage(BGSFaction.getFactions(DataProvider.isAdmin(event), BGSSystem.systemExists(args[2], args[2], 0,true))).queue();
+                    event.getChannel().sendMessage(BGSFaction.getFactions(DataProvider.isAdmin(event), BGSSystem.systemExists(args[2], args[2], 0, true))).queue();
                 } else {
                     event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
                 }
@@ -140,7 +162,7 @@ public class BGS implements PMCommand, GuildCommand {
                 if (args.length == 4) {
                     event.getChannel().sendMessage(BGSFaction.setFactionVisibility(args[1].equalsIgnoreCase("show"), args[2], args[3])).queue();
                 } else { // show system help if wrong number of arguments
-                    event.getChannel().sendMessage(BGS_FACTION_HIDE_HELP + "\n" + BGSFaction.getFactions(DataProvider.isAdmin(event),-1)).queue();
+                    event.getChannel().sendMessage(BGS_FACTION_HIDE_HELP + "\n" + BGSFaction.getFactions(DataProvider.isAdmin(event), -1)).queue();
                 }
 
             } else if (args[1].equalsIgnoreCase("add")) { // add a new faction to the database
@@ -159,12 +181,12 @@ public class BGS implements PMCommand, GuildCommand {
                 //bgs faction, remove, <factionname>, <systemname>
                 event.getChannel().sendMessage(BGSFaction.removeFaction(args)).queue();
 
-            } else{ // if got this far something went wrong. Show system help
+            } else { // if got this far something went wrong. Show system help
                 event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
             }
         }
         // admin functions for systems
-        else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems") || args[0].equalsIgnoreCase("sys")) && DataProvider.isAdmin(event)){
+        else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems") || args[0].equalsIgnoreCase("sys")) && DataProvider.isAdmin(event)) {
             if (args.length == 1) { // send default help message for system admin
                 event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
 
@@ -187,7 +209,7 @@ public class BGS implements PMCommand, GuildCommand {
                 //bgs system, edit, <systemid>, <shortname>, <fullname>
                 event.getChannel().sendMessage(BGSSystem.editSystem(args)).queue();
 
-            } else{ // if got this far something went wrong. Show system help
+            } else { // if got this far something went wrong. Show system help
                 event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
             }
         }
@@ -196,47 +218,42 @@ public class BGS implements PMCommand, GuildCommand {
             if (args.length == 1) { // Send help message for goals
                 event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
 
-            }else if (args[1].equalsIgnoreCase("end")) { // end a goal now a new goal.
+            } else if (args[1].equalsIgnoreCase("end")) { // end a goal now a new goal.
                 //bgs goals,end,goalid
                 if (args.length >= 3) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
                     event.getChannel().sendMessage(BGSGoal.endGoal(args)).queue();
-                } else{ // show help message for adding a goal as less than 5 arguments
+                } else { // show help message for adding a goal as less than 5 arguments
                     event.getChannel().sendMessage(BGS_GOAL_END_HELP).queue();
                 }
-            }
-            else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
+            } else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
                 //bgs goals,add,system,Start Date:Time, Ticks, activity/faction/usergoal/globalgoal,activity/faction/usergoal/globalgoal,activity/faction/usergoal/globalgoal
                 if (args.length >= 5) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
                     event.getChannel().sendMessage(BGSGoal.addGoal(args)).queue();
-                } else{ // show help message for adding a goal as less than 5 arguments
+                } else { // show help message for adding a goal as less than 5 arguments
                     event.getChannel().sendMessage(BGS_GOAL_ADD_HELP).queue();
                 }
-            }
-            else if (args[1].equalsIgnoreCase("delete") || args[1].equalsIgnoreCase("del")) { // delete a goal
+            } else if (args[1].equalsIgnoreCase("delete") || args[1].equalsIgnoreCase("del")) { // delete a goal
                 //bgs goals,<del>,goalid
                 if (args.length == 3) {
                     event.getChannel().sendMessage(BGSGoal.deleteGoal(args[2])).queue();
                 } else {
                     event.getChannel().sendMessage(BGS_GOAL_DEL_HELP).queue();
                 }
-            }
-            else if (args[1].equalsIgnoreCase("deleteact") || args[1].equalsIgnoreCase("delact")) { // delete an individual goal item from a goal
+            } else if (args[1].equalsIgnoreCase("deleteact") || args[1].equalsIgnoreCase("delact")) { // delete an individual goal item from a goal
                 //bgs goals,<delact>,goalid,Activity
                 if (args.length == 4) {
-                    event.getChannel().sendMessage(BGSGoal.deleteGoalItem(Activity.from(args[3]),args[2])).queue();
+                    event.getChannel().sendMessage(BGSGoal.deleteGoalItem(Activity.from(args[3]), args[2])).queue();
                 } else {
                     event.getChannel().sendMessage(BGS_GOAL_DELACT_HELP).queue();
                 }
-            }
-            else if (args[1].equalsIgnoreCase("edit")) { // edit a goal. Goal items are edited using /editact
+            } else if (args[1].equalsIgnoreCase("edit")) { // edit a goal. Goal items are edited using /editact
                 //bgs golas,edit,goalid,system,Start Date:Time, Ticks
                 if (args.length == 6) {
                     event.getChannel().sendMessage(BGSGoal.editGoal(args)).queue();
                 } else {
                     event.getChannel().sendMessage(BGS_GOAL_EDIT_HELP).queue();
                 }
-            }
-            else if (args[1].equalsIgnoreCase("editactivity") || args[1].equalsIgnoreCase("addactivity") || args[1].equalsIgnoreCase("editact") || args[1].equalsIgnoreCase("addact")) {
+            } else if (args[1].equalsIgnoreCase("editactivity") || args[1].equalsIgnoreCase("addactivity") || args[1].equalsIgnoreCase("editact") || args[1].equalsIgnoreCase("addact")) {
                 //bgs goals,<addact,editact>,goalid,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
                 String message = "";
                 // need 4 or more arguments to add a goal item
@@ -244,47 +261,41 @@ public class BGS implements PMCommand, GuildCommand {
                     // loop through the goal items which are in the array from 3 onwards
                     for (int i = 3; i < args.length; i++) {
                         String[] goalitem = args[i].split("/");
-                        message += BGSGoal.addGoalItem(goalitem, i-2, args[2]); // add the goal item
+                        message += BGSGoal.addGoalItem(goalitem, i - 2, args[2]); // add the goal item
                     }
                     event.getChannel().sendMessage(message).queue();
                 } else {
                     event.getChannel().sendMessage(BGS_GOAL_EDITACT_HELP).queue();
                 }
-            }
-
-            else if (args[1].equalsIgnoreCase("note")) { // add a note to a goal. Allows special instructions to be given.
+            } else if (args[1].equalsIgnoreCase("note")) { // add a note to a goal. Allows special instructions to be given.
                 if (args.length >= 3) {
                     //bgs goals, goalid, note
                     event.getChannel().sendMessage(BGSGoal.addGoalNote(args)).queue();
                 } else {
                     event.getChannel().sendMessage(BGS_GOAL_NOTE_HELP).queue();
                 }
-            }
-
-            else if (args[1].equalsIgnoreCase("list")) {
+            } else if (args[1].equalsIgnoreCase("list")) {
                 //bgs goals, list,#
                 //Get # most recent goals
                 //If # is not specified then get all active goals
                 String recent = "0";
-                if(args.length == 3) {
+                if (args.length == 3) {
                     recent = args[2];
                 }
 
-                ArrayList<String> messages = BGSGoal.listGoal(recent,event.getAuthor().getId(), false);
+                ArrayList<String> messages = BGSGoal.listGoal(recent, event.getAuthor().getId(), false);
                 String messageToSend = "";
-                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
-                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
                         event.getChannel().sendMessage(messageToSend + "\u0000").queue();
                         messageToSend = "";
                         messageToSend += message;
-                    }
-                    else { // need the line break if not going to be seperate messages.
+                    } else { // need the line break if not going to be seperate messages.
                         messageToSend += "\n" + message;
                     }
                 }
                 event.getChannel().sendMessage(messageToSend).queue();
-            }
-            else{
+            } else {
                 event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
             }
         } else if (args.length == 1) {
@@ -292,13 +303,12 @@ public class BGS implements PMCommand, GuildCommand {
                 ArrayList<String> messages = BGSGoal.listGoal("0", event.getAuthor().getId(), true);
                 messages.add(BGSStats.getUserStats(event.getAuthor().getId()));
                 String messageToSend = "";
-                for (String message : messages){ // check if we are going to exceed the 2000 character limit of a message
-                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)){
+                for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
                         JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(messageToSend + "\u0000").queue();
                         messageToSend = "";
                         messageToSend += message;
-                    }
-                    else { // need the line break if not going to be seperate messages.
+                    } else { // need the line break if not going to be seperate messages.
                         messageToSend += "\n" + message;
                     }
                 }
@@ -320,13 +330,12 @@ public class BGS implements PMCommand, GuildCommand {
             message += BGSSystem.getSystems(DataProvider.isAdmin(event));
             event.getChannel().sendMessage(message).queue();
 
-        }
-        else if (args.length == 3) {
+        } else if (args.length == 3) {
             String message;
-            int systemid = BGSSystem.systemExists(args[2],args[2],0,false);
-            if(systemid > 0) {
+            int systemid = BGSSystem.systemExists(args[2], args[2], 0, false);
+            if (systemid > 0) {
                 message = "**WARNING ACTION NOT LOGGED**\nFaction not specified? Enter '" + Listener.prefix + "bgs help' or use one of the factions below:\n";
-                message += BGSFaction.getFactions(DataProvider.isAdmin(event),systemid);
+                message += BGSFaction.getFactions(DataProvider.isAdmin(event), systemid);
             } else {
                 message = "**WARNING ACTION NOT LOGGED**\nYou specified an invalid system. Enter '" + Listener.prefix + "bgs help' or use one of the star system names below:\n";
                 message += BGSSystem.getSystems(DataProvider.isAdmin(event));
@@ -334,8 +343,7 @@ public class BGS implements PMCommand, GuildCommand {
 
             event.getChannel().sendMessage(message).queue();
 
-        }
-        else if (args.length == 4) {
+        } else if (args.length == 4) {
             //bgs activity, amount, system, faction
             event.getChannel().sendMessage(BGSLogging.logActivity(DataProvider.isAdmin(event), args[0], event.getAuthor().getId(), event.getMember().getEffectiveName(), args[1], args[2], args[3])).queue();
 
@@ -356,7 +364,8 @@ public class BGS implements PMCommand, GuildCommand {
 
 
     // other stuff starts
-    private static final NavigableMap<Long, String> suffixes = new TreeMap<> ();
+    private static final NavigableMap<Long, String> suffixes = new TreeMap<>();
+
     static {
         suffixes.put(1_000L, "k");
         suffixes.put(1_000_000L, "M");
@@ -389,15 +398,15 @@ public class BGS implements PMCommand, GuildCommand {
         long diffHours = diff / (60 * 60 * 1000) % 24;
         long diffDays = diff / (24 * 60 * 60 * 1000);
         List<String> output = new ArrayList<>();
-        if(diffDays>0)
-            output.add(diffDays + " day" + ((diffDays > 1) ? "s":""));
-        if(diffHours>0)
-            output.add(diffHours + " hr" + ((diffHours > 1) ? "s":""));
-        if(diffMinutes>0)
-            output.add(diffMinutes + " min" + ((diffMinutes > 1) ? "s":""));
-        if(diffSeconds>0 && diffHours==0)
-            output.add(diffSeconds + " sec" + ((diffSeconds > 1) ? "s":""));
-        if(diff < 0)
+        if (diffDays > 0)
+            output.add(diffDays + " day" + ((diffDays > 1) ? "s" : ""));
+        if (diffHours > 0)
+            output.add(diffHours + " hr" + ((diffHours > 1) ? "s" : ""));
+        if (diffMinutes > 0)
+            output.add(diffMinutes + " min" + ((diffMinutes > 1) ? "s" : ""));
+        if (diffSeconds > 0 && diffHours == 0)
+            output.add(diffSeconds + " sec" + ((diffSeconds > 1) ? "s" : ""));
+        if (diff < 0)
             return "Finished";
         else
             return String.join(", ", output) + " left";
