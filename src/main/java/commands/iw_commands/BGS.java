@@ -63,6 +63,7 @@ public class BGS implements PMCommand, GuildCommand {
                     break;
                 case "mur":
                 case "murder":
+                case "murders":
                     output = Activity.MURDER;
                     break;
                 case "exploration":
