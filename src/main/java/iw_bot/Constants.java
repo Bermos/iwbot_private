@@ -13,7 +13,11 @@ public class Constants {
             "The good we secure for ourselves is precarious and uncertain until it is secured for all of us and incorporated into our common life. (Jane Addams)",
             "Those who surrender freedom for security will not have, nor do they deserve, either one. (Benjamin Franklin)",
             "Don't cry because it's over, smile because it happened. (Dr. Seuss)",
-            "Insanity is doing the same thing, over and over again, but expecting different results. (Narcotics Anonymous)"
+            "Insanity is doing the same thing, over and over again, but expecting different results. (Narcotics Anonymous)",
+            "\"It will happen to you\", but you have to initate it. (reddit)",
+            "Talk to EVERYONE. The cashier, the girl on the subway, the bank teller. You aren't good enough at engaging people until you're on the phone with your bank to cancel your credit card and end up talking about travel plans in Russia. (My friend is this good. He started by opening conversation with EVERYONE.) (reddit)",
+            "Let your plans be dark and impenetrable as night, and when you move, fall like a thunderbolt. (Sun Tzu, The Art of War)",
+            "In the midst of chaos, there is also opportunity (Sun Tzu, The Art of War)"
     };
 
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -34,31 +38,29 @@ public class Constants {
     public final static String BGS_FACTION_EDIT_HELP = "**Help: Edit BGS Faction**\n" + Listener.prefix + "bgs faction, edit, <factionid>, <shortname>, <fullname>";
 
 
-
     public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list}>\n";
-    public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/Faction/CMDRGoal #/GlobalGoal #>\n"+
+    public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/Faction/CMDRGoal #/GlobalGoal #>\n" +
             "You can append as many <Activity/Faction/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
-    public final static String BGS_GOAL_DEL_HELP = "**Help: Delete BGS Goal**\n" + Listener.prefix + "bgs goal, {delete,del}, <goalid #>\n"+
+    public final static String BGS_GOAL_DEL_HELP = "**Help: Delete BGS Goal**\n" + Listener.prefix + "bgs goal, {delete,del}, <goalid #>\n" +
             "You can get a list of goals by using " + Listener.prefix + "bgs goals, list, <last # goals>";
-    public final static String BGS_GOAL_DELACT_HELP = "**Help: Delete Specific BGS Goal Activity Target**\n" + Listener.prefix + "bgs goal, {deleteactivity, delact}, <goalid #>, <activity>, <faction>\n"+
+    public final static String BGS_GOAL_DELACT_HELP = "**Help: Delete Specific BGS Goal Activity Target**\n" + Listener.prefix + "bgs goal, {deleteactivity, delact}, <goalid #>, <activity>, <faction>\n" +
             "You can get a list of goals by using " + Listener.prefix + "bgs goal, list, <last # goals>";
-    public final static String BGS_GOAL_EDIT_HELP = "**Help: Edit BGS Goal**\n" + Listener.prefix + "bgs goal, edit, <goalid #>, <system>, <Start dd/MM/yy HH:mm>, <ticks #>\n"+
-            "You can get a list of goals by using " + Listener.prefix + "bgs goal, list, <last # goals>\n"+
-            "To edit the activity targets of a goal use " + Listener.prefix + "bgs goal, editactivity\n"+
+    public final static String BGS_GOAL_EDIT_HELP = "**Help: Edit BGS Goal**\n" + Listener.prefix + "bgs goal, edit, <goalid #>, <system>, <Start dd/MM/yy HH:mm>, <ticks #>\n" +
+            "You can get a list of goals by using " + Listener.prefix + "bgs goal, list, <last # goals>\n" +
+            "To edit the activity targets of a goal use " + Listener.prefix + "bgs goal, editactivity\n" +
             "To add an activity target to a goal use " + Listener.prefix + "bgs goal, addactivity";
-    public final static String BGS_GOAL_EDITACT_HELP = "**Help: Add/Edit BGS Goal Activity Targets**\n" + Listener.prefix + "bgs goal, {addactivity, addact, editactivity, editact}, <goalid> <Activity/Faction/CMDRGoal #/GlobalGoal #>\n"+
+    public final static String BGS_GOAL_EDITACT_HELP = "**Help: Add/Edit BGS Goal Activity Targets**\n" + Listener.prefix + "bgs goal, {addactivity, addact, editactivity, editact}, <goalid> <Activity/Faction/CMDRGoal #/GlobalGoal #>\n" +
             "You can append as many <Activity/Faction/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
-    public final static String BGS_GOAL_NOTE_HELP = "**Help: BGS Goal Notes**\n" + Listener.prefix + "bgs goal, note, <goalid>, <text>\n"+
+    public final static String BGS_GOAL_NOTE_HELP = "**Help: BGS Goal Notes**\n" + Listener.prefix + "bgs goal, note, <goalid>, <text>\n" +
             "Add a note to a goal with specific instructions for CMDRs";
-    public final static String BGS_GOAL_END_HELP = "**Help: END BGS Goal**\n" + Listener.prefix + "bgs goal, end, <goalid>,[<End dd/MM/yy HH:mm>]\n"+
+    public final static String BGS_GOAL_END_HELP = "**Help: END BGS Goal**\n" + Listener.prefix + "bgs goal, end, <goalid>,[<End dd/MM/yy HH:mm>]\n" +
             "End a BGS goal early. Useful if tick time changes. If you do not specify the end data/time then it will end the goal straight away.";
-
 
 
     public final static String BGS_LOG_HELP = " **BGS Bot Commands:**\n" +
             "Enter '" + Listener.prefix + "bgs' to add or remove BGS role\n" +
             "\n" +
-            "Format for logging BGS actions is:\n"+
+            "Format for logging BGS actions is:\n" +
             Listener.prefix + "bgs <activity>, <amount with no seperators>, <system identifier>, <faction identifier>\n" +
             "\n" +
             "\n" +
