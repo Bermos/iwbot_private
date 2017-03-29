@@ -79,7 +79,7 @@ class BGSStats {
                         block += "```" + entry.getKey();
                     }
                     else {
-                        block += entry.getKey() + ": " + entry.getValue() + "\n";
+                        block += entry.getKey().replaceAll(".*~\\*#", "") + ": " + entry.getValue() + "\n";
                     }
                 }
             }
@@ -169,7 +169,7 @@ class BGSStats {
                         totals.put(rs.getString("s_fullname"),"systemtitle");
                         systemcheck = rs.getString("s_fullname");
                     }
-                    totals.put((BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("f_shortname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
+                    totals.put(rs.getString("s_fullname") + "~*#" + (BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("f_shortname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
                     factions.add(rs.getString("f_shortname") + " = " + rs.getString("f_fullname"));
                 }
             } else {
@@ -194,7 +194,8 @@ class BGSStats {
                         totals.put(rs.getString("s_fullname"),"systemtitle");
                         systemcheck = rs.getString("s_fullname");
                     }
-                    totals.put((BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("f_shortname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
+                    totals.put(rs.getString("s_fullname") + "~*#" + (BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("f_shortname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
+                    factions.add(rs.getString("f_shortname") + " = " + rs.getString("f_fullname"));
                 }
             }
             if(factions.size() > 0) {
