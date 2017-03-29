@@ -129,7 +129,19 @@ public class BGS implements PMCommand, GuildCommand {
             } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")) { // summary stats
                 // Two options. No system filter and filtering for a system
                 if (args.length == 4 || args.length == 5) {
-                    event.getChannel().sendMessage(BGSStats.getTick(args)).queue();
+
+                    List<String> messages = BGSStats.getTick(args);
+                    String messageToSend = "";
+                    for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                        if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                            event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                            messageToSend = "";
+                            messageToSend += message;
+                        } else { // need the line break if not going to be seperate messages.
+                            messageToSend += "\n" + message;
+                        }
+                    }
+                    event.getChannel().sendMessage(messageToSend).queue();
 
                 } else { // send help for summary stats
                     event.getChannel().sendMessage(BGS_STATS_HELP).queue();
