@@ -18,29 +18,8 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 public class DataProvider {
-	private static Info info;
-
-    public static void setDiscordToken(String discordToken) {
-        if (info == null)
-            getInfo();
-        info.discord.token = discordToken;
-
-        setInfo();
-    }
-
-    public static void setPrefix(String prefix) {
-        if (info == null)
-            getInfo();
-        info.discord.prefix = prefix;
-
-        setInfo();
-    }
-
-    public static String getPrefix() {
-		if (info == null)
-			getInfo();
-        return info.discord.prefix;
-    }
+	private static Info info = getInfo();
+	public static String lastMessageSent;
 
     static class ConData {
         String IP;
@@ -49,7 +28,7 @@ public class DataProvider {
         String PW;
     }
 
-	class Info {
+    public class Info {
 		class Discord {
 			String token;
 			List<String> idOwner;
@@ -64,19 +43,45 @@ public class DataProvider {
 		String inaraPW;
 		String googleToken;
 		String githubToken;
-		String githubBranch;
+		String JAVA_HOME;
 		boolean dev;
-		boolean test;
 	}
-	
-	private static void getInfo() {
+
+	public static Info getInfoBackup() {
+		return info;
+	}
+
+	public static void revertToBackup(Info backupInfo) {
+		info = backupInfo;
+	}
+
+    public static void setDiscordToken(String discordToken) {
+        info.discord.token = discordToken;
+
+        setInfo();
+    }
+
+    public static void setPrefix(String prefix) {
+        info.discord.prefix = prefix;
+
+        setInfo();
+    }
+
+    public static String getPrefix() {
+        return info.discord.prefix;
+    }
+
+	private static Info getInfo() {
 		try {
 			Gson gson = new Gson();
 			JsonReader jReader = new JsonReader(new FileReader("./data.json"));
-			info = gson.fromJson(jReader, Info.class);
+			return gson.fromJson(jReader, Info.class);
 		} catch (FileNotFoundException e) {
 			LogUtil.logErr(e);
 		}
+		System.out.println("ERROR data.json file not found. Exiting...");
+		System.exit(2);
+		return null;
 	}
 	
 	private static void setInfo() {
@@ -98,8 +103,6 @@ public class DataProvider {
 	 * @return the token to login to Discord
 	 */
 	public static String getToken() {
-		if (info == null)
-			getInfo();
 		return info.discord.token;
 	}
 	
@@ -110,8 +113,6 @@ public class DataProvider {
 	 * @return list of ID strings
 	 */
 	public static List<String> getOwnerIDs() {
-		if (info == null)
-			getInfo();
 		return info.discord.idOwner;
 	}
 	
@@ -120,8 +121,6 @@ public class DataProvider {
 	 * @param id of the owner to add
 	 */
 	public static void addOwner(String id) {
-		if (info == null)
-			getInfo();
 		info.discord.idOwner.add(id);
 		setInfo();
 	}
@@ -131,11 +130,11 @@ public class DataProvider {
 	 * @param id of the owner to remove
 	 */
 	public static boolean removeOwner(String id) {
-		if (info == null)
-			getInfo();
-		boolean success = !info.discord.idOwner.remove(info.discord.idOwner.indexOf(id)).isEmpty();
+		if (info.discord.idOwner.indexOf(id) == -1)
+		    return false;
+		info.discord.idOwner.remove(info.discord.idOwner.indexOf(id));
 		setInfo();
-		return success;
+		return true;
 	}
 	
 	/**
@@ -144,8 +143,6 @@ public class DataProvider {
 	 * @return message as string
 	 */
 	public static String getNewMemberInfo() {
-		if (info == null)
-			getInfo();
 		return info.discord.newMember;
 	}
 	
@@ -155,8 +152,6 @@ public class DataProvider {
 	 * @param message as string
 	 */
 	public static void setNewMemberInfo(String message) {
-		if (info == null)
-			getInfo();
 		info.discord.newMember = message;
 		setInfo();
 	}
@@ -166,8 +161,6 @@ public class DataProvider {
 	 * @return the admin channel id as string
 	 */
 	public static String getAdminChanID() {
-		if (info == null)
-			getInfo();
 		return info.discord.adminChanID;
 	}
 	
@@ -176,8 +169,6 @@ public class DataProvider {
 	 * @param id of the channel used for admin
 	 */
 	public static void setAdminChanID(String id) {
-		if (info == null)
-			getInfo();
 		info.discord.adminChanID = id;
 		setInfo();
 	}
@@ -187,8 +178,6 @@ public class DataProvider {
 	 * @return the ids of all admin roles
 	 */
 	public static List<String> getAdminRoleIDs() {
-		if (info == null)
-			getInfo();
 		return info.discord.idRoles;
 	}
 	
@@ -197,15 +186,11 @@ public class DataProvider {
 	 * @param id of the admin role
 	 */
 	public static void addAdminRoleID(String id) {
-		if (info == null)
-			getInfo();
 		info.discord.idRoles.add(id);
 		setInfo();
 	}
 	
 	public static void removeAdminRoleID(String id) {
-		if (info == null)
-			getInfo();
 		info.discord.idRoles.remove(id);
 		setInfo();
 	}
@@ -250,14 +235,10 @@ public class DataProvider {
 	}
 
 	public static String getInaraPW() {
-		if (info == null)
-			getInfo();
 		return info.inaraPW;
 	}
 
 	public static String getGoogleToken() {
-		if (info == null)
-			getInfo();
 		return info.googleToken;
 	}
 
@@ -266,32 +247,18 @@ public class DataProvider {
 	 * @return if the bot runs in development
 	 */
 	public static boolean isDev () {
-		if (info == null)
-			getInfo();
 		return info.dev;
 	}
 
 	public static ConData getConData(String conName) {
-		if (info == null)
-			getInfo();
 		return info.connections.get(conName);
 	}
 
 	public static String getGithubToken() {
-	    if (info == null)
-	        getInfo();
 	    return info.githubToken;
     }
 
-    public static String getGithubBranch() {
-        if (info == null)
-            getInfo();
-        return info.githubBranch;
-    }
-
     public static void addConnection(String name, String ip, String db, String us, String pw) {
-	    if (info == null)
-	        getInfo();
 	    ConData con = new ConData();
 	    con.IP = ip; con.DB = db;
 	    con.US = us; con.PW = pw;
@@ -300,9 +267,7 @@ public class DataProvider {
 	    setInfo();
     }
 
-    public static boolean isTest() {
-		if (info == null)
-			getInfo();
-		return info.test;
+	public static String getJavaHome() {
+		return info.JAVA_HOME;
 	}
 }

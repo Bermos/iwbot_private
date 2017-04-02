@@ -74,7 +74,7 @@ public class Missions implements GuildCommand {
 			.grant(Permission.MANAGE_CHANNEL)
 			.update().queue();
 
-		// Set permissions for iwmembers
+		// Set permissions for iw pilots
 		permManager = missionChannel.createPermissionOverride(iwRole).complete().getManagerUpdatable();
 		permManager.grant(Permission.MESSAGE_READ)
 			.grant(Permission.MESSAGE_WRITE)

@@ -1,5 +1,6 @@
 package commands.misc_commands;
 
+import iw_bot.Listener;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +37,7 @@ public class NotesTest {
         tests.add(new TestCase("0", new String[] {"0"}, new String[] {"edit", "", ""}, "Edited"));
 
         tests.add(new TestCase("0", new String[] {"0"}, new String[] {"del", ""}, "Deleted"));
+        Listener.isTest = true;
     }
 
     @Test

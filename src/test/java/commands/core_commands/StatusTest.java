@@ -1,5 +1,6 @@
 package commands.core_commands;
 
+import iw_bot.Listener;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class StatusTest {
     public void setUp() throws Exception {
         tests = new ArrayList<>();
 
-        String uptime   = "```Uptime              \\| ([0-9]*d )?[0-9]{2}:[0-9]{2}:[0-9]{2}\n" +
+        String uptime = "```Uptime              \\| ([0-9]*d )?[0-9]{2}:[0-9]{2}:[0-9]{2}\n" +
             "# Threads           \\| [0-9]*\n" +
             "Memory usage        \\| [0-9]*\\.[0-9]{2}\\/[0-9]*\\.[0-9]{2} MB\n" +
             "Unique AI Datasets  \\| ([0-9]{1,3}('[0-9]{3})*)\n" +
@@ -29,6 +30,7 @@ public class StatusTest {
             "Version             \\| [0-9]*\\.[0-9]*\\.[0-9]*_[0-9]*```";
 
         tests.add(new TestCase(uptime));
+        Listener.isTest = true;
     }
 
     @Test

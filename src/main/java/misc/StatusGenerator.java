@@ -11,7 +11,7 @@ import provider.Connections;
 
 public class StatusGenerator extends Thread {
 	private Presence presence;
-	private Connection connect = new Connections().getConnection();
+	private Connections connections = new Connections();
 	
 	public void run() {
 		Thread.currentThread().setName("BOT - MISC - StatusGenerator");
@@ -20,7 +20,7 @@ public class StatusGenerator extends Thread {
 		//noinspection InfiniteLoopStatement
 		while(true) {
 			try {
-				PreparedStatement ps = connect.prepareStatement("SELECT word1, word3, word5 FROM markov WHERE char_length(word1) > 3 AND char_length(word3) > 3 AND char_length(word5) > 3 ORDER BY rand() LIMIT 1");
+				PreparedStatement ps = connections.getConnection().prepareStatement("SELECT word1, word3, word5 FROM markov WHERE char_length(word1) > 3 AND char_length(word3) > 3 AND char_length(word5) > 3 ORDER BY rand() LIMIT 1");
 				ResultSet rs = ps.executeQuery();
 				
 				rs.next();
