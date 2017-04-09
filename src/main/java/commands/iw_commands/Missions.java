@@ -221,7 +221,7 @@ public class Missions implements GuildCommand {
 		//Post SOP link via command "mission sop"
 		if (Arrays.binarySearch(args, "sop") > -1) {
 			Missions.archive(event.getChannel(), event.getAuthor().getId());
-			event.getChannel().sendMessage("Please review our Standard Operating Procedures before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wl");
+			event.getChannel().sendMessage("Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wl");
 		}
 
 		//State the intent of deleting that channel. Ask if they are for sure
