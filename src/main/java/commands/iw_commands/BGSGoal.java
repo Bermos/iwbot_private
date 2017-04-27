@@ -210,7 +210,7 @@ class BGSGoal {
                     goalid = rs.getInt(1);
                 }
 
-                String message = "**New goal added to BGS logging**\n" +
+                String message = "**New goal added to BGS logging #" + goalid + "**\n" +
                         "*Start:* " + starttime + "\n" +
                         "*End:* " + endtime + " (" + args[4] + " ticks)\n";
                 if (args.length >= 6) {
@@ -329,7 +329,7 @@ class BGSGoal {
                 }
             }
 
-            message = "**Goal Item #" + Integer.toString(i) + " Added/Updated**\n" +
+            message = "**Goal Item #" + Integer.toString(i) + " Added/Updated to Goal " + goalid + "**\n" +
                     "*Activity:* " + activity + "\n" +
                     "*Faction:* " + goalitem[1] + "\n" +
                     "*CMDR Goal:* " + NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(goalitem[2])).replace('.', '\'') + "\n" +
