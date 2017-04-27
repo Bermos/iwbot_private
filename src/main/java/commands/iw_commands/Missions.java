@@ -122,6 +122,9 @@ public class Missions implements GuildCommand {
 							+ "Bravo: *TBA*\n";
 		
 		missionChannel.getManager().setTopic(topic).queue();
+
+		//Add SOP and welcome to beginning of channel
+        getChannel(channelName).sendMessage("Hello" + explorerName + "\n" + "Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wl").queue();
 	}
 
 	private static void archive(TextChannel channel, String id) {
@@ -220,8 +223,7 @@ public class Missions implements GuildCommand {
 
 		//Post SOP link via command "mission sop"
 		if (Arrays.binarySearch(args, "sop") > -1) {
-			Missions.archive(event.getChannel(), event.getAuthor().getId());
-			event.getChannel().sendMessage("Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wl");
+			event.getChannel().sendMessage("Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wl").queue();
 		}
 
 		//State the intent of deleting that channel. Ask if they are for sure

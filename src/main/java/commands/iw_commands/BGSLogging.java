@@ -58,27 +58,33 @@ class BGSLogging {
                     ps = connect.prepareStatement("SELECT a.username, i.usergoal,SUM(a.amount) AS total FROM bgs_goal g " +
                             "LEFT JOIN bgs_goal_item i ON i.goalid = g.goalid " +
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
-                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND " +
-                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.userid = ? " +
+                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
+                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.userid = ? AND " +
+                            "i.factionid = ? " +
                             "AND a.timestamp >= g.startts AND a.timestamp <= g.endts " +
                             "GROUP BY a.userid HAVING total >= i.usergoal;");
-                    ps.setString(1, activity.toString());
-                    ps.setInt(2, systemid);
-                    ps.setInt(3, factionid);
-                    ps.setString(4, userid);
+                    ps.setInt(1, systemid);
+                    ps.setString(2, activity.toString());
+                    ps.setInt(3, systemid);
+                    ps.setInt(4, factionid);
+                    ps.setString(5, userid);
+                    ps.setInt(6, factionid);
                     ResultSet rs = ps.executeQuery();
+
 
                     // check if global goal has been met
                     ps = connect.prepareStatement("SELECT a.username, i.globalgoal, SUM(a.amount) AS total FROM bgs_goal g " +
                             "LEFT JOIN bgs_goal_item i ON i.goalid = g.goalid " +
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
-                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND " +
-                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? " +
-                            "AND a.timestamp >= g.startts AND a.timestamp <= g.endts " +
+                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
+                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND " +
+                            "i.factionid = ? " +
                             "HAVING total >= i.globalgoal;");
-                    ps.setString(1, activity.toString());
-                    ps.setInt(2, systemid);
-                    ps.setInt(3, factionid);
+                    ps.setInt(1, systemid);
+                    ps.setString(2, activity.toString());
+                    ps.setInt(3, systemid);
+                    ps.setInt(4, factionid);
+                    ps.setInt(5, factionid);
                     ResultSet rs1 = ps.executeQuery();
 
                     if (BGS.getRows(rs) > 0 && BGS.getRows(rs1) > 0) { //CMDR and system goal met

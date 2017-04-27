@@ -38,7 +38,10 @@ public class Constants {
     public final static String BGS_FACTION_EDIT_HELP = "**Help: Edit BGS Faction**\n" + Listener.prefix + "bgs faction, edit, <factionid>, <shortname>, <fullname>";
 
 
-    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list}>\n";
+    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list}>\n\n"+
+            "Example of active goal list: " + Listener.prefix + "bgs goals,list\n"+
+            "Example of X recent goals: " + Listener.prefix + "bgs goals,list,{X}\n"+
+            "Example of X recent goals starting from Y goal ID: " + Listener.prefix + "bgs goals,list,{X},{Y}";
     public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/Faction/CMDRGoal #/GlobalGoal #>\n" +
             "You can append as many <Activity/Faction/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
     public final static String BGS_GOAL_DEL_HELP = "**Help: Delete BGS Goal**\n" + Listener.prefix + "bgs goal, {delete,del}, <goalid #>\n" +
