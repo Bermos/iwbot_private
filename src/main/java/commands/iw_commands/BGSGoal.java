@@ -100,7 +100,7 @@ class BGSGoal {
                 message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + BGS.dateDiff(new Date(), SQL_SDF.parse(rs.getString("endts"))) + ")";
                 if (numrows > 0) {
                     if (showUserP) {
-                        message += String.format("```%1$-17s | %2$-15s | %3$s\n", "", "Your Goal", "System Goal");
+                        message += String.format("```%1$-17s | %2$-16s | %3$s\n", "", "Your Goal", "System Goal");
                     } else {
                         message += String.format("```%1$-17s | %2$-15s | %3$s\n", "", "CMDR (Num Met)", "System Goal");
                     }
@@ -112,7 +112,7 @@ class BGSGoal {
                             factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"));
                         }
                         if (showUserP) {
-                            message += String.format("%1$-17s | %2$-15s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
+                            message += String.format("%1$-17s | %2$-16s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         } else {
                             ps = connect.prepareStatement("SELECT IFNULL(COUNT(*),0) AS userfinished FROM (SELECT SUM(a.amount) AS total FROM bgs_activity a WHERE a.activity = ? AND a.timestamp >= ? AND a.timestamp <= ? AND a.systemid = ? AND a.factionid = ? GROUP BY userid HAVING total >= ?) AS tmp");
                             ps.setString(1, rs1.getString("activity"));

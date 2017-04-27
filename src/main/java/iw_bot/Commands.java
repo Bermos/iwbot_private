@@ -74,6 +74,18 @@ class Commands {
 			}
 		});
 
+		guildCommands.put("shitdown", new GuildCommand() {
+			@Override
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				event.getChannel().sendMessage(":poop:").queue();
+			}
+
+			@Override
+			public String getHelp(GuildMessageReceivedEvent event) {
+				return "";
+			}
+		});
+
 		guildCommands.put("debug", new DebugMode());
 
 		guildCommands.put("update", new Update());
