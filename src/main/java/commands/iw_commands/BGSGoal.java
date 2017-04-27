@@ -256,15 +256,16 @@ class BGSGoal {
         return "**Note added to goal**";
     }
 
-    static String deleteGoalItem(BGS.Activity activity, String goalid) {
+    static String deleteGoalItem(BGS.Activity activity, String goalid, String factionid) {
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal_item WHERE goalid = (SELECT goalid FROM bgs_goal WHERE goalid = ?) AND activity = ? LIMIT 1");
+            PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal_item WHERE goalid = (SELECT goalid FROM bgs_goal WHERE goalid = ?) AND activity = ? AND factionid = (SELECT factionid FROM bgs_faction WHERE factionid = ?) LIMIT 1");
             ps.setInt(1, Integer.parseInt(goalid));
             ps.setString(2, activity.toString());
+            ps.setString(3, factionid);
             ps.executeUpdate();
         } catch (SQLException e) {
-            return "**Failed deleting Goal Item**\n" + Listener.prefix + "bgs goal,{deleteitem,delitem},<goalid>";
+            return(BGS_GOAL_DELACT_HELP);
         }
         return "**Goal Item Deleted**";
     }

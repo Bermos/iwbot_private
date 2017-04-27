@@ -254,8 +254,8 @@ public class BGS implements PMCommand, GuildCommand {
                 }
             } else if (args[1].equalsIgnoreCase("deleteact") || args[1].equalsIgnoreCase("delact")) { // delete an individual goal item from a goal
                 //bgs goals,<delact>,goalid,Activity
-                if (args.length == 4) {
-                    event.getChannel().sendMessage(BGSGoal.deleteGoalItem(Activity.from(args[3]), args[2])).queue();
+                if (args.length == 5) {
+                    event.getChannel().sendMessage(BGSGoal.deleteGoalItem(Activity.from(args[3]), args[2], args[4])).queue();
                 } else {
                     event.getChannel().sendMessage(BGS_GOAL_DELACT_HELP).queue();
                 }
