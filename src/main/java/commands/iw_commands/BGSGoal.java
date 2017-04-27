@@ -44,32 +44,45 @@ class BGSGoal {
 
     }
 
-    static ArrayList<String> listGoal(String recent, String userid, boolean showUserP) {
+    static ArrayList<String> listGoal(String startid, String recent, String userid, boolean showUserP) {
         Connection connect = new Connections().getConnection();
         ArrayList<String> messages = new ArrayList<>();
         try {
             PreparedStatement ps;
-            String message = "";
+            String message;
             if (Integer.parseInt(recent) == 0) { // get active goals
                 ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname, " +
                         "startts, endts, ticks, note " +
                         "FROM bgs_goal g " +
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
-            } else {
+                message = "**Active Goals**\n" +
+                        "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            } else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals (no more than 10)
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
                         "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(recent));
-                message = "**" + recent + " Most Recent Goals**\n";
+                message = "**" + recent + " Most Recent Goals**\n" +
+                        "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            }
+            else if(Integer.parseInt(startid) > 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals starting from goalID Y (no more than 10)
+                ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
+                        "FROM bgs_goal g " +
+                        "WHERE startts <= (SELECT startts FROM bgs_goal WHERE goalid = ?) " +
+                        "ORDER BY startts DESC LIMIT ?");
+                ps.setInt(1, Integer.parseInt(startid));
+                ps.setInt(2, Integer.parseInt(recent));
+                message = "**" + recent + " most recent goals starting from goal #" + startid + "**\n" +
+                        "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            }
+            else {
+                messages.add("You can not return more than 10 goals");
+                return messages;
             }
             ResultSet rs = ps.executeQuery();
             int rows = 0;
 
             while (rs.next()) {
                 rows = rows + 1;
-                if (rows == 1) {
-                    message = "**Active Goals**\n" +
-                            "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
-                }
                 ps = connect.prepareStatement("SELECT i.activity, i.factionid, i.usergoal, i.globalgoal, g.systemid, g.endts, g.startts, " +
                         "(SELECT f_shortname FROM bgs_faction f WHERE f.factionid = i.factionid) AS f_shortname, " +
                         "(SELECT f_fullname FROM bgs_faction f WHERE f.factionid = i.factionid) AS f_fullname, " +

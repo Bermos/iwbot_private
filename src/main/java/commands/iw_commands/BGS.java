@@ -95,7 +95,7 @@ public class BGS implements PMCommand, GuildCommand {
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
-                ArrayList<String> messages = BGSGoal.listGoal("0", event.getAuthor().getId(), true);
+                ArrayList<String> messages = BGSGoal.listGoal("0", "0", event.getAuthor().getId(), true);
                 messages.add(BGSStats.getUserStats(event.getAuthor().getId()));
                 String messageToSend = "";
                 for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
@@ -292,11 +292,15 @@ public class BGS implements PMCommand, GuildCommand {
                 //Get # most recent goals
                 //If # is not specified then get all active goals
                 String recent = "0";
+                String startid = "0";
                 if (args.length == 3) {
                     recent = args[2];
+                } else if (args.length == 4) {
+                    recent = args[2];
+                    startid = args[3];
                 }
 
-                ArrayList<String> messages = BGSGoal.listGoal(recent, event.getAuthor().getId(), false);
+                ArrayList<String> messages = BGSGoal.listGoal(startid, recent, event.getAuthor().getId(), false);
                 String messageToSend = "";
                 for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
                     if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
@@ -313,7 +317,7 @@ public class BGS implements PMCommand, GuildCommand {
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
-                ArrayList<String> messages = BGSGoal.listGoal("0", event.getAuthor().getId(), true);
+                ArrayList<String> messages = BGSGoal.listGoal("0","0", event.getAuthor().getId(), true);
                 messages.add(BGSStats.getUserStats(event.getAuthor().getId()));
                 String messageToSend = "";
                 for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
