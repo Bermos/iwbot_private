@@ -1,9 +1,9 @@
 package provider.jda.events;
 
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.jda.Discord;
+import provider.jda.Message;
 import provider.jda.User;
 import provider.jda.channel.PrivateChannel;
 

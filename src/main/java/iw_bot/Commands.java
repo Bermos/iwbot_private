@@ -8,7 +8,9 @@ import commands.ed_commands.CMDRLookup;
 import commands.ed_commands.Distance;
 import commands.iw_commands.*;
 import commands.misc_commands.*;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -47,30 +49,30 @@ class Commands {
 
 		//Guild message commands
 		guildCommands.put("help", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+			public void runCommand(GuildMessageEvent event, Discord discord) {
 				String message = "Commands available:\n```html\n";
 				for (Map.Entry<String, GuildCommand> entry : guildCommands.entrySet()) {
 					if (!entry.getValue().getHelp(event).isEmpty())
-						message += String.format(Listener.prefix + "%-12s | " + entry.getValue().getHelp(event) + "\n", entry.getKey());
+						message += String.format(DataProvider.getPrefix() + "%-12s | " + entry.getValue().getHelp(event) + "\n", entry.getKey());
 				}
 				message += "```\n";
 				message += "For a detailed help please use this guide: https://drive.google.com/file/d/0B1EHAnlL83qgbnRLV2ktQmVlOXM/view?usp=sharing";
-				event.getChannel().sendMessage(message).queue();
+				event.replyAsync(message);
 			}
 			
-			public String getHelp(GuildMessageReceivedEvent event) {
+			public String getHelp(GuildMessageEvent event) {
 				return "< ?> variables are optional, <a>|<b> either var a OR b";
 			}
 		});
 
 		guildCommands.put("version", new GuildCommand() {
 			@Override
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendMessage(Listener.prefix).queue();
+			public void runCommand(GuildMessageEvent event, Discord discord) {
+				event.replyAsync(DataProvider.getPrefix());
 			}
 
 			@Override
-			public String getHelp(GuildMessageReceivedEvent event) {
+			public String getHelp(GuildMessageEvent event) {
 				return "Returns the current version";
 			}
 		});

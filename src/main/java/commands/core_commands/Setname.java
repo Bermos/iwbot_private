@@ -2,49 +2,47 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 public class Setname implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        event.getChannel().sendMessage(setname(event.getJDA(), args));
+        event.getChannel().sendMessage(setname(event.getDiscord(), event.getArgs()));
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        event.getChannel().sendMessage(setname(event.getJDA(), args));
+        event.getChannel().sendMessage(setname(event.getDiscord(), event.getArgs()));
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event)))
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
             return "";
         return "<name>";
     }
 
-    private String setname(JDA jda, String[] args) {
-
-        if (args.length == 0) {
+    private String setname(Discord discord, String[] args) {
+        if (args.length == 0)
             return "[Error] No name stated";
-        }
 
-        jda.getSelfUser().getManager().setName(args[0]).queue();
+        discord.setName(args[0]);
         return "[Success] Name changed";
     }
 }

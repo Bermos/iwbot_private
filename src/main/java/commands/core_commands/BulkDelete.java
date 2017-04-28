@@ -5,7 +5,6 @@ import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.PermissionOverride;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.managers.PermOverrideManagerUpdatable;
 import provider.DataProvider;
 import provider.jda.Discord;
@@ -33,13 +32,15 @@ public class BulkDelete implements GuildCommand {
     public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
+        String[] args = event.getArgs();
+
         //This command needs arguments
         if (args.length == 0) {
-            event.getChannel().sendMessage("[Error] Please specify the number of messages you want to delete").queue();
+            event.replyAsync("[Error] Please specify the number of messages you want to delete");
             return;
         }
 
@@ -52,8 +53,8 @@ public class BulkDelete implements GuildCommand {
 
             //check for excessive usage and give alternative
             if (diff > 7*24*60) {
-                event.getChannel().sendMessage("You are trying to delete over 7 days worth of messages. Have you thought about just using 'clear all'?\n" +
-                        "If that is not a option, you'll have to use this command it 7-day-batches.").queue();
+                event.replyAsync("You are trying to delete over 7 days worth of messages. Have you thought about just using 'clear all'?\n" +
+                        "If that is not a option, you'll have to use this command it 7-day-batches.");
                 return;
             }
 
@@ -77,7 +78,7 @@ public class BulkDelete implements GuildCommand {
                 event.getChannel().deleteMessages(toDelete).queue();
             }
 
-            event.getChannel().sendMessage("Last " + deleted + " messages deleted").queue();
+            event.replyAsync("Last " + deleted + " messages deleted");
         }
 
         //Channel clear part
@@ -142,7 +143,7 @@ public class BulkDelete implements GuildCommand {
             if (number == 1)
                 event.getChannel().sendMessage("Last message deleted. But why use me for that you lazy son of a @&?%!\nbtw, that was only the command you typed. Jeez, people...").queue();
             else
-                event.getChannel().sendMessage("Last " + number + " messages deleted").queue();
+                event.replyAsync("Last " + number + " messages deleted");
         }
     }
 

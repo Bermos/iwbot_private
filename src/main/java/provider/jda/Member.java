@@ -15,4 +15,13 @@ public class Member extends User {
     public String getEffectiveName() {
         return super.getDiscord().getEffectiveName(super.getId(), guildId);
     }
+
+    public boolean hasRole(Role role) {
+        for(String roleId : discord.getRoleIdsForMember(id, guildId)) {
+            if (roleId.equals(role.getId()))
+                return true;
+        }
+
+        return false;
+    }
 }

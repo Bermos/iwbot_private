@@ -2,6 +2,7 @@ package provider.jda;
 
 import iw_bot.Listener;
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.Role;
@@ -71,6 +72,10 @@ public class Discord {
         jda.shutdown();
     }
 
+    public void setGame(Game game) {
+        jda.getPresence().setGame(game);
+    }
+
     public Member getMember(String guildId, String id) {
         return new Member(id, this, guildId);
     }
@@ -96,7 +101,7 @@ public class Discord {
         jda.getTextChannelById(id).sendTyping().queue();
     }
 
-    public Iterable<? extends provider.jda.Role> getRolesByName(String id, String name, boolean exact) {
+    public List<provider.jda.Role> getRolesByName(String id, String name, boolean exact) {
         return jda.getGuildById(id).getRolesByName(name, !exact).stream().map(role -> new provider.jda.Role(role.getId(), id, this)).collect(Collectors.toList());
     }
 
@@ -116,5 +121,36 @@ public class Discord {
 
         return jda.getTextChannelById(channel.getId()).getMessageById(id).complete().getMentionedChannels().stream()
                     .map(chan -> new GuildChannel(chan.getId(), this)).collect(Collectors.toList());
+    }
+
+    public void setName(String name) {
+        jda.getSelfUser().getManager().setName(name).queue();
+    }
+
+    public String getEmoteByGuild(String id, String emoteId) {
+        return jda.getGuildById(id).getEmoteById(emoteId).getAsMention();
+    }
+
+    public List<User> getMentionedUsers(String id, Channel channel) {
+        return jda.getTextChannelById(channel.getId()).getMessageById(id).complete().getMentionedUsers().stream()
+                .map(user -> new User(user.getId(), this)).collect(Collectors.toList());
+    }
+
+    public void addRolesToMember(String id, Member applicantMem, provider.jda.Role pc) {
+        net.dv8tion.jda.core.entities.Guild guild = jda.getGuildById(id);
+        guild.getController().addRolesToMember(guild.getMemberById(applicantMem.getId()), guild.getRoleById(pc.getId())).queue();
+    }
+
+    public void createRole(String id) {
+        jda.getGuildById(id).getController().createRole().queue();
+    }
+
+    public String getChannelTopic(String id) {
+        return jda.getTextChannelById(id).getTopic();
+    }
+
+    public List<provider.jda.Role> getMentionedRoles(String id, GuildChannel channel) {
+        return jda.getTextChannelById(channel.getId()).getMessageById(id).complete().getMentionedRoles().stream()
+                .map(role -> new provider.jda.Role(role.getId(), channel.get, this)).collect(Collectors.toList());
     }
 }

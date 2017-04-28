@@ -4,9 +4,9 @@ import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.Listener;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.Connections;
 import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
 import provider.jda.events.PrivateMessageEvent;
 
 import java.sql.PreparedStatement;
@@ -24,12 +24,12 @@ public class Status implements PMCommand, GuildCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(status()).queue();
+    public void runCommand(GuildMessageEvent event, Discord discord) {
+        event.replyAsync(status(discord.getListener()));
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         return "Shows information about the bot";
     }
 

@@ -1,7 +1,6 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 import provider.jda.Discord;
 import provider.jda.events.GuildMessageEvent;
@@ -13,10 +12,11 @@ public class AdminRole implements GuildCommand {
     public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
+        String[] args = event.getArgs();
         Arrays.sort(args);
 
         if ((Arrays.binarySearch(args, "view") > -1) || args.length == 0) {
@@ -25,26 +25,25 @@ public class AdminRole implements GuildCommand {
                 message += ( "-" + event.getGuild().getRoleById(id).getName() + "\n" );
 
             if (!message.isEmpty())
-                event.getChannel().sendMessage("Roles with admin privileges:\n" + message).queue();
+                event.replyAsync("Roles with admin privileges:\n" + message);
             else
-                event.getChannel().sendMessage("No admin roles defined").queue();
+                event.getChannel().sendMessage("No admin roles defined");
         }
         else if (args[0].equalsIgnoreCase("add")) {
             if (!event.getMessage().getMentionedRoles().isEmpty()) {
                 DataProvider.addAdminRoleID(event.getMessage().getMentionedRoles().get(0).getId());
             } else if (args.length == 2) {
-                net.dv8tion.jda.core.entities.Role role = event.getGuild().getRoles().stream().filter(vrole -> vrole.getName().equalsIgnoreCase(args[1].trim())).findFirst().orElse(null);
-                if (role != null) {
-                    DataProvider.addAdminRoleID(role.getId());
+                if (!event.getGuild().getRolesByName(args[1], false).isEmpty()) {
+                    DataProvider.addAdminRoleID(event.getGuild().getRolesByName(args[1], false).get(0).getId());
                 } else {
-                    event.getChannel().sendMessage("[Error] No role with this name found").queue();
+                    event.replyAsync("[Error] No role with this name found");
                     return;
                 }
             } else {
-                event.getChannel().sendMessage("[Error] No role specified").queue();
+                event.replyAsync("[Error] No role specified");
                 return;
             }
-            event.getChannel().sendMessage("[Success] Admin role saved").queue();
+            event.replyAsync("[Success] Admin role saved");
         }
         else if (args[0].equalsIgnoreCase("del")) {
             if (!event.getMessage().getMentionedRoles().isEmpty()) {
@@ -54,14 +53,14 @@ public class AdminRole implements GuildCommand {
                 if (role != null) {
                     DataProvider.removeAdminRoleID(role.getId());
                 } else {
-                    event.getChannel().sendMessage("[Error] No role with this name found").queue();
+                    event.replyAsync("[Error] No role with this name found");
                     return;
                 }
             } else {
-                event.getChannel().sendMessage("[Error] No role specified").queue();
+                event.replyAsync("[Error] No role specified");
                 return;
             }
-            event.getChannel().sendMessage("[Success] Admin role removed").queue();
+            event.replyAsync("[Success] Admin role removed");
         }
     }
 

@@ -3,11 +3,11 @@ package commands.core_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 import provider.jda.Discord;
-import provider.jda.events.PrivateMessageEvent;
 import provider.jda.channel.Channel;
+import provider.jda.events.GuildMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.io.*;
 import java.util.Date;
@@ -29,19 +29,19 @@ public class Update implements GuildCommand, PMCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || event.getMember().getRoles().contains(event.getGuild().getRolesByName("Bot Wizard", true).get(0)))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || event.getMember().hasRole(event.getGuild().getRolesByName("Bot Wizard", true).get(0)))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        String branch = args.length == 0 ? "master" : args[0];
+        String branch = event.getArgs().length == 0 ? "master" : event.getArgs()[0];
         update(event.getChannel(), branch);
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         return "Updates the bot from the desired branch";
     }
 

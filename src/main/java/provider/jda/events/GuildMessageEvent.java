@@ -1,20 +1,14 @@
 package provider.jda.events;
 
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import provider.jda.Discord;
-import provider.jda.Guild;
-import provider.jda.Member;
-import provider.jda.User;
-import provider.jda.channel.Channel;
+import provider.jda.*;
 import provider.jda.channel.GuildChannel;
-import provider.jda.channel.PrivateChannel;
-import provider.jda.events.MessageEvent;
 
 public class GuildMessageEvent implements MessageEvent {
     private Discord discord;
     private GuildChannel channel;
+    private Message message;
     private Guild guild;
     private User author;
     private String[] args;
@@ -23,9 +17,10 @@ public class GuildMessageEvent implements MessageEvent {
                              Discord discord,
                              String[] args) {
         this.discord = discord;
-        this.channel = new GuildChannel(event.getChannel().getId(), discord);
         this.guild   = new Guild(event.getGuild().getId(), discord);
         this.author  = new User(event.getAuthor().getId(), discord);
+        this.channel = new GuildChannel(event.getChannel().getId(), guild, discord);
+        this.message = new Message(event.getMessage().getId(), this.channel, discord);
         this.args    = args;
 
     }
@@ -40,7 +35,7 @@ public class GuildMessageEvent implements MessageEvent {
     }
 
     @Override
-    public Channel getChannel() {
+    public GuildChannel getChannel() {
         return channel;
     }
 
@@ -52,6 +47,11 @@ public class GuildMessageEvent implements MessageEvent {
     @Override
     public String[] getArgs() {
         return args;
+    }
+
+    @Override
+    public Message getMessage() {
+        return message;
     }
 
     @Override

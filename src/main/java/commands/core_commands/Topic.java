@@ -1,17 +1,18 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
 
 public class Topic implements GuildCommand {
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         String topic = event.getChannel().getTopic().isEmpty() ? "This channel has no topic." : event.getChannel().getTopic();
-        event.getChannel().sendMessage(topic).queue();
+        event.replyAsync(topic);
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         return "Shows the channel details";
     }
 }

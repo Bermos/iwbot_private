@@ -84,8 +84,7 @@ public class DankMemes {
 				continue;
 
 			checkSuccessful = meme.lastUsed + meme.cd < System.currentTimeMillis();
-			
-			
+
 			//If it is then execute the meme
 			if (checkSuccessful)
 				execute(event, meme);

@@ -20,4 +20,12 @@ public class Message {
     public List<Channel> getMentionedChannels() {
         return discord.getMentionedChannels(id, channel);
     }
+
+    public List<User> getMentionedUsers() {
+        return discord.getMentionedUsers(id, channel);
+    }
+
+    public List<Role> getMentionedRoles() {
+        return discord.getMentionedRoles(id, channel);
+    }
 }

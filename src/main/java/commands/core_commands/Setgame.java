@@ -2,48 +2,48 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 public class Setgame implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        event.getChannel().sendMessage(setgame(event.getJDA(), args));
+        event.getChannel().sendMessage(setgame(event.getDiscord(), event.getArgs()));
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
-        event.getChannel().sendMessage(setgame(event.getJDA(), args));
+        event.getChannel().sendMessage(setgame(event.getDiscord(), event.getArgs()));
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         //Permission check
         if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
             return "";
         return "<game?> - To set the Playing: ...";
     }
 
-    private String setgame(JDA jda, String[] args) {
+    private String setgame(Discord discord, String[] args) {
         if (args.length == 0)
-            jda.getPresence().setGame(null);
+            discord.setGame(null);
         else
-            jda.getPresence().setGame(Game.of(args[0]));
+            discord.setGame(Game.of(args[0]));
         return "[Success] Game changed";
     }
 }

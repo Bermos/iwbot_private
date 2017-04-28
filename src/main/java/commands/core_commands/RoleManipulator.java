@@ -26,7 +26,7 @@ public class RoleManipulator implements GuildCommand {
             event.replyAsync("[Error] No action selected");
         } else {
             if (args[0].equalsIgnoreCase("add")) {
-                event.getGuild().getController().createRole().setName(args[1]).queue();
+                event.getGuild().getController().createRole().setName(args[1]).queue(); //TODO
                 event.replyAsync("[Success] role '" + args[1] + "' created");
             }
             if (args[0].equalsIgnoreCase("del")) {

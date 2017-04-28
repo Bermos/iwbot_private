@@ -3,13 +3,16 @@ package provider.jda.channel;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import provider.jda.Discord;
+import provider.jda.Guild;
 
 public class GuildChannel implements Channel {
     private String id;
+    private Guild guild;
     private Discord discord;
 
-    public GuildChannel(String id, Discord discord) {
+    public GuildChannel(String id, Guild guild, Discord discord) {
         this.id = id;
+        this.guild = guild;
         this.discord = discord;
     }
 
@@ -46,5 +49,9 @@ public class GuildChannel implements Channel {
     @Override
     public void sendTyping() {
         discord.sendGTyping(id);
+    }
+
+    public String getTopic() {
+        return discord.getChannelTopic(id);
     }
 }

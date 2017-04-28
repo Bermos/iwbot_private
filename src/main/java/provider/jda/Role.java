@@ -13,6 +13,10 @@ public class Role {
         this.discord = discord;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public String getName() {
         return discord.getRoleName(id, guildId);
     }
@@ -20,4 +24,6 @@ public class Role {
     public void deleteAsync() {
         discord.deleteRoleAsync(id, guildId);
     }
+
+
 }

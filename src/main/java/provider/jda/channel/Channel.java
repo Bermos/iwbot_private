@@ -19,5 +19,4 @@ public interface Channel {
     Message sendMessage(MessageEmbed embed);
 
     void sendTyping();
-
 }

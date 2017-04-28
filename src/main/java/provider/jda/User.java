@@ -1,8 +1,8 @@
 package provider.jda;
 
 public class User {
-    private String id;
-    private Discord discord;
+    String id;
+    Discord discord;
 
     public User(String id, Discord discord) {
         this.id = id;

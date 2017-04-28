@@ -4,9 +4,10 @@ import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
+import provider.jda.Discord;
+import provider.jda.events.GuildMessageEvent;
+import provider.jda.events.PrivateMessageEvent;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,17 +20,17 @@ import java.util.concurrent.TimeUnit;
 
 public class Reminder implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(reminder(event.getAuthor().getId(), args));
+    public void runCommand(PrivateMessageEvent event, Discord discord) {
+        event.getChannel().sendMessage(reminder(event.getAuthor().getId(), event.getArgs()));
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(reminder(event.getAuthor().getId(), args));
+    public void runCommand(GuildMessageEvent event, Discord discord) {
+        event.getChannel().sendMessage(reminder(event.getAuthor().getId(), event.getArgs()));
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         return "Syntax is: '/reminder ##t, reason' - ## number, t time unit (s|m|h|d|w|y), reason is optional";
     }
 

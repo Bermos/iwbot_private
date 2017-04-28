@@ -3,12 +3,13 @@ package commands.iw_commands;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import commands.GuildCommand;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.Connections;
 import provider.DataProvider;
+import provider.jda.Discord;
+import provider.jda.Member;
+import provider.jda.Role;
+import provider.jda.User;
+import provider.jda.events.GuildMessageEvent;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,20 +26,22 @@ public class Applicant implements GuildCommand {
     private final Connections con = new Connections();
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(GuildMessageEvent event, Discord discord) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
-            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
+        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+            event.replyAsync("[Error] You aren't authorized to do this");
             return;
         }
 
+        String[] args = event.getArgs();
+
         if (args.length == 0) {
-            event.getChannel().sendMessage("[Error] Please use at least one argument for this command").queue();
+            event.replyAsync("[Error] Please use at least one argument for this command");
             return;
         }
 
         if (event.getMessage().getMentionedUsers().isEmpty()) {
-            event.getChannel().sendMessage("[Error] Please mention a user").queue();
+            event.replyAsync("[Error] Please mention a user");
             return;
         }
 
@@ -59,7 +62,7 @@ public class Applicant implements GuildCommand {
             delete(event);
     }
 
-    private void delete(GuildMessageReceivedEvent event) {
+    private void delete(GuildMessageEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
@@ -67,18 +70,18 @@ public class Applicant implements GuildCommand {
             ps.setString(1, uApplicant.getId());
 
             if (ps.executeUpdate() == 1) {
-                event.getChannel().sendMessage("Applicant removed").queue();
+                event.replyAsync("Applicant removed");
             } else {
-                event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
+                event.replyAsync("Applicant not found. Has he been registered via 'applicant new, ...' ?");
             }
 
         } catch (SQLException e) {
-            event.getChannel().sendMessage("Something went wrong. Couldn't find applicant to delete").queue();
+            event.replyAsync("Something went wrong. Couldn't find applicant to delete");
             LogUtil.logErr(e);
         }
     }
 
-    private void status(GuildMessageReceivedEvent event) {
+    private void status(GuildMessageEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
         Member mApplicant = event.getGuild().getMember(uApplicant);
 
@@ -92,18 +95,18 @@ public class Applicant implements GuildCommand {
                 out += "Eval: " + rs.getInt("eval") + "\n";
                 out += "Missions: " + rs.getInt("missions") + "\n";
 
-                event.getChannel().sendMessage(out).queue();
+                event.replyAsync(out);
             } else {
-                event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
+                event.replyAsync("Applicant not found. Has he been registered via 'applicant new, ...' ?");
             }
 
         } catch (SQLException e) {
-            event.getChannel().sendMessage("Something went wrong. Couldn't get status of applicant").queue();
+            event.replyAsync("Something went wrong. Couldn't get status of applicant");
             LogUtil.logErr(e);
         }
     }
 
-    private void mission(GuildMessageReceivedEvent event) {
+    private void mission(GuildMessageEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
@@ -111,9 +114,9 @@ public class Applicant implements GuildCommand {
             ps.setString(1, uApplicant.getId());
 
             if (ps.executeUpdate() == 1) {
-                event.getChannel().sendMessage("Added mission done").queue();
+                event.replyAsync("Added mission done");
             } else {
-                event.getChannel().sendMessage("No mission added. Either applicant is already at 2 or he wasn't found.").queue();
+                event.replyAsync("No mission added. Either applicant is already at 2 or he wasn't found.");
             }
 
         } catch (SQLException e) {
@@ -121,7 +124,7 @@ public class Applicant implements GuildCommand {
         }
     }
 
-    private void combat(GuildMessageReceivedEvent event) {
+    private void combat(GuildMessageEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
@@ -129,16 +132,16 @@ public class Applicant implements GuildCommand {
             ps.setString(1, uApplicant.getId());
 
             if (ps.executeUpdate() == 1) {
-                event.getChannel().sendMessage("Added combat eval done").queue();
+                event.replyAsync("Added combat eval done");
             } else {
-                event.getChannel().sendMessage("No combat eval added. Either applicant already had his or he wasn't found.").queue();
+                event.replyAsync("No combat eval added. Either applicant already had his or he wasn't found.");
             }
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
     }
 
-    private void newApplicant(GuildMessageReceivedEvent event, String[] args) {
+    private void newApplicant(GuildMessageEvent event, String[] args) {
         User applicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
@@ -153,25 +156,25 @@ public class Applicant implements GuildCommand {
 
             Arrays.sort(args);
             if (Arrays.binarySearch(args, "pc") > -1) {
-                event.getGuild().getController().addRolesToMember(applicantMem, pc).queue();
+                event.getGuild().getController().addRolesToMember(applicantMem, pc);
             }
             if (Arrays.binarySearch(args, "xbox") > -1) {
-                event.getGuild().getController().addRolesToMember(applicantMem, xbox).queue();
+                event.getGuild().getController().addRolesToMember(applicantMem, xbox);
             }
-            event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
+            event.getGuild().getController().addRolesToMember(applicantMem, appl);
 
-            event.getChannel().sendMessage("Added new applicant").queue();
+            event.replyAsync("Added new applicant");
 
         } catch (MySQLIntegrityConstraintViolationException e) {
-            event.getChannel().sendMessage("This applicant is already registered").queue();
+            event.replyAsync("This applicant is already registered");
         } catch (SQLException e) {
-            event.getChannel().sendMessage("Something went wrong. No new applicant saved.").queue();
+            event.replyAsync("Something went wrong. No new applicant saved.");
             LogUtil.logErr(e);
         }
     }
 
     @Override
-    public String getHelp(GuildMessageReceivedEvent event) {
+    public String getHelp(GuildMessageEvent event) {
         return "";
     }
 }
