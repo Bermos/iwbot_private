@@ -38,7 +38,7 @@ public class Constants {
     public final static String BGS_FACTION_EDIT_HELP = "**Help: Edit BGS Faction**\n" + Listener.prefix + "bgs faction, edit, <factionid>, <shortname>, <fullname>";
 
 
-    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list}>\n\n"+
+    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list, note}>\n\n"+
             "Example of active goal list: " + Listener.prefix + "bgs goals,list\n"+
             "Example of X recent goals: " + Listener.prefix + "bgs goals,list,{X}\n"+
             "Example of X recent goals starting from Y goal ID: " + Listener.prefix + "bgs goals,list,{X},{Y}";

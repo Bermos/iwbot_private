@@ -266,7 +266,7 @@ class BGSGoal {
         } catch (SQLException e) {
             return "**SQL ERROR NOTE NOT ADDED**\n";
         }
-        return "**Note added to goal**";
+        return "**Note added to goal #" + args[2] + "**";
     }
 
     static String deleteGoalItem(BGS.Activity activity, String goalid, String factionid) {
