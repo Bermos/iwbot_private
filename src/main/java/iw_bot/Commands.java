@@ -3,6 +3,7 @@ package iw_bot;
 import commands.GuildCommand;
 import commands.PMCommand;
 import commands.core_commands.*;
+import commands.core_commands.Shutdown;
 import commands.ed_commands.CMDRLookup;
 import commands.ed_commands.Distance;
 import commands.iw_commands.*;
@@ -74,18 +75,6 @@ class Commands {
 			}
 		});
 
-		guildCommands.put("shitdown", new GuildCommand() {
-			@Override
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendMessage(":poop:").queue();
-			}
-
-			@Override
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "";
-			}
-		});
-
 		guildCommands.put("debug", new DebugMode());
 
 		guildCommands.put("update", new Update());
@@ -143,6 +132,18 @@ class Commands {
 		guildCommands.put("restart", new Restart());
 
 		guildCommands.put("shutdown", new Shutdown());
+
+		guildCommands.put("shitdown", new GuildCommand() {
+			@Override
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				event.getChannel().sendMessage(":poop:").queue();
+			}
+
+			@Override
+			public String getHelp(GuildMessageReceivedEvent event) {
+				return "";
+			}
+		});
 
 		//end of commands
 	}
