@@ -23,6 +23,8 @@ public class Constants {
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public final static SimpleDateFormat USER_SDF = new SimpleDateFormat("dd/MM/yy HH:mm");
 
+    public final static String MOD_ONLY_CMD_ERROR = "**You have to be a moderator to use this bot command.**\nCheck pinned messages in the #bgs_ops channel or use **" + Listener.prefix + "bgs mystats** for a customised report on active goals and progress towards them.";
+
     public final static String BGS_STATS_HELP = "**Help: Produce Statistics on BGS Data**\n" + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
 
     public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems**\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show, list}>";
