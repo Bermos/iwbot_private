@@ -52,7 +52,7 @@ public class Missions implements GuildCommand {
 	}
 	
 	private static void create(String name, GuildManager guildManager, Member explorer) {
-		Channel missionChannel;
+		TextChannel missionChannel;
 		Guild guild = guildManager.getGuild();
 		Role iwRole = guild.getRoleById("143171790225670145");
 		Role explorerRole = guild.getRoleById("143403360081543168");
@@ -62,7 +62,7 @@ public class Missions implements GuildCommand {
 		String channelName = "mission_" + name;
 		String explorerName = "*edit*";
 
-		missionChannel = guild.getController().createTextChannel(channelName).complete();
+		missionChannel = (TextChannel) guild.getController().createTextChannel(channelName).complete();
 
 		// Set permissions for moderators
 		PermOverrideManagerUpdatable permManager = missionChannel.createPermissionOverride(moderatorRole).complete().getManagerUpdatable();
@@ -89,7 +89,7 @@ public class Missions implements GuildCommand {
 			.update().queue();
 
 		// In case the explorer is mentioned in the message...
-		if (explorer != null) {
+        if (explorer != null) {
 			// Set permissions for the explorer
 			permManager = missionChannel.createPermissionOverride(explorer).complete().getManagerUpdatable();
 			permManager.grant(Permission.MESSAGE_READ)
@@ -123,12 +123,10 @@ public class Missions implements GuildCommand {
 		
 		missionChannel.getManager().setTopic(topic).queue();
 
-		//Add SOP and welcome to beginning of channel
-		MissionChannel mChannel = getChannel(missionChannel.getName());
-		if (mChannel == null) {
-			return;
-		}
-		mChannel.sendMessage("Hello" + explorerName + "\n" + "Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wI").queue();
+		// Send out SOP
+        if (explorerName.equals("*edit*")) { explorerName = "explorer"; }
+
+		missionChannel.sendMessage("Hello" + explorerName + "\n" + "Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wI").queue();
 	}
 
 	private static void archive(TextChannel channel, String id) {
@@ -203,9 +201,9 @@ public class Missions implements GuildCommand {
 	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
 
 		//Create new mission channel and assign role to mentioned explorer
-		if (args.length == 3 && args[0].equalsIgnoreCase("new")) {
+		if (args.length > 1 && args[0].equalsIgnoreCase("new")) {
 			User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
-			Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
+			create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
 			event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
 		}
 
