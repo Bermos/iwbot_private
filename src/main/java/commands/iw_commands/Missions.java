@@ -124,6 +124,8 @@ public class Missions implements GuildCommand {
 		missionChannel.getManager().setTopic(topic).queue();
 
 		// Send out SOP
+        if (explorerName.equals("*edit*")) { explorerName = "explorer"; }
+
 		missionChannel.sendMessage("Hello" + explorerName + "\n" + "Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wI").queue();
 	}
 
