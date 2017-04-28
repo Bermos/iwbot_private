@@ -44,32 +44,45 @@ class BGSGoal {
 
     }
 
-    static ArrayList<String> listGoal(String recent, String userid, boolean showUserP) {
+    static ArrayList<String> listGoal(String startid, String recent, String userid, boolean showUserP) {
         Connection connect = new Connections().getConnection();
         ArrayList<String> messages = new ArrayList<>();
         try {
             PreparedStatement ps;
-            String message = "";
+            String message;
             if (Integer.parseInt(recent) == 0) { // get active goals
                 ps = connect.prepareStatement("SELECT goalid, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname, " +
                         "startts, endts, ticks, note " +
                         "FROM bgs_goal g " +
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
-            } else {
+                message = "**Active Goals**\n" +
+                        "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            } else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals (no more than 10)
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
                         "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(recent));
-                message = "**" + recent + " Most Recent Goals**\n";
+                message = "**" + recent + " Most Recent Goals**\n" +
+                        "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            }
+            else if(Integer.parseInt(startid) > 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals starting from goalID Y (no more than 10)
+                ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
+                        "FROM bgs_goal g " +
+                        "WHERE startts <= (SELECT startts FROM bgs_goal WHERE goalid = ?) " +
+                        "ORDER BY startts DESC LIMIT ?");
+                ps.setInt(1, Integer.parseInt(startid));
+                ps.setInt(2, Integer.parseInt(recent));
+                message = "**" + recent + " most recent goals starting from goal #" + startid + "**\n" +
+                        "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            }
+            else {
+                messages.add("You can not return more than 10 goals");
+                return messages;
             }
             ResultSet rs = ps.executeQuery();
             int rows = 0;
 
             while (rs.next()) {
                 rows = rows + 1;
-                if (rows == 1) {
-                    message = "**Active Goals**\n" +
-                            "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
-                }
                 ps = connect.prepareStatement("SELECT i.activity, i.factionid, i.usergoal, i.globalgoal, g.systemid, g.endts, g.startts, " +
                         "(SELECT f_shortname FROM bgs_faction f WHERE f.factionid = i.factionid) AS f_shortname, " +
                         "(SELECT f_fullname FROM bgs_faction f WHERE f.factionid = i.factionid) AS f_fullname, " +
@@ -87,7 +100,7 @@ class BGSGoal {
                 message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + BGS.dateDiff(new Date(), SQL_SDF.parse(rs.getString("endts"))) + ")";
                 if (numrows > 0) {
                     if (showUserP) {
-                        message += String.format("```%1$-17s | %2$-15s | %3$s\n", "", "Your Goal", "System Goal");
+                        message += String.format("```%1$-17s | %2$-16s | %3$s\n", "", "Your Goal", "System Goal");
                     } else {
                         message += String.format("```%1$-17s | %2$-15s | %3$s\n", "", "CMDR (Num Met)", "System Goal");
                     }
@@ -99,7 +112,7 @@ class BGSGoal {
                             factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"));
                         }
                         if (showUserP) {
-                            message += String.format("%1$-17s | %2$-15s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
+                            message += String.format("%1$-17s | %2$-16s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)", int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)");
                         } else {
                             ps = connect.prepareStatement("SELECT IFNULL(COUNT(*),0) AS userfinished FROM (SELECT SUM(a.amount) AS total FROM bgs_activity a WHERE a.activity = ? AND a.timestamp >= ? AND a.timestamp <= ? AND a.systemid = ? AND a.factionid = ? GROUP BY userid HAVING total >= ?) AS tmp");
                             ps.setString(1, rs1.getString("activity"));
@@ -210,7 +223,7 @@ class BGSGoal {
                     goalid = rs.getInt(1);
                 }
 
-                String message = "**New goal added to BGS logging**\n" +
+                String message = "**New goal added to BGS logging #" + goalid + "**\n" +
                         "*Start:* " + starttime + "\n" +
                         "*End:* " + endtime + " (" + args[4] + " ticks)\n";
                 if (args.length >= 6) {
@@ -253,18 +266,19 @@ class BGSGoal {
         } catch (SQLException e) {
             return "**SQL ERROR NOTE NOT ADDED**\n";
         }
-        return "**Note added to goal**";
+        return "**Note added to goal #" + args[2] + "**";
     }
 
-    static String deleteGoalItem(BGS.Activity activity, String goalid) {
+    static String deleteGoalItem(BGS.Activity activity, String goalid, String factionid) {
         Connection connect = new Connections().getConnection();
         try {
-            PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal_item WHERE goalid = (SELECT goalid FROM bgs_goal WHERE goalid = ?) AND activity = ? LIMIT 1");
+            PreparedStatement ps = connect.prepareStatement("DELETE FROM bgs_goal_item WHERE goalid = (SELECT goalid FROM bgs_goal WHERE goalid = ?) AND activity = ? AND factionid = (SELECT factionid FROM bgs_faction WHERE factionid = ?) LIMIT 1");
             ps.setInt(1, Integer.parseInt(goalid));
             ps.setString(2, activity.toString());
+            ps.setString(3, factionid);
             ps.executeUpdate();
         } catch (SQLException e) {
-            return "**Failed deleting Goal Item**\n" + Listener.prefix + "bgs goal,{deleteitem,delitem},<goalid>";
+            return(BGS_GOAL_DELACT_HELP);
         }
         return "**Goal Item Deleted**";
     }
@@ -329,7 +343,7 @@ class BGSGoal {
                 }
             }
 
-            message = "**Goal Item #" + Integer.toString(i) + " Added/Updated**\n" +
+            message = "**Goal Item #" + Integer.toString(i) + " Added/Updated to Goal " + goalid + "**\n" +
                     "*Activity:* " + activity + "\n" +
                     "*Faction:* " + goalitem[1] + "\n" +
                     "*CMDR Goal:* " + NumberFormat.getInstance(Locale.GERMANY).format(Integer.parseInt(goalitem[2])).replace('.', '\'') + "\n" +

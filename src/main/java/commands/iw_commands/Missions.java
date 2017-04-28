@@ -122,6 +122,13 @@ public class Missions implements GuildCommand {
 							+ "Bravo: *TBA*\n";
 		
 		missionChannel.getManager().setTopic(topic).queue();
+
+		//Add SOP and welcome to beginning of channel
+		MissionChannel mChannel = getChannel(missionChannel.getName());
+		if (mChannel == null) {
+			return;
+		}
+		mChannel.sendMessage("Hello" + explorerName + "\n" + "Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wI").queue();
 	}
 
 	private static void archive(TextChannel channel, String id) {
@@ -218,7 +225,12 @@ public class Missions implements GuildCommand {
             event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage("Explorer tags removed.").queue();
         }
 
-        //State the intent of deleting that channel. Ask if they are for sure
+		//Post SOP link via command "mission sop"
+		if (Arrays.binarySearch(args, "sop") > -1) {
+			event.getChannel().sendMessage("Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wI").queue();
+		}
+
+		//State the intent of deleting that channel. Ask if they are for sure
 		if (Arrays.binarySearch(args, "close") > -1) {
 			Missions.archiveRequest(event.getChannel(), event.getAuthor().getId());
 			event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. " +

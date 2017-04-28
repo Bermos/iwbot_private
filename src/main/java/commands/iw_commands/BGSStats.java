@@ -4,6 +4,7 @@ package commands.iw_commands;
 import iw_bot.Listener;
 import iw_bot.LogUtil;
 
+import org.hamcrest.core.IsNull;
 import provider.Connections;
 
 import java.sql.Connection;
@@ -50,27 +51,52 @@ class BGSStats {
         return outputs;
     }
 
-    static String getTick(String[] args) {
+    static List<String> getTick(String[] args) {
         String system = "all";
+        Boolean first = true;
+        List<String> output = new ArrayList<>();
+        String block;
 
         if (args.length == 5) {
             system = args[4];
         }
         try {
             Date time = USER_SDF.parse(args[3]);
-            String output = "Data for " + args[2] + " ticks after " + args[3] + " UTC System Filter: " + system + "\n```";
+            block = "Data for " + args[2] + " ticks after " + args[3] + " UTC System Filter: " + system + "\n";
             Map<String, String> entries = getTotalAmount(time, Integer.parseInt(args[2]), system);
             for (Entry<String, String> entry : entries.entrySet()) {
-                output += entry.getKey() + ": " + entry.getValue() + "\n";
+                if(Objects.equals(entry.getValue(), "systemtitle")){
+                    if (!first){
+                        block += "```";
+                        output.add(block);
+                        block = "";
+                    }
+                    block += "**" + entry.getKey() + "**\n```";
+                    first = false;
+                }
+                else {
+                    if(Objects.equals(entry.getValue(), "factionlist")){
+                        block += "```" + entry.getKey();
+                    }
+                    else if(Objects.equals(entry.getValue(), "cmdrlist")){
+                        block += "\n\n**Active Cmdrs**" + entry.getKey();
+                    }
+                    else {
+                        block += entry.getKey().replaceAll(".*~\\*#", "") + ": " + entry.getValue() + "\n";
+                    }
+                }
             }
-            output += "```";
-            if (entries.isEmpty())
-                return "No records for the specified period";
+            output.add(block);
+            if (entries.isEmpty()) {
+                output.add("No records for the specified period");
+                return output;
+            }
             else {
                 return output;
             }
         } catch (ParseException e) {
-            return "Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'";
+            output.add("Parsing error. Make sure the date follows the pattern 'dd/MM/yy HH:mm'");
+            return output;
         }
     }
 
@@ -121,33 +147,58 @@ class BGSStats {
     private static Map<String, String> getTotalAmount(Date start, int ticks, String system) {
         Map<String, String> totals = new LinkedHashMap<>();
         Date end = ticks == 0 ? new Date() : new Date(start.getTime() + (ticks * 24 * 60 * 60 * 1000L));
+        String systemcheck = "";
+        Set<String> factions = new TreeSet<>();
+        Set<String> cmdrs = new TreeSet<>();
 
         Connection connect = new Connections().getConnection();
         try {
             if (system.equals("all")) {
                 PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = b.systemid) AS s_fullname, " +
+                        "(SELECT bgs_faction.f_fullname FROM bgs_faction WHERE bgs_faction.factionid = b.factionid) AS f_fullname, " +
+                        "(SELECT bgs_faction.f_shortname FROM bgs_faction WHERE bgs_faction.factionid = b.factionid) AS f_shortname, " +
                         "b.activity, " +
                         "SUM(b.amount) AS total," +
                         "COUNT(DISTINCT(b.userid)) AS numcmdrs " +
                         "FROM bgs_activity b " +
                         "WHERE timestamp > ? AND timestamp < ? " +
-                        "GROUP BY s_fullname, activity " +
-                        "ORDER BY s_fullname ASC, activity ASC");
+                        "GROUP BY s_fullname, f_fullname, activity " +
+                        "ORDER BY s_fullname ASC, activity ASC, f_fullname ASC");
                 ps.setString(1, SQL_SDF.format(start));
                 ps.setString(2, SQL_SDF.format(end));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     double cmdravg = (double) rs.getInt("total") / rs.getInt("numcmdrs");
-                    totals.put((BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("s_fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
+                    if(!Objects.equals(systemcheck, rs.getString("s_fullname"))){
+                        totals.put(rs.getString("s_fullname"),"systemtitle");
+                        systemcheck = rs.getString("s_fullname");
+                    }
+                    totals.put(rs.getString("s_fullname") + "~*#" + (BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("f_shortname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
+                    factions.add(rs.getString("f_shortname") + " = " + rs.getString("f_fullname"));
+                }
+                // now get list of cmdrs involved
+                ps = connect.prepareStatement("SELECT "+
+                        "DISTINCT(b.userid), b.username " +
+                        "FROM bgs_activity b " +
+                        "WHERE b.timestamp > ? AND b.timestamp < ? " +
+                        "ORDER BY username ASC");
+                ps.setString(1, SQL_SDF.format(start));
+                ps.setString(2, SQL_SDF.format(end));
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    cmdrs.add(rs.getString("username"));
                 }
             } else {
                 PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = b.systemid) AS s_fullname," +
+                        "(SELECT bgs_faction.f_fullname FROM bgs_faction WHERE bgs_faction.factionid = b.factionid) AS f_fullname, " +
+                        "(SELECT bgs_faction.f_shortname FROM bgs_faction WHERE bgs_faction.factionid = b.factionid) AS f_shortname, " +
                         "b.activity, " +
                         "SUM(b.amount) AS total, " +
                         "COUNT(DISTINCT(b.userid)) AS numcmdrs " +
                         "FROM bgs_activity b " +
                         "WHERE b.timestamp > ? AND b.timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) AND s_hidden = '0' LIMIT 1) " +
-                        "GROUP BY s_fullname, activity ORDER BY s_fullname ASC, activity ASC");
+                        "GROUP BY s_fullname, f_fullname, activity " +
+                        "ORDER BY s_fullname ASC, activity ASC, f_fullname ASC");
                 ps.setString(1, SQL_SDF.format(start));
                 ps.setString(2, SQL_SDF.format(end));
                 ps.setString(3, system);
@@ -155,8 +206,34 @@ class BGSStats {
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     double cmdravg = (double) rs.getInt("total") / rs.getInt("numcmdrs");
-                    totals.put((BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("s_fullname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
+                    if(!Objects.equals(systemcheck, rs.getString("s_fullname"))){
+                        totals.put(rs.getString("s_fullname"),"systemtitle");
+                        systemcheck = rs.getString("s_fullname");
+                    }
+                    totals.put(rs.getString("s_fullname") + "~*#" + (BGS.Activity.valueOf(rs.getString("activity").toUpperCase()).toString()) + " (" + rs.getString("f_shortname") + ")", NumberFormat.getInstance(Locale.GERMANY).format(rs.getInt("total")).replace('.', '\'') + " from " + rs.getInt("numcmdrs") + " CMDRs (" + BGS.int_format_short((int) cmdravg) + " avg.)");
+                    factions.add(rs.getString("f_shortname") + " = " + rs.getString("f_fullname"));
                 }
+
+                // now get list of cmdrs involved
+                ps = connect.prepareStatement("SELECT "+
+                        "DISTINCT(b.userid), b.username " +
+                        "FROM bgs_activity b " +
+                        "WHERE b.timestamp > ? AND b.timestamp < ? AND b.systemid = (SELECT systemid FROM bgs_system WHERE (s_shortname = ? OR s_fullname = ?) AND s_hidden = '0' LIMIT 1) " +
+                        "ORDER BY username ASC");
+                ps.setString(1, SQL_SDF.format(start));
+                ps.setString(2, SQL_SDF.format(end));
+                ps.setString(3, system);
+                ps.setString(4, system);
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    cmdrs.add(rs.getString("username"));
+                }
+            }
+            if(factions.size() > 0) {
+                totals.put("\n" + String.join("\n", factions),"factionlist");
+            }
+            if(cmdrs.size() > 0) {
+                totals.put("\n" + String.join(", ", cmdrs),"cmdrlist");
             }
         } catch (SQLException e) {
             LogUtil.logErr(e);
