@@ -122,15 +122,199 @@ public class BGS implements PMCommand, GuildCommand {
             BGSRole.toggleBgsRole(event);
         }
         // admin calls for stats
-        else if (args[0].equalsIgnoreCase("stats") && DataProvider.isAdmin(event)) {
-            if (args.length == 1) { // send default help message for stats admin
-                event.getChannel().sendMessage(BGS_STATS_HELP).queue();
+        else if (args[0].equalsIgnoreCase("stats")) {
+            if(DataProvider.isAdmin(event)) {
+                if (args.length == 1) { // send default help message for stats admin
+                    event.getChannel().sendMessage(BGS_STATS_HELP).queue();
 
-            } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")) { // summary stats
-                // Two options. No system filter and filtering for a system
-                if (args.length == 4 || args.length == 5) {
+                } else if (args[1].equalsIgnoreCase("summary") || args[1].equalsIgnoreCase("sum")) { // summary stats
+                    // Two options. No system filter and filtering for a system
+                    if (args.length == 4 || args.length == 5) {
 
-                    List<String> messages = BGSStats.getTick(args);
+                        List<String> messages = BGSStats.getTick(args);
+                        String messageToSend = "";
+                        for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                            if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                                event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                                messageToSend = "";
+                                messageToSend += message;
+                            } else { // need the line break if not going to be seperate messages.
+                                messageToSend += "\n" + message;
+                            }
+                        }
+                        event.getChannel().sendMessage(messageToSend).queue();
+
+                    } else { // send help for summary stats
+                        event.getChannel().sendMessage(BGS_STATS_HELP).queue();
+
+                    }
+                }
+                // CSV output
+                else if (args[1].equalsIgnoreCase("csv") && args.length >= 4) {
+                    JDAUtil.sendMultipleMessages(event.getChannel(), BGSStats.getFullTick(args));
+
+                } else { // If got this far something went wrong so show help for stats
+                    event.getChannel().sendMessage(BGS_STATS_HELP).queue();
+
+                }
+            } else{
+                event.getChannel().sendMessage(MOD_ONLY_CMD_ERROR).queue();
+            }
+        }
+        // admin commands for system factions
+        else if ((args[0].equalsIgnoreCase("faction") || args[0].equalsIgnoreCase("factions") || args[0].equalsIgnoreCase("fac"))) {
+            if (DataProvider.isAdmin(event)) {
+                if (args.length == 1) { // send default help message for system admin
+                    event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
+                } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the factions available
+                    //bgs faction, list, <system>
+                    if (args.length == 2) {
+                        event.getChannel().sendMessage("**BGS Factions**\n" + BGSFaction.getFactions(true, 0) + BGSFaction.getFactions(true, -1)).queue();
+                    } else if (args.length == 3) {
+                        event.getChannel().sendMessage(BGSFaction.getFactions(DataProvider.isAdmin(event), BGSSystem.systemExists(args[2], args[2], 0, true))).queue();
+                    } else {
+                        event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) { // show or hide a faction
+                    //bgs faction, <show | hide>, faction, system
+                    if (args.length == 4) {
+                        event.getChannel().sendMessage(BGSFaction.setFactionVisibility(args[1].equalsIgnoreCase("show"), args[2], args[3])).queue();
+                    } else { // show system help if wrong number of arguments
+                        event.getChannel().sendMessage(BGS_FACTION_HIDE_HELP + "\n" + BGSFaction.getFactions(DataProvider.isAdmin(event), -1)).queue();
+                    }
+
+                } else if (args[1].equalsIgnoreCase("add")) { // add a new faction to the database
+                    //bgs faction, add, <shortname>, <fullname>
+                    event.getChannel().sendMessage(BGSFaction.addFaction(args)).queue();
+
+                } else if (args[1].equalsIgnoreCase("edit")) { // edit a faction in the database
+                    //bgs faction, edit, <factionid>, <shortname>, <fullname>
+                    event.getChannel().sendMessage(BGSFaction.editFaction(args)).queue();
+
+                } else if (args[1].equalsIgnoreCase("assign") || args[1].equalsIgnoreCase("ass")) { // assign a faction to a system
+                    //bgs faction, assign, <factionname>, <systemname>
+                    event.getChannel().sendMessage(BGSFaction.assignFaction(args)).queue();
+
+                } else if (args[1].equalsIgnoreCase("remove") || args[1].equalsIgnoreCase("rem")) { // remove a faction from a system
+                    //bgs faction, remove, <factionname>, <systemname>
+                    event.getChannel().sendMessage(BGSFaction.removeFaction(args)).queue();
+
+                } else { // if got this far something went wrong. Show system help
+                    event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
+                }
+            } else{
+                event.getChannel().sendMessage(MOD_ONLY_CMD_ERROR).queue();
+            }
+        }
+        // admin functions for systems
+        else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems") || args[0].equalsIgnoreCase("sys"))) {
+            if (DataProvider.isAdmin(event)) {
+                if (args.length == 1) { // send default help message for system admin
+                    event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
+
+                } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the systems available
+                    event.getChannel().sendMessage("**BGS Star Systems**\n" + BGSSystem.getSystems(DataProvider.isAdmin(event))).queue();
+
+                } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) { // show or hide a system
+                    if (args.length == 3) {
+                        event.getChannel().sendMessage(BGSSystem.setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
+
+                    } else { // show system help if wrong number of arguments
+                        event.getChannel().sendMessage(BGS_SYSTEM_HIDE_HELP + "\n" + BGSSystem.getSystems(DataProvider.isAdmin(event))).queue();
+                    }
+
+                } else if (args[1].equalsIgnoreCase("add")) { // add a new system to the database
+                    //bgs system, add, <shortname>, <fullname>
+                    event.getChannel().sendMessage(BGSSystem.addSystem(args)).queue();
+
+                } else if (args[1].equalsIgnoreCase("edit")) { // edit a system in the database
+                    //bgs system, edit, <systemid>, <shortname>, <fullname>
+                    event.getChannel().sendMessage(BGSSystem.editSystem(args)).queue();
+
+                } else { // if got this far something went wrong. Show system help
+                    event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
+                }
+            }
+            else{
+                event.getChannel().sendMessage(MOD_ONLY_CMD_ERROR).queue();
+            }
+        }
+        // admin functions for goals
+        else if ((args[0].equalsIgnoreCase("goal") || args[0].equalsIgnoreCase("goals"))) {
+            if (DataProvider.isAdmin(event)) {
+                if (args.length == 1) { // Send help message for goals
+                    event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
+
+                } else if (args[1].equalsIgnoreCase("end")) { // end a goal now a new goal.
+                    //bgs goals,end,goalid
+                    if (args.length >= 3) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
+                        event.getChannel().sendMessage(BGSGoal.endGoal(args)).queue();
+                    } else { // show help message for adding a goal as less than 5 arguments
+                        event.getChannel().sendMessage(BGS_GOAL_END_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
+                    //bgs goals,add,system,Start Date:Time, Ticks, activity/faction/usergoal/globalgoal,activity/faction/usergoal/globalgoal,activity/faction/usergoal/globalgoal
+                    if (args.length >= 5) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
+                        event.getChannel().sendMessage(BGSGoal.addGoal(args)).queue();
+                    } else { // show help message for adding a goal as less than 5 arguments
+                        event.getChannel().sendMessage(BGS_GOAL_ADD_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("delete") || args[1].equalsIgnoreCase("del")) { // delete a goal
+                    //bgs goals,<del>,goalid
+                    if (args.length == 3) {
+                        event.getChannel().sendMessage(BGSGoal.deleteGoal(args[2])).queue();
+                    } else {
+                        event.getChannel().sendMessage(BGS_GOAL_DEL_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("deleteact") || args[1].equalsIgnoreCase("delact")) { // delete an individual goal item from a goal
+                    //bgs goals,<delact>,goalid,Activity
+                    if (args.length == 5) {
+                        event.getChannel().sendMessage(BGSGoal.deleteGoalItem(Activity.from(args[3]), args[2], args[4])).queue();
+                    } else {
+                        event.getChannel().sendMessage(BGS_GOAL_DELACT_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("edit")) { // edit a goal. Goal items are edited using /editact
+                    //bgs golas,edit,goalid,system,Start Date:Time, Ticks
+                    if (args.length == 6) {
+                        event.getChannel().sendMessage(BGSGoal.editGoal(args)).queue();
+                    } else {
+                        event.getChannel().sendMessage(BGS_GOAL_EDIT_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("editactivity") || args[1].equalsIgnoreCase("addactivity") || args[1].equalsIgnoreCase("editact") || args[1].equalsIgnoreCase("addact")) {
+                    //bgs goals,<addact,editact>,goalid,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
+                    String message = "";
+                    // need 4 or more arguments to add a goal item
+                    if (args.length >= 4) {
+                        // loop through the goal items which are in the array from 3 onwards
+                        for (int i = 3; i < args.length; i++) {
+                            String[] goalitem = args[i].split("/");
+                            message += BGSGoal.addGoalItem(goalitem, i - 2, args[2]); // add the goal item
+                        }
+                        event.getChannel().sendMessage(message).queue();
+                    } else {
+                        event.getChannel().sendMessage(BGS_GOAL_EDITACT_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("note")) { // add a note to a goal. Allows special instructions to be given.
+                    if (args.length >= 3) {
+                        //bgs goals, goalid, note
+                        event.getChannel().sendMessage(BGSGoal.addGoalNote(args)).queue();
+                    } else {
+                        event.getChannel().sendMessage(BGS_GOAL_NOTE_HELP).queue();
+                    }
+                } else if (args[1].equalsIgnoreCase("list")) {
+                    //bgs goals, list,#
+                    //Get # most recent goals
+                    //If # is not specified then get all active goals
+                    String recent = "0";
+                    String startid = "0";
+                    if (args.length == 3) {
+                        recent = args[2];
+                    } else if (args.length == 4) {
+                        recent = args[2];
+                        startid = args[3];
+                    }
+
+                    ArrayList<String> messages = BGSGoal.listGoal(startid, recent, event.getAuthor().getId(), false);
                     String messageToSend = "";
                     for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
                         if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
@@ -142,178 +326,11 @@ public class BGS implements PMCommand, GuildCommand {
                         }
                     }
                     event.getChannel().sendMessage(messageToSend).queue();
-
-                } else { // send help for summary stats
-                    event.getChannel().sendMessage(BGS_STATS_HELP).queue();
-
-                }
-            }
-            // CSV output
-            else if (args[1].equalsIgnoreCase("csv") && args.length >= 4) {
-                JDAUtil.sendMultipleMessages(event.getChannel(), BGSStats.getFullTick(args));
-
-            } else { // If got this far something went wrong so show help for stats
-                event.getChannel().sendMessage(BGS_STATS_HELP).queue();
-
-            }
-        }
-        // admin commands for system factions
-        else if ((args[0].equalsIgnoreCase("faction") || args[0].equalsIgnoreCase("factions") || args[0].equalsIgnoreCase("fac")) && DataProvider.isAdmin(event)) {
-            if (args.length == 1) { // send default help message for system admin
-                event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
-            } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the factions available
-                //bgs faction, list, <system>
-                if (args.length == 2) {
-                    event.getChannel().sendMessage("**BGS Factions**\n" + BGSFaction.getFactions(true, 0) + BGSFaction.getFactions(true, -1)).queue();
-                } else if (args.length == 3) {
-                    event.getChannel().sendMessage(BGSFaction.getFactions(DataProvider.isAdmin(event), BGSSystem.systemExists(args[2], args[2], 0, true))).queue();
                 } else {
-                    event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
+                    event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
                 }
-            } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) { // show or hide a faction
-                //bgs faction, <show | hide>, faction, system
-                if (args.length == 4) {
-                    event.getChannel().sendMessage(BGSFaction.setFactionVisibility(args[1].equalsIgnoreCase("show"), args[2], args[3])).queue();
-                } else { // show system help if wrong number of arguments
-                    event.getChannel().sendMessage(BGS_FACTION_HIDE_HELP + "\n" + BGSFaction.getFactions(DataProvider.isAdmin(event), -1)).queue();
-                }
-
-            } else if (args[1].equalsIgnoreCase("add")) { // add a new faction to the database
-                //bgs faction, add, <shortname>, <fullname>
-                event.getChannel().sendMessage(BGSFaction.addFaction(args)).queue();
-
-            } else if (args[1].equalsIgnoreCase("edit")) { // edit a faction in the database
-                //bgs faction, edit, <factionid>, <shortname>, <fullname>
-                event.getChannel().sendMessage(BGSFaction.editFaction(args)).queue();
-
-            } else if (args[1].equalsIgnoreCase("assign") || args[1].equalsIgnoreCase("ass")) { // assign a faction to a system
-                //bgs faction, assign, <factionname>, <systemname>
-                event.getChannel().sendMessage(BGSFaction.assignFaction(args)).queue();
-
-            } else if (args[1].equalsIgnoreCase("remove") || args[1].equalsIgnoreCase("rem")) { // remove a faction from a system
-                //bgs faction, remove, <factionname>, <systemname>
-                event.getChannel().sendMessage(BGSFaction.removeFaction(args)).queue();
-
-            } else { // if got this far something went wrong. Show system help
-                event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
-            }
-        }
-        // admin functions for systems
-        else if ((args[0].equalsIgnoreCase("system") || args[0].equalsIgnoreCase("systems") || args[0].equalsIgnoreCase("sys")) && DataProvider.isAdmin(event)) {
-            if (args.length == 1) { // send default help message for system admin
-                event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
-
-            } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the systems available
-                event.getChannel().sendMessage("**BGS Star Systems**\n" + BGSSystem.getSystems(DataProvider.isAdmin(event))).queue();
-
-            } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) { // show or hide a system
-                if (args.length == 3) {
-                    event.getChannel().sendMessage(BGSSystem.setSystemVisibility(args[1].equalsIgnoreCase("show"), args[2])).queue();
-
-                } else { // show system help if wrong number of arguments
-                    event.getChannel().sendMessage(BGS_SYSTEM_HIDE_HELP + "\n" + BGSSystem.getSystems(DataProvider.isAdmin(event))).queue();
-                }
-
-            } else if (args[1].equalsIgnoreCase("add")) { // add a new system to the database
-                //bgs system, add, <shortname>, <fullname>
-                event.getChannel().sendMessage(BGSSystem.addSystem(args)).queue();
-
-            } else if (args[1].equalsIgnoreCase("edit")) { // edit a system in the database
-                //bgs system, edit, <systemid>, <shortname>, <fullname>
-                event.getChannel().sendMessage(BGSSystem.editSystem(args)).queue();
-
-            } else { // if got this far something went wrong. Show system help
-                event.getChannel().sendMessage(BGS_SYSTEM_HELP).queue();
-            }
-        }
-        // admin functions for goals
-        else if ((args[0].equalsIgnoreCase("goal") || args[0].equalsIgnoreCase("goals")) && DataProvider.isAdmin(event)) {
-            if (args.length == 1) { // Send help message for goals
-                event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
-
-            } else if (args[1].equalsIgnoreCase("end")) { // end a goal now a new goal.
-                //bgs goals,end,goalid
-                if (args.length >= 3) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
-                    event.getChannel().sendMessage(BGSGoal.endGoal(args)).queue();
-                } else { // show help message for adding a goal as less than 5 arguments
-                    event.getChannel().sendMessage(BGS_GOAL_END_HELP).queue();
-                }
-            } else if (args[1].equalsIgnoreCase("add")) { // add a new goal.
-                //bgs goals,add,system,Start Date:Time, Ticks, activity/faction/usergoal/globalgoal,activity/faction/usergoal/globalgoal,activity/faction/usergoal/globalgoal
-                if (args.length >= 5) { // 5 arguments specifies no goal items. More than 5 means at least one goal item is specified.
-                    event.getChannel().sendMessage(BGSGoal.addGoal(args)).queue();
-                } else { // show help message for adding a goal as less than 5 arguments
-                    event.getChannel().sendMessage(BGS_GOAL_ADD_HELP).queue();
-                }
-            } else if (args[1].equalsIgnoreCase("delete") || args[1].equalsIgnoreCase("del")) { // delete a goal
-                //bgs goals,<del>,goalid
-                if (args.length == 3) {
-                    event.getChannel().sendMessage(BGSGoal.deleteGoal(args[2])).queue();
-                } else {
-                    event.getChannel().sendMessage(BGS_GOAL_DEL_HELP).queue();
-                }
-            } else if (args[1].equalsIgnoreCase("deleteact") || args[1].equalsIgnoreCase("delact")) { // delete an individual goal item from a goal
-                //bgs goals,<delact>,goalid,Activity
-                if (args.length == 5) {
-                    event.getChannel().sendMessage(BGSGoal.deleteGoalItem(Activity.from(args[3]), args[2], args[4])).queue();
-                } else {
-                    event.getChannel().sendMessage(BGS_GOAL_DELACT_HELP).queue();
-                }
-            } else if (args[1].equalsIgnoreCase("edit")) { // edit a goal. Goal items are edited using /editact
-                //bgs golas,edit,goalid,system,Start Date:Time, Ticks
-                if (args.length == 6) {
-                    event.getChannel().sendMessage(BGSGoal.editGoal(args)).queue();
-                } else {
-                    event.getChannel().sendMessage(BGS_GOAL_EDIT_HELP).queue();
-                }
-            } else if (args[1].equalsIgnoreCase("editactivity") || args[1].equalsIgnoreCase("addactivity") || args[1].equalsIgnoreCase("editact") || args[1].equalsIgnoreCase("addact")) {
-                //bgs goals,<addact,editact>,goalid,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal,Activity/usergoal/globalgoal
-                String message = "";
-                // need 4 or more arguments to add a goal item
-                if (args.length >= 4) {
-                    // loop through the goal items which are in the array from 3 onwards
-                    for (int i = 3; i < args.length; i++) {
-                        String[] goalitem = args[i].split("/");
-                        message += BGSGoal.addGoalItem(goalitem, i - 2, args[2]); // add the goal item
-                    }
-                    event.getChannel().sendMessage(message).queue();
-                } else {
-                    event.getChannel().sendMessage(BGS_GOAL_EDITACT_HELP).queue();
-                }
-            } else if (args[1].equalsIgnoreCase("note")) { // add a note to a goal. Allows special instructions to be given.
-                if (args.length >= 3) {
-                    //bgs goals, goalid, note
-                    event.getChannel().sendMessage(BGSGoal.addGoalNote(args)).queue();
-                } else {
-                    event.getChannel().sendMessage(BGS_GOAL_NOTE_HELP).queue();
-                }
-            } else if (args[1].equalsIgnoreCase("list")) {
-                //bgs goals, list,#
-                //Get # most recent goals
-                //If # is not specified then get all active goals
-                String recent = "0";
-                String startid = "0";
-                if (args.length == 3) {
-                    recent = args[2];
-                } else if (args.length == 4) {
-                    recent = args[2];
-                    startid = args[3];
-                }
-
-                ArrayList<String> messages = BGSGoal.listGoal(startid, recent, event.getAuthor().getId(), false);
-                String messageToSend = "";
-                for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
-                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
-                        event.getChannel().sendMessage(messageToSend + "\u0000").queue();
-                        messageToSend = "";
-                        messageToSend += message;
-                    } else { // need the line break if not going to be seperate messages.
-                        messageToSend += "\n" + message;
-                    }
-                }
-                event.getChannel().sendMessage(messageToSend).queue();
-            } else {
-                event.getChannel().sendMessage(BGS_GOAL_HELP).queue();
+            } else{
+                event.getChannel().sendMessage(MOD_ONLY_CMD_ERROR).queue();
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("mystats")) {
