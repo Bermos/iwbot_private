@@ -89,7 +89,6 @@ public class Missions implements GuildCommand {
 			.update().queue();
 
 		// In case the explorer is mentioned in the message...
-        System.out.println((explorer == null) + " tada");
         if (explorer != null) {
 			// Set permissions for the explorer
 			permManager = missionChannel.createPermissionOverride(explorer).complete().getManagerUpdatable();
@@ -98,8 +97,6 @@ public class Missions implements GuildCommand {
 				.grant(Permission.MESSAGE_MENTION_EVERYONE)
 				.grant(Permission.MESSAGE_HISTORY)
 				.update().queue();
-
-			System.out.println(permManager.getChannel().getName());
 
 			// Give the explorer role to the explorer
 			guildManager.getGuild().getController().addRolesToMember(explorer, explorerRole).queue();
