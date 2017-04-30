@@ -97,7 +97,7 @@ class BGSGoal {
                 rs1.last();
                 int numrows = rs1.getRow();
                 rs1.beforeFirst();
-                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + BGS.dateDiff(new Date(), SQL_SDF.parse(rs.getString("endts"))) + ")";
+                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " UTC to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " UTC (" + BGS.dateDiff(new Date(), SQL_SDF.parse(rs.getString("endts"))) + ")";
                 if (numrows > 0) {
                     if (showUserP) {
                         message += String.format("```%1$-17s | %2$-16s | %3$s\n", "", "Your Goal", "System Goal");
