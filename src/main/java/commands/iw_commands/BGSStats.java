@@ -79,7 +79,7 @@ class BGSStats {
                         block += "```" + entry.getKey();
                     }
                     else if(Objects.equals(entry.getValue(), "cmdrlist")){
-                        block += "\n\n**Active Cmdrs**" + entry.getKey();
+                        block += "\n\n**Active Cmdrs**\n```" + entry.getKey() + "```";
                     }
                     else {
                         block += entry.getKey().replaceAll(".*~\\*#", "") + ": " + entry.getValue() + "\n";
@@ -186,7 +186,10 @@ class BGSStats {
                 ps.setString(2, SQL_SDF.format(end));
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    cmdrs.add(rs.getString("username"));
+                    try {
+                        cmdrs.add("@" + Listener.jda.getUserById(rs.getString("userid")).getName());
+                    } catch (NullPointerException ignored){
+                    }
                 }
             } else {
                 PreparedStatement ps = connect.prepareStatement("SELECT (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = b.systemid) AS s_fullname," +
@@ -226,14 +229,22 @@ class BGSStats {
                 ps.setString(4, system);
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    cmdrs.add(rs.getString("username"));
+                    try {
+                        cmdrs.add("@" + Listener.jda.getUserById(rs.getString("userid")).getName());
+                    } catch (NullPointerException ignored){
+                    }
                 }
             }
             if(factions.size() > 0) {
                 totals.put("\n" + String.join("\n", factions),"factionlist");
             }
             if(cmdrs.size() > 0) {
-                totals.put("\n" + String.join(", ", cmdrs),"cmdrlist");
+                String cmdrNames = String.join(", ", cmdrs);
+                try {
+                    cmdrNames = new StringBuilder(cmdrNames).replace(cmdrNames.lastIndexOf(","), cmdrNames.lastIndexOf(",") + 1, " and").toString();
+                } catch (StringIndexOutOfBoundsException ignored) {
+                }
+                totals.put(cmdrNames,"cmdrlist");
             }
         } catch (SQLException e) {
             LogUtil.logErr(e);
@@ -292,9 +303,13 @@ class BGSStats {
 
             List<String> cmdrNamesList = new ArrayList<>();
             while (rs.next()) {
-                String rowValues = Listener.jda.getUserById(rs.getString("userid")).getName() + ",";
-                if (!cmdrNamesList.contains("@" + Listener.jda.getUserById(rs.getString("userid")).getName())) {
-                    cmdrNamesList.add("@" + Listener.jda.getUserById(rs.getString("userid")).getName());
+                String rowValues = "";
+                try {
+                    rowValues = Listener.jda.getUserById(rs.getString("userid")).getName() + ",";
+                    if (!cmdrNamesList.contains("@" + Listener.jda.getUserById(rs.getString("userid")).getName())) {
+                        cmdrNamesList.add("@" + Listener.jda.getUserById(rs.getString("userid")).getName());
+                    }
+                } catch (NullPointerException ignored){
                 }
                 rowValues += rs.getString("Tick") + ",";
                 for (int i = 4; i <= columnCount; i++) {
