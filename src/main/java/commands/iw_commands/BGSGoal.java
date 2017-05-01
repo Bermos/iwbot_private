@@ -57,7 +57,15 @@ class BGSGoal {
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
                 message = "**Active Goals**\n" +
                         "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
-            } else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals (no more than 10)
+            } else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) > 10) { // get specific goal (has to have an ID greater than 10)
+            ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
+                    "FROM bgs_goal g " +
+                    "WHERE g.goalid = ?");
+            ps.setInt(1, Integer.parseInt(recent));
+            message = "**Goal #" + recent + "**\n" +
+                    "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            }
+            else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals (no more than 10)
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
                         "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(recent));
