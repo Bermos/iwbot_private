@@ -13,6 +13,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import iw_bot.LogUtil;
+import jdk.nashorn.internal.runtime.ScriptObject;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
@@ -21,7 +22,16 @@ public class DataProvider {
 	private static Info info = getInfo();
 	public static String lastMessageSent;
 
-    static class ConData {
+	//TODO
+	public static Map<String, String> getGuildCommands() {
+		return guildCommands;
+	}
+
+	public static Map<String, String> getPMCommands() {
+		return PMCommands;
+	}
+
+	static class ConData {
         String IP;
         String DB;
         String US;
