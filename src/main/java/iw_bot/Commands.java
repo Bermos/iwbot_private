@@ -77,6 +77,7 @@ class Commands {
 
 		guildCommands.put("update", new Update());
 
+		//TODO Unify all 3 setters
 		guildCommands.put("setavatar", new Setavatar());
 
 		guildCommands.put("setname", new Setname());
