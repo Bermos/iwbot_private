@@ -76,7 +76,7 @@ class BGSGoal {
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
                         "FROM bgs_goal g " +
                         "WHERE startts <= (SELECT startts FROM bgs_goal WHERE goalid = ?) " +
-                        "ORDER BY startts DESC LIMIT ?");
+                        "ORDER BY startts DESC, goalid DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(startid));
                 ps.setInt(2, Integer.parseInt(recent));
                 message = "**" + recent + " most recent goals starting from goal #" + startid + "**\n" +
