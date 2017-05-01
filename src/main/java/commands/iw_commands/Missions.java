@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static iw_bot.Constants.MISSIONS_SOP;
+
 public class Missions implements GuildCommand {
 	private static List<MissionChannel> missionChannels = new ArrayList<>();
 
@@ -126,7 +128,7 @@ public class Missions implements GuildCommand {
 		// Send out SOP
         if (explorerName.equals("*edit*")) { explorerName = "explorer"; }
 
-		missionChannel.sendMessage("Hello" + explorerName + "\n" + "Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wI").queue();
+		missionChannel.sendMessage("Hello " + explorerName + "\n" + MISSIONS_SOP).queue();
 	}
 
 	private static void archive(TextChannel channel, String id) {
@@ -225,7 +227,7 @@ public class Missions implements GuildCommand {
 
 		//Post SOP link via command "mission sop"
 		if (Arrays.binarySearch(args, "sop") > -1) {
-			event.getChannel().sendMessage("Please review our Standard Operating Procedures (SOP) before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wI").queue();
+			event.getChannel().sendMessage(MISSIONS_SOP).queue();
 		}
 
 		//State the intent of deleting that channel. Ask if they are for sure

@@ -57,7 +57,15 @@ class BGSGoal {
                         "WHERE startts <= CURRENT_TIMESTAMP AND endts >= CURRENT_TIMESTAMP ORDER BY startts");
                 message = "**Active Goals**\n" +
                         "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
-            } else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals (no more than 10)
+            } else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) > 10) { // get specific goal (has to have an ID greater than 10)
+            ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
+                    "FROM bgs_goal g " +
+                    "WHERE g.goalid = ?");
+            ps.setInt(1, Integer.parseInt(recent));
+            message = "**Goal #" + recent + "**\n" +
+                    "Please ensure you carry out actions for the correct faction. If you are not sure ask on the #bgs_ops channel.\n\n";
+            }
+            else if(Integer.parseInt(startid) == 0 && Integer.parseInt(recent) <= 10) { // get X most recent goals (no more than 10)
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
                         "FROM bgs_goal g ORDER BY startts DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(recent));
@@ -68,7 +76,7 @@ class BGSGoal {
                 ps = connect.prepareStatement("SELECT *, (SELECT bgs_system.s_fullname FROM bgs_system WHERE bgs_system.systemid = g.systemid) AS s_fullname " +
                         "FROM bgs_goal g " +
                         "WHERE startts <= (SELECT startts FROM bgs_goal WHERE goalid = ?) " +
-                        "ORDER BY startts DESC LIMIT ?");
+                        "ORDER BY startts DESC, goalid DESC LIMIT ?");
                 ps.setInt(1, Integer.parseInt(startid));
                 ps.setInt(2, Integer.parseInt(recent));
                 message = "**" + recent + " most recent goals starting from goal #" + startid + "**\n" +
@@ -97,7 +105,7 @@ class BGSGoal {
                 rs1.last();
                 int numrows = rs1.getRow();
                 rs1.beforeFirst();
-                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " (" + BGS.dateDiff(new Date(), SQL_SDF.parse(rs.getString("endts"))) + ")";
+                message += "**" + ((showUserP) ? "" : "(#" + rs.getString("goalid") + ") ") + rs.getString("s_fullname") + "**\nFrom " + USER_SDF.format(SQL_SDF.parse(rs.getString("startts"))) + " UTC to " + USER_SDF.format(SQL_SDF.parse(rs.getString("endts"))) + " UTC (" + BGS.dateDiff(new Date(), SQL_SDF.parse(rs.getString("endts"))) + ")";
                 if (numrows > 0) {
                     if (showUserP) {
                         message += String.format("```%1$-17s | %2$-16s | %3$s\n", "", "Your Goal", "System Goal");
