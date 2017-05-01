@@ -19,9 +19,63 @@
       "PW": ""
     }
   },
-  "inaraPW": "1",
+  "inara": {
+    "name": "",
+    "password": ""
+  },
   "googleToken": "1",
   "githubToken": "1",
   "JAVA_HOME": "",
-  "dev": true
+  "dev": true,
+  "test": true,
+  "bot": {
+    "kind": "IWBot",
+    "pmCommands": {
+      "update": "core_commands.Update",
+      "bgs": "iw_commands.BGS",
+      "time": "core_commands.UTCTime",
+      "dist": "ed_commands.Distance",
+      "roll": "misc_commands.RollDice",
+      "status": "core_commands.Status",
+      "restart": "core_commands.Restart",
+      "shutdown": "core_commands.Shutdown",
+      "account": "iw_commands.Auth",
+      "owner": "core_commands.EditOwner",
+      "send": "core_commands.SendMessage"
+    },
+    "guildCommands": {
+      "debug": "core_commands.DebugMode",
+      "update": "core_commands.Update",
+      "setavatar": "core_commands.Setavatar",
+      "setname": "core_commands.Setname",
+      "setgame": "core_commands.Setgame",
+      "role": "core_commands.Role",
+      "welcome": "core_commands.Welcome",
+      "adminchannel": "core_commands.AdminChannel",
+      "adminrole": "core_commands.AdminRole",
+      "topic": "core_commands.Topic",
+      "time": "core_commands.UTCTime",
+      "status": "core_commands.Status",
+      "restart": "core_commands.Restart",
+      "shutdown": "core_commands.Shutdown",
+      "clear": "core_commands.BulkDelete",
+
+      "dist": "ed_commands.Distance",
+      "whois": "ed_commands.CMDRLookup",
+
+      "note": "misc_commands.Notes",
+      "roll": "misc_commands.RollDice",
+      "xkcd": "misc_commands.XKCD",
+      "dance": "misc_commands.Dance",
+      "memes": "misc_commands.Memes",
+      "stripme": "misc_commands.Stripme",
+      "reminder": "misc_commands.Reminder",
+
+      "bgs": "iw_commands.BGS",
+      "list": "iw_commands.MissionsList",
+      "next": "iw_commands.MissionsNext",
+      "mission": "iw_commands.Missions",
+      "applicant": "iw_commands.Applicant"
+    }
+  }
 }
