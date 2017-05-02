@@ -78,6 +78,14 @@ public class DataProvider {
         setInfo();
     }
 
+    public static void setPrefix(String guildId, String prefix) {
+        //TODO
+        info.discord.prefix = prefix;
+
+        setInfo();
+    }
+
+
     public static String getPrefix() {
         return info.discord.prefix;
     }
@@ -297,4 +305,9 @@ public class DataProvider {
     public static String getBotName() {
         return info.bot.name;
     }
+
+    public static boolean isGuildOwner(String id, String id1) {
+        //TODO
+	    return false;
+	}
 }
