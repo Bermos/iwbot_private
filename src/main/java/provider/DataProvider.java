@@ -1,5 +1,14 @@
 package provider;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import iw_bot.LogUtil;
+import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -7,31 +16,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-
-import iw_bot.LogUtil;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-
 public class DataProvider {
 	private static Info info = getInfo();
 	public static String lastMessageSent;
 
-	//TODO
-	public static Map<String, String> getGuildCommands() {
-		return guildCommands;
-	}
-
-	public static Map<String, String> getPMCommands() {
-		return PMCommands;
-	}
-
-	static class ConData {
+    static class ConData {
         String IP;
         String DB;
         String US;
@@ -48,13 +37,25 @@ public class DataProvider {
 			String prefix;
 		}
 
+		class Inara {
+			String name;
+			String password;
+		}
+
+		class Bot {
+			String name;
+			Map<String, String> pmCommands;
+			Map<String, String> guildCommands;
+		}
+
 		Discord discord;
 		Map<String, ConData> connections;
-		String inaraPW;
+		Inara inara;
 		String googleToken;
 		String githubToken;
 		String JAVA_HOME;
 		boolean dev;
+		Bot bot;
 	}
 
 	public static Info getInfoBackup() {
@@ -245,8 +246,12 @@ public class DataProvider {
 	}
 
 	public static String getInaraPW() {
-		return info.inaraPW;
+		return info.inara.password;
 	}
+
+	public static String getInaraName() {
+	    return info.inara.name;
+    }
 
 	public static String getGoogleToken() {
 		return info.googleToken;
@@ -280,4 +285,16 @@ public class DataProvider {
 	public static String getJavaHome() {
 		return info.JAVA_HOME;
 	}
+
+	public static Map<String, String> getGuildCommands() {
+		return info.bot.guildCommands;
+	}
+
+	public static Map<String, String> getPMCommands() {
+		return info.bot.pmCommands;
+	}
+
+    public static String getBotName() {
+        return info.bot.name;
+    }
 }

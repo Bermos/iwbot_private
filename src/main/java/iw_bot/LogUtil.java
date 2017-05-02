@@ -1,15 +1,14 @@
 package iw_bot;
 
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
-import net.dv8tion.jda.core.entities.User;
 import provider.DataProvider;
 
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class LogUtil {
     public static void logErr(Exception e) {
@@ -35,12 +34,22 @@ public class LogUtil {
                 return;
             }
 
-            //TODO fix url
             EmbedBuilder eb = new EmbedBuilder()
                     .setTitle(message)
-                    //.setUrl("https://google.com/#q=" + e.getMessage())
                     .setDescription(stacktrace)
                     .setColor(new Color(179, 58, 58));
+
+            String[] parts = message.split(" ");
+            boolean noUrl = true;
+            for (String part : parts) {
+                try {
+                    new URL(part);
+                    noUrl = false;
+                } catch (MalformedURLException ignored) {}
+            }
+            if (noUrl)
+                eb.setUrl("https://google.com/#q=" + e.getMessage());
+
             MessageEmbed embed = eb.build();
 
             for (String userId : DataProvider.getOwnerIDs()) {

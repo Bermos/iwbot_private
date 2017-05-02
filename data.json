@@ -27,9 +27,8 @@
   "githubToken": "1",
   "JAVA_HOME": "",
   "dev": true,
-  "test": true,
   "bot": {
-    "kind": "IWBot",
+    "name": "IWBot",
     "pmCommands": {
       "update": "core_commands.Update",
       "bgs": "iw_commands.BGS",

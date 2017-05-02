@@ -2,10 +2,6 @@ package iw_bot;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import commands.core_commands.*;
-import commands.ed_commands.*;
-import commands.iw_commands.*;
-import commands.misc_commands.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 
@@ -22,93 +18,7 @@ class Commands {
 
 		pmCommands.put("version", (event, args) -> event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue());
 
-		loadPMCommands();
-
-		loadGuildCommands();
-
-        /* pmCommands.put("update", new Update());
-		
-		pmCommands.put("bgs", new BGS());
-		
-		pmCommands.put("time", new UTCTime());
-		
-		pmCommands.put("dist", new Distance());
-
-		pmCommands.put("roll", new RollDice());
-		
-		pmCommands.put("status", new Status());
-		
-		pmCommands.put("restart", new Restart());
-
-		pmCommands.put("shutdown", new Shutdown());
-
-		pmCommands.put("account", new Auth());
-
-		pmCommands.put("owner", new EditOwner());
-
-		pmCommands.put("send", new SendMessage());
-
 		//Guild message commands
-
-		guildCommands.put("debug", new DebugMode());
-
-		guildCommands.put("update", new Update());
-
-		//TODO Unify all 3 setters
-		guildCommands.put("setavatar", new Setavatar());
-
-		guildCommands.put("setname", new Setname());
-
-		guildCommands.put("setgame", new Setgame());
-
-		guildCommands.put("role", new Role());
-
-		guildCommands.put("dist", new Distance());
-
-		guildCommands.put("welcome", new Welcome());
-
-		guildCommands.put("adminchannel", new AdminChannel());
-
-		guildCommands.put("adminrole", new AdminRole());
-
-		guildCommands.put("dance", new Dance());
-
-		guildCommands.put("topic", new Topic());
-
-		guildCommands.put("time", new UTCTime());
-
-		guildCommands.put("status", new Status());
-
-		guildCommands.put("xkcd", new XKCD());
-		
-		guildCommands.put("stripme", new Stripme());
-
-		guildCommands.put("note", new Notes());
-		
-		guildCommands.put("list", new MissionsList());
-		
-		guildCommands.put("next", new MissionsNext());
-		
-		guildCommands.put("mission", new Missions());
-		
-		guildCommands.put("bgs", new BGS());
-
-		guildCommands.put("roll", new RollDice());
-		
-		guildCommands.put("memes", new Memes());
-
-		guildCommands.put("reminder", new Reminder());
-
-		guildCommands.put("whois", new CMDRLookup());
-
-		guildCommands.put("clear", new BulkDelete());
-
-		guildCommands.put("applicant", new Applicant());
-
-		guildCommands.put("restart", new Restart());
-
-		guildCommands.put("shutdown", new Shutdown()); */
-
 		guildCommands.put("shitdown", new GuildCommand() {
 			@Override
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
@@ -151,6 +61,10 @@ class Commands {
 		});
 
 		//end of commands
+
+		loadPMCommands();
+
+		loadGuildCommands();
 	}
 
 	private void loadGuildCommands() {
