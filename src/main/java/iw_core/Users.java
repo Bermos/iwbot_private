@@ -97,7 +97,7 @@ public class Users {
 	}
 
 	public static void joined(GuildMemberJoinEvent event) {
-		System.out.printf("[%s] %s has joined the guild.\n", event.getGuild().getName(), event.getMember().getNickname());
+		System.out.printf("[%s] %s has memberJoined the guild.\n", event.getGuild().getName(), event.getMember().getNickname());
 		Member member = event.getMember();
 		String rName = member.getRoles().isEmpty() ? "none" : member.getRoles().get(0).getName();
 		

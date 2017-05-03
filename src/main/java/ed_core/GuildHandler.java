@@ -1,5 +1,6 @@
 package ed_core;
 
+import core.Listener;
 import net.dv8tion.jda.core.JDA;
 
 import java.util.LinkedHashMap;
@@ -7,17 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GuildHandler {
-    public static void leaveGuild(String id) {
-    }
 
-    public static boolean isAutoWelcome(String id) {
-        return false;
-    }
-
-    public static void welcome(JDA jda, String id, String id1) {
-    }
-
-    class Guild {
+    static class Guild {
         public String name;
         public String ownerId;
         public String ownerName;
@@ -48,11 +40,48 @@ public class GuildHandler {
         return guilds;
     }
 
-    public static void newGuild(String guildId, String ownerId, String ownerName) {
-        //TODO
+    public static void newGuild(String guildId, String guildName, String ownerId, String ownerName) {
+        if (guilds.containsKey(guildId)) {
+            guilds.remove(guildId);
+        }
+
+        guilds.put(guildId, new Guild(guildName, ownerId, ownerName));
     }
 
-    public static void joined(String userID, String guildId) {
-        //TODO
+    public static void memberJoined(String userId, String guildId) {
+        guilds.get(guildId).newUsers.add(userId);
+    }
+
+    public static void leaveGuild(String id) {
+        guilds.remove(id);
+    }
+
+    public static boolean isAutoWelcome(String id) {
+        return guilds.get(id).autoWelcome;
+    }
+
+    public static void welcome(String guildId, String userId) {
+        Guild guild = guilds.get(guildId);
+        JDA jda = Listener.jda;
+
+        // If a welcome message is set
+        if (guild.welcome) {
+            String message;
+            if (guild.welcomeMessage.contains("<user>")) {
+                message = guild.welcomeMessage.replace("<user>", jda.getUserById(userId).getAsMention());
+            } else {
+                message = jda.getUserById(userId).getAsMention() + " " + guild.welcomeMessage;
+            }
+            jda.getGuildById(guildId).getTextChannelById(guild.welcomeChannel).sendMessage(message).queue();
+
+        // Store user for when a welcome message is set
+        } else {
+            guilds.get(guildId).newUsers.add(userId);
+        }
+
+    }
+
+    public static void updateGuildName(String id, String name) {
+        guilds.get(id).name = name;
     }
 }

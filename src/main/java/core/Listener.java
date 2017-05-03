@@ -124,7 +124,7 @@ public class Listener extends ListenerAdapter {
             channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
 
             event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
-                    .sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
+                    .sendMessage("New user, " + event.getMember().getEffectiveName() + ", just memberJoined!").queue();
 
         }
 	}
