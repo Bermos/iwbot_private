@@ -1,4 +1,4 @@
-package iw_bot;
+package core;
 
 import java.text.SimpleDateFormat;
 

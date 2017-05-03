@@ -2,19 +2,18 @@ package commands.misc_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import iw_bot.Listener;
+import core.Listener;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
 
+import java.awt.*;
 import java.util.Date;
 
-/**
- * Created by bermos on 02/05/17.
- */
 public class Feedback implements GuildCommand, PMCommand {
+    Color color = new Color(0, 0, 0);
 
     @Override
     public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
@@ -35,6 +34,7 @@ public class Feedback implements GuildCommand, PMCommand {
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor(author.getName(), channelUrl, author.getEffectiveAvatarUrl())
                 .setDescription(message)
+                .setColor(color)
                 .addField("Info", info, true);
 
         //Send feedback to me and a thank to the author
@@ -61,6 +61,7 @@ public class Feedback implements GuildCommand, PMCommand {
         EmbedBuilder eb = new EmbedBuilder()
                 .setAuthor(author.getName(), channelUrl, author.getEffectiveAvatarUrl())
                 .setDescription(message)
+                .setColor(color)
                 .addField("Info", info, true);
 
         //Send feedback to me and a thank to the author

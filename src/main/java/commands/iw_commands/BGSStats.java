@@ -1,10 +1,9 @@
 package commands.iw_commands;
 
 
-import iw_bot.Listener;
-import iw_bot.LogUtil;
+import core.Listener;
+import core.LogUtil;
 
-import org.hamcrest.core.IsNull;
 import provider.Connections;
 
 import java.sql.Connection;
@@ -17,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static iw_bot.Constants.*;
+import static core.Constants.*;
 
 class BGSStats {
     static List<String> getFullTick(String[] args) {

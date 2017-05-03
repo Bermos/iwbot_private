@@ -1,7 +1,7 @@
 package provider;
 
-import iw_bot.Listener;
-import iw_bot.LogUtil;
+import core.Listener;
+import core.LogUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,4 +1,4 @@
-package iw_bot;
+package core;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
@@ -56,6 +56,8 @@ public class LogUtil {
                 JDAUtil.getPrivateChannel(Listener.jda.getUserById(userId)).sendMessage(embed).queue();
             }
         } catch (Exception e1) {
+            e.printStackTrace();
+            System.out.println("----------------------------------------------");
             e1.printStackTrace();
         }
     }

@@ -1,7 +1,7 @@
 package commands.iw_commands;
 
 import commands.PMCommand;
-import iw_bot.LogUtil;
+import core.LogUtil;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.Connections;
 

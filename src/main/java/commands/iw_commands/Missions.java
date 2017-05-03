@@ -1,7 +1,7 @@
 package commands.iw_commands;
 
 import commands.GuildCommand;
-import iw_bot.LogUtil;
+import core.LogUtil;
 import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static iw_bot.Constants.MISSIONS_SOP;
+import static core.Constants.MISSIONS_SOP;
 
 public class Missions implements GuildCommand {
 	private static List<MissionChannel> missionChannels = new ArrayList<>();

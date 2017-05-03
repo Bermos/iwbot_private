@@ -2,7 +2,7 @@ package commands.iw_commands;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
-import iw_bot.LogUtil;
+import core.LogUtil;
 
 import provider.Connections;
 import provider.DataProvider;
@@ -13,7 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static iw_bot.Constants.*;
+import static core.Constants.*;
 
 class BGSLogging {
     static String logActivity(boolean admin, String sActivity, String userid, String username, String sAmount, String system, String faction) {

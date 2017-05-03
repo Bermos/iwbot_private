@@ -1,8 +1,7 @@
 package commands.iw_commands;
 
 
-import iw_bot.Listener;
-import iw_bot.LogUtil;
+import core.LogUtil;
 
 import provider.Connections;
 
@@ -17,7 +16,7 @@ import java.util.*;
 
 
 import static commands.iw_commands.BGS.int_format_short;
-import static iw_bot.Constants.*;
+import static core.Constants.*;
 
 class BGSGoal {
     // goal stuff start

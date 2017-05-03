@@ -2,7 +2,7 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import iw_bot.LogUtil;
+import core.LogUtil;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Icon;
 import net.dv8tion.jda.core.entities.Message;

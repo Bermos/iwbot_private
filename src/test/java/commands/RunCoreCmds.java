@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
         DebugModeTest.class,
         EditOwnerTest.class,
         ShutdownTest.class,
-        StatusTest.class,
+        //StatusTest.class,
         TopicTest.class,
         UTCTimeTest.class,
         WelcomeTest.class })

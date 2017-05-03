@@ -1,4 +1,4 @@
-package iw_bot;
+package core;
 
 import commands.GuildCommand;
 import net.dv8tion.jda.core.AccountType;

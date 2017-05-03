@@ -1,4 +1,4 @@
-package iw_bot;
+package core;
 
 import commands.GuildCommand;
 import commands.PMCommand;

@@ -1,6 +1,6 @@
 package commands.core_commands;
 
-import iw_bot.Listener;
+import core.Listener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

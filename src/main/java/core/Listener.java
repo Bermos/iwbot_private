@@ -1,22 +1,15 @@
-package iw_bot;
+package core;
 
-import commands.misc_commands.Reminder;
-import iw_core.Users;
 import misc.DankMemes;
-import misc.StatusGenerator;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
+import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
-import net.dv8tion.jda.core.events.guild.member.GuildMemberRoleAddEvent;
-import net.dv8tion.jda.core.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-import net.dv8tion.jda.core.events.user.UserAvatarUpdateEvent;
-import net.dv8tion.jda.core.events.user.UserNameUpdateEvent;
-import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import provider.Connections;
 import provider.DataProvider;
@@ -27,8 +20,8 @@ import java.util.Date;
 
 public class Listener extends ListenerAdapter {
 	private Commands commands;
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-	private static final String BOT_NAME = DataProvider.getBotName();
+	static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+	static final String BOT_NAME = DataProvider.getBotName();
 
 	public static final String prefix = DataProvider.getPrefix().isEmpty() ? "/" : DataProvider.getPrefix();
 	public static final long startupTime = new Date().getTime();
@@ -39,11 +32,8 @@ public class Listener extends ListenerAdapter {
 	
 	@Override
 	public void onReady(ReadyEvent event) {
-		this.commands = new Commands();
+		commands = new Commands();
 		new AutoUpdate();
-
-		//Initial parsing of the memes.json file
-		DankMemes.update();
 
 		//Print out startup info
 		System.out.println("[" + sdf.format(new Date()) + "][Info] " + BOT_NAME + " v" + VERSION_NUMBER + " ready!");
@@ -61,17 +51,7 @@ public class Listener extends ListenerAdapter {
 			//Start metadata statistics logging
 			Statistics stats = Statistics.getInstance();
 			stats.connect(event.getJDA());
-
-            //Start random Playing... generator
-            new StatusGenerator(event.getJDA().getPresence());
 		}
-
-        //Setup and synchronise users and online status with MySQL db
-        new Users();
-        Users.sync(event);
-
-        //Start checks for any set reminders from users
-        new Reminder().startChecks(event.getJDA());
 	}
 	
 	@Override
@@ -125,8 +105,6 @@ public class Listener extends ListenerAdapter {
 
         if (!DataProvider.isDev())
 		    Statistics.getInstance().logMessage(event);
-
-        event.getAuthor().isFake();
 	}
 
 	private static String[] getArgs(String content, String commandName) {
@@ -149,40 +127,5 @@ public class Listener extends ListenerAdapter {
                     .sendMessage("New user, " + event.getMember().getEffectiveName() + ", just joined!").queue();
 
         }
-
-        Users.joined(event);
-	}
-	
-	@Override
-	public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
-        Users.left(event);
-	}
-	
-	@Override
-	public void onGuildMemberRoleAdd(GuildMemberRoleAddEvent event) {
-        Users.roleUpdate(event);
-	}
-	
-	@Override
-	public void onGuildMemberRoleRemove(GuildMemberRoleRemoveEvent event) {
-        Users.roleUpdate(event);
-	}
-	
-	@Override
-	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
-	    if (isDebug)
-            System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
-
-        Users.setOnlineStatus(event);
-	}
-	
-	@Override
-	public void onUserNameUpdate(UserNameUpdateEvent event) {
-        Users.nameUpdate(event);
-	}
-	
-	@Override
-	public void onUserAvatarUpdate(UserAvatarUpdateEvent event) {
-        Users.avatarUpdate(event);
 	}
 }

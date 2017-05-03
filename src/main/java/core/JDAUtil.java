@@ -1,4 +1,4 @@
-package iw_bot;
+package core;
 
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.PrivateChannel;

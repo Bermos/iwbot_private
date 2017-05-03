@@ -1,6 +1,6 @@
 package iw_core;
 
-import iw_bot.LogUtil;
+import core.LogUtil;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;

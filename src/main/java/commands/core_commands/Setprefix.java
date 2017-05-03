@@ -6,9 +6,6 @@ import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 
-/**
- * Created by bermos on 02/05/17.
- */
 public class Setprefix implements GuildCommand {
 
     @Override

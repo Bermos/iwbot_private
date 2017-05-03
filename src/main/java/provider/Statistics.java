@@ -2,7 +2,8 @@ package provider;
 
 import java.util.concurrent.TimeUnit;
 
-import iw_bot.LogUtil;
+import core.LogUtil;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -16,7 +17,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 public class Statistics extends Thread {
 	private static Statistics instance;
 	private static InfluxDB influxDB;
-	private static String dbName = "iw_monitor";
+	private static String dbName;
 	private static JDA jda;
 
 	private Statistics() {
@@ -33,6 +34,7 @@ public class Statistics extends Thread {
 	
 	public void connect(JDA jda) {
 		DataProvider.ConData info = DataProvider.getConData("influx");
+		dbName = info.DB;
 
 		Statistics.influxDB = InfluxDBFactory.connect(info.IP, info.US, info.PW);
 		Statistics.jda = jda;
@@ -66,10 +68,21 @@ public class Statistics extends Thread {
 
 				//update statistics
 				int onlineUser = 0;
-				for(Member member : jda.getGuildById("142749481530556416").getMembers()) {
-					if (!member.getOnlineStatus().equals(OnlineStatus.OFFLINE))
-						onlineUser++;
+				for (Guild guild : jda.getGuilds()) {
+					for (Member member : guild.getMembers()) {
+						if (!member.getOnlineStatus().equals(OnlineStatus.OFFLINE))
+							onlineUser++;
+					}
 				}
+
+				Point guilds = Point.measurement("guilds")
+						.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+						.addField("no", jda.getGuilds().size())
+						.addField("channels", jda.getTextChannels().size())
+						.addField("private_channels", jda.getPrivateChannels().size())
+						.build();
+				influxDB.write(dbName, "default", guilds);
+
 				Point users = Point.measurement("users")
 						.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
 						.addField("online", onlineUser)

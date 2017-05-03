@@ -1,4 +1,4 @@
-package iw_bot;
+package core;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -26,10 +26,18 @@ public class Main {
 			install();
 
 		try {
-			
+			Listener listener;
+			switch (DataProvider.getBotName()) {
+				case "IWBot": listener = new ListenerIW(); break;
+				case "EDBot": listener = new ListenerED(); break;
+
+				default: listener = new Listener();
+			}
+
+
 			new JDABuilder(AccountType.BOT)
 			.setToken(DataProvider.getToken())
-			.addListener(new Listener())
+			.addListener(listener)
 			.buildBlocking();
 			
 		} catch (LoginException e) {

@@ -1,8 +1,7 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
-import iw_bot.JDAUtil;
-import iw_bot.Listener;
+import core.JDAUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 

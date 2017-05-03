@@ -1,6 +1,6 @@
 package commands.misc_commands;
 
-import iw_bot.Listener;
+import core.Listener;
 import org.junit.Before;
 import org.junit.Test;
 

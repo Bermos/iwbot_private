@@ -1,4 +1,4 @@
-package iw_bot;
+package core;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -14,10 +14,6 @@ import provider.DataProvider;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 
 class AutoUpdate {
     class Author {
@@ -35,7 +31,13 @@ class AutoUpdate {
 
     AutoUpdate() {
         try {
-            int port = 1701;
+            int port;
+            switch (DataProvider.getBotName()) {
+                case "IWBot": port = 1701; break;
+                case "EDBot": port = 1702; break;
+
+                default: port = 1701;
+            }
 
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/update", new GitHookHandler());

@@ -1,6 +1,6 @@
 package commands.core_commands;
 
-import iw_bot.Listener;
+import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 

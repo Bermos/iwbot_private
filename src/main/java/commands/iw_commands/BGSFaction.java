@@ -1,6 +1,6 @@
 package commands.iw_commands;
 
-import iw_bot.LogUtil;
+import core.LogUtil;
 
 import provider.Connections;
 
@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static iw_bot.Constants.*;
+import static core.Constants.*;
 
 class BGSFaction {
     static String getFactionFullname(int factionid) {

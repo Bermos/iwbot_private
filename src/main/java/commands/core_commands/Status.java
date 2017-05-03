@@ -2,18 +2,11 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import iw_bot.Listener;
-import iw_bot.LogUtil;
+import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-import provider.Connections;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class Status implements PMCommand, GuildCommand {
@@ -38,33 +31,19 @@ public class Status implements PMCommand, GuildCommand {
         int hours			 = (int) TimeUnit.MILLISECONDS.toHours(diff) % 24;
         int minutes			 = (int) TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
         int seconds			 = (int) TimeUnit.MILLISECONDS.toSeconds(diff) % 60;
-        NumberFormat nForm	 = NumberFormat.getInstance(Locale.GERMANY);
         int noThreads		 = Thread.getAllStackTraces().keySet().size();
-        String uniqueSets    = "error";
-        String totalSets     = "error";
         String totalMemory	 = String.format("%.2f",(double) Runtime.getRuntime().maxMemory() / 1024 / 1024);
         String usedMemory	 = String.format("%.2f",(double)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024);
 
-        try {
-            PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT COUNT(idmarkov) AS unique_sets, sum(prob) AS total_sets FROM markov");
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                uniqueSets = nForm.format(rs.getInt("unique_sets")).replace('.', '\'');
-                totalSets = nForm.format(rs.getInt("total_sets")).replace('.', '\'');
-                rs.close();
-                ps.close();
-            }
-        } catch (SQLException e) {
-            LogUtil.logErr(e);
-        }
-
         String contOut = "```"
+                + "Created by          | " + "CMDR Bermos with help from CMDRs Nobkins & SparticA5S. You can PM !!feedback <message> to leave me, well, feedback.\n"
                 + "Uptime              | " + String.format("%dd %02d:%02d:%02d\n", days, hours, minutes, seconds)
-                + "# Threads           | " + noThreads						+ "\n"
-                + "Memory usage        | " + usedMemory + "/" + totalMemory	+ " MB\n"
-                + "Unique AI Datasets  | " + uniqueSets						+ "\n"
-                + "Total AI Datasets   | " + totalSets						+ "\n"
-                + "Version             | " + Listener.VERSION_NUMBER		+ "```";
+                + "# Threads           | " + noThreads						 + "\n"
+                + "Memory usage        | " + usedMemory + "/" + totalMemory  + " MB\n"
+                + "Guilds              | " + Listener.jda.getGuilds().size() + "\n"
+                + "Invite link         | " + "https://discordapp.com/oauth2/authorize?client_id=177053144570789888&scope=bot&permissions=3072\n"
+                + "Donate (Server-Rent)| " + "http://goo.gl/pFXvvl\n"
+                + "Version             | " + Listener.VERSION_NUMBER		 + "```";
 
         return contOut;
     }

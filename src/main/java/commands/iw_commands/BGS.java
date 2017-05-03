@@ -2,8 +2,8 @@ package commands.iw_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
-import iw_bot.JDAUtil;
-import iw_bot.Listener;
+import core.JDAUtil;
+import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static iw_bot.Constants.*;
+import static core.Constants.*;
 
 public class BGS implements PMCommand, GuildCommand {
     enum Activity {

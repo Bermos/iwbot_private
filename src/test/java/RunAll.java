@@ -1,7 +1,7 @@
 import commands.RunCoreCmds;
 import commands.RunMiscCmds;
-import iw_bot.CommandsTest;
-import iw_bot.Listener;
+import core.CommandsTest;
+import core.Listener;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
