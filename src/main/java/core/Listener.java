@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Listener extends ListenerAdapter {
-	private Commands commands;
+	private static Commands commands;
 	static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 	static final String BOT_NAME = DataProvider.getBotName();
 
@@ -127,5 +127,12 @@ public class Listener extends ListenerAdapter {
                     .sendMessage("New user, " + event.getMember().getEffectiveName() + ", just memberJoined!").queue();
 
         }
+	}
+
+	public static void reloadCmds(GuildMessageReceivedEvent event) {
+		commands = null;
+		commands = new Commands();
+
+		event.getChannel().sendMessage("(Re-)loaded " + commands.guildCommands.size() + " guild and " + commands.pmCommands.size() + " pm commands.").queue();
 	}
 }

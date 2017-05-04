@@ -1,9 +1,8 @@
 package core;
 
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.PrivateChannel;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.List;
 
@@ -29,5 +28,25 @@ public class JDAUtil {
         for (String message : messages) {
             chan.sendMessage(message).queue();
         }
+    }
+
+    /**
+     * Determines if the user is authorized to perform
+     * actions that require higher clarance.
+     *
+     * @param event Guild message received
+     * @return whether that user is authorized or not
+     */
+    public static boolean isAuthorized(GuildMessageReceivedEvent event) {
+        if (event.getGuild().getOwner().equals(event.getAuthor())) {
+            return true;
+        }
+
+        for (Role role : event.getMember().getRoles()) {
+            if (role.hasPermission(Permission.ADMINISTRATOR) || role.hasPermission(Permission.MANAGE_SERVER))
+                return true;
+        }
+
+        return false;
     }
 }
