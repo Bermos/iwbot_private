@@ -58,8 +58,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        //event.getChannel().sendMessage(lookup(args)).queue();
-        event.getChannel().sendMessage("Sorry, this functions is currently broken. Bermos is working on fixing it, thanks for your patience!").queue();
+        event.getChannel().sendMessage(lookup(args)).queue();
     }
 
     @Override
