@@ -1,8 +1,15 @@
 package ed_core;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import core.Listener;
 import net.dv8tion.jda.core.JDA;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,10 +41,33 @@ public class GuildHandler {
         }
     }
 
-    private static LinkedHashMap<String, Guild> guilds = getGuilds();
+    private static LinkedHashMap<String, Guild> guilds = loadGuilds();
 
-    private static LinkedHashMap<String,Guild> getGuilds() {
-        return guilds;
+    public static LinkedHashMap<String,Guild> loadGuilds() {
+        LinkedHashMap<String, Guild> guilds;
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<Guild>>() {}.getType();
+        try {
+            guilds = gson.fromJson(new JsonReader(new FileReader("./guilds.json")), listType);
+            return guilds;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.exit(2);
+        return null;
+    }
+
+    private static void saveGuilds() {
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<Guild>>() {}.getType();
+        try {
+            JsonWriter jw = new JsonWriter(new FileWriter("./guilds.json"));
+            jw.setIndent("  ");
+            gson.toJson(guilds, listType, jw);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void newGuild(String guildId, String guildName, String ownerId, String ownerName) {
@@ -46,14 +76,17 @@ public class GuildHandler {
         }
 
         guilds.put(guildId, new Guild(guildName, ownerId, ownerName));
+        saveGuilds();
     }
 
     public static void memberJoined(String userId, String guildId) {
         guilds.get(guildId).newUsers.add(userId);
+        saveGuilds();
     }
 
     public static void leaveGuild(String id) {
         guilds.remove(id);
+        saveGuilds();
     }
 
     public static boolean isAutoWelcome(String id) {
@@ -79,9 +112,12 @@ public class GuildHandler {
             guilds.get(guildId).newUsers.add(userId);
         }
 
+        saveGuilds();
     }
 
     public static void updateGuildName(String id, String name) {
         guilds.get(id).name = name;
+
+        saveGuilds();
     }
 }
