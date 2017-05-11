@@ -60,8 +60,8 @@ class BGSLogging {
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
                             "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
                             "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.userid = ? AND " +
-                            "i.factionid = ? " +
-                            "AND a.timestamp >= g.startts AND a.timestamp <= g.endts " +
+                            "i.factionid = ? AND i.usergoal > 0 AND" +
+                            "a.timestamp >= g.startts AND a.timestamp <= g.endts " +
                             "GROUP BY a.userid HAVING total >= i.usergoal;");
                     ps.setInt(1, systemid);
                     ps.setString(2, activity.toString());
@@ -78,7 +78,7 @@ class BGSLogging {
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
                             "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
                             "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND " +
-                            "i.factionid = ? " +
+                            "i.factionid = ? AND i.globalgoal > 0 " +
                             "HAVING total >= i.globalgoal;");
                     ps.setInt(1, systemid);
                     ps.setString(2, activity.toString());
