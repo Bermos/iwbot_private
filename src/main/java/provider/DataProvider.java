@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static core.Main.CONFIG_LOC;
+
 public class DataProvider {
 	private static Info info = getInfo();
 	public static String lastMessageSent;
@@ -25,6 +27,16 @@ public class DataProvider {
         String DB;
         String US;
         String PW;
+    }
+
+    public static class Bot {
+        String token;
+        Map<String, String> pmCommands;
+        Map<String, String> guildCommands;
+
+        public String getToken() {
+            return token;
+        }
     }
 
     public class Info {
@@ -42,12 +54,6 @@ public class DataProvider {
 			String password;
 		}
 
-		class Bot {
-			String name;
-			Map<String, String> pmCommands;
-			Map<String, String> guildCommands;
-		}
-
 		Discord discord;
 		Map<String, ConData> connections;
 		Inara inara;
@@ -55,45 +61,13 @@ public class DataProvider {
 		String githubToken;
 		String JAVA_HOME;
 		boolean dev;
-		Bot bot;
+		Map<String, Bot> bots;
 	}
-
-	public static Info getInfoBackup() {
-		return info;
-	}
-
-	public static void revertToBackup(Info backupInfo) {
-		info = backupInfo;
-	}
-
-    public static void setDiscordToken(String discordToken) {
-        info.discord.token = discordToken;
-
-        setInfo();
-    }
-
-    public static void setPrefix(String prefix) {
-        info.discord.prefix = prefix;
-
-        setInfo();
-    }
-
-    public static void setPrefix(String guildId, String prefix) {
-        //TODO
-        info.discord.prefix = prefix;
-
-        setInfo();
-    }
-
-
-    public static String getPrefix() {
-        return info.discord.prefix;
-    }
 
 	private static Info getInfo() {
 		try {
 			Gson gson = new Gson();
-			JsonReader jReader = new JsonReader(new FileReader("./data.json"));
+			JsonReader jReader = new JsonReader(new FileReader(CONFIG_LOC));
 			return gson.fromJson(jReader, Info.class);
 		} catch (FileNotFoundException e) {
 			LogUtil.logErr(e);
@@ -102,11 +76,11 @@ public class DataProvider {
 		System.exit(2);
 		return null;
 	}
-	
+
 	private static void setInfo() {
 		try {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			JsonWriter jWriter = new JsonWriter(new FileWriter("./data.json"));
+			JsonWriter jWriter = new JsonWriter(new FileWriter(CONFIG_LOC));
 			jWriter.setHtmlSafe(false);
 			jWriter.setIndent("  ");
 			gson.toJson(info, Info.class, jWriter);
@@ -115,6 +89,68 @@ public class DataProvider {
 			LogUtil.logErr(e);
 		}
 	}
+
+	/**
+	 * Gets the info object for backup purposes
+	 *
+	 * @return info object
+	 */
+	public static Info getInfoBackup() {
+		return info;
+	}
+
+	/**
+	 * Give a info object to restore a previous state.
+	 *
+	 * @param backupInfo
+	 */
+	public static void revertToBackup(Info backupInfo) {
+		info = backupInfo;
+	}
+
+	/**
+	 * Takes a string to set as a discord token
+	 *
+	 * @param discordToken
+	 */
+    public static void setDiscordToken(String discordToken) {
+        info.discord.token = discordToken;
+
+        setInfo();
+    }
+
+	/**
+	 * Takes a string to set as a prefix for the bot
+	 *
+	 * @param prefix
+	 */
+	public static void setPrefix(String prefix) {
+        info.discord.prefix = prefix;
+
+        setInfo();
+    }
+
+	/**
+	 * Sets the prefix for a specific guild.
+	 *
+	 * @param guildId Id of the guild to set the prefix for.
+	 * @param prefix The prefix to set
+	 */
+	public static void setPrefix(String guildId, String prefix) {
+        //TODO
+        info.discord.prefix = prefix;
+
+        setInfo();
+    }
+
+	/**
+	 * Gets the standard prefix
+	 *
+	 * @return string of the prefix
+	 */
+    public static String getPrefix() {
+        return info.discord.prefix;
+    }
 	
 	/**
 	 * Returns the token necessary to login to Discord
@@ -136,7 +172,8 @@ public class DataProvider {
 	}
 	
 	/**
-	 * 
+	 * Takes a string of a discord user id to add to the list of owners
+	 *
 	 * @param id of the owner to add
 	 */
 	public static void addOwner(String id) {
@@ -145,7 +182,9 @@ public class DataProvider {
 	}
 	
 	/**
-	 * 
+	 * Takes a string of an id of a discord user to remove
+	 * from the list of owners
+	 *
 	 * @param id of the owner to remove
 	 */
 	public static boolean removeOwner(String id) {
@@ -176,6 +215,7 @@ public class DataProvider {
 	}
 
 	/**
+	 * Returns the string of a discord channel id of the admin channel
 	 * 
 	 * @return the admin channel id as string
 	 */
@@ -184,7 +224,8 @@ public class DataProvider {
 	}
 	
 	/**
-	 * 
+	 * Takes a string of a discord channel id to set as the new admin channel
+     *
 	 * @param id of the channel used for admin
 	 */
 	public static void setAdminChanID(String id) {
@@ -193,6 +234,8 @@ public class DataProvider {
 	}
 	
 	/**
+     * Returns a list of discord role ids of roles that are allowed to
+	 * administer the bot
 	 * 
 	 * @return the ids of all admin roles
 	 */
@@ -201,31 +244,67 @@ public class DataProvider {
 	}
 	
 	/**
-	 * 
+	 * Takes a string of a discord role id to add to the list of roles
+	 * with admin privileges for the bot
+	 *
 	 * @param id of the admin role
 	 */
 	public static void addAdminRoleID(String id) {
 		info.discord.idRoles.add(id);
 		setInfo();
 	}
-	
+
+	/**
+	 * Takes a string of a discord role id to remove from the list of
+	 * roles with admin privileges for the bot
+	 *
+	 * @param id of the admin role
+	 */
 	public static void removeAdminRoleID(String id) {
 		info.discord.idRoles.remove(id);
 		setInfo();
 	}
 
+	/**
+	 * Takes a GuildMessageReceivedEvent to check if the author of
+	 * the message is an owner of the bot
+	 *
+	 * @param event
+	 * @return true if the author is a owner
+	 */
 	public static boolean isOwner(GuildMessageReceivedEvent event) {
 		return getOwnerIDs().contains(event.getAuthor().getId());
 	}
 
+	/**
+	 * Takes a PrivateMessageReceivedEvent to check if the author of
+	 * the message is an owner of the bot
+	 *
+	 * @param event
+	 * @return true if the author is a owner
+	 */
 	public static boolean isOwner(PrivateMessageReceivedEvent event) {
 		return getOwnerIDs().contains(event.getAuthor().getId());
 	}
 
+	/**
+	 * Takes a string of a discord user id to check if he is a owner
+	 * of the bot
+	 *
+	 * @param id of the user in question
+	 * @return true if the user is a owner
+	 */
 	public static boolean isOwner(String id) {
 		return getOwnerIDs().contains(id);
 	}
 
+	/**
+	 * Takes a GuildMessageEvent to check if the author is a member
+	 * of the roles that have admin privileges for the bot
+	 *
+	 * @param event
+	 * @return true if the author has admin privileges
+	 */
 	public static boolean isAdmin(GuildMessageReceivedEvent event) {
 		boolean isAdmin = false;
 		for (Role role : event.getMember().getRoles()) {
@@ -235,6 +314,13 @@ public class DataProvider {
 		return isAdmin;
 	}
 
+	/**
+	 * Takes a list of Roles to check if any of them is given
+	 * admin privileges for the bot
+	 *
+	 * @param roles
+	 * @return true if any of the roles has admin privileges
+	 */
 	public static boolean isAdmin(List<Role> roles) {
 		boolean isAdmin = false;
 		for (Role role : roles) {
@@ -244,6 +330,13 @@ public class DataProvider {
 		return isAdmin;
 	}
 
+	/**
+	 * Takes a list of strings of discord role ids to check if any
+	 * of the associated roles has admin privileges for the bot
+	 *
+	 * @param roleIds
+	 * @return true if any of the roles has admin privileges
+	 */
 	public static boolean isAdmin(String[] roleIds) {
 		boolean isAdmin = false;
 		for (String roleId : roleIds) {
@@ -253,19 +346,35 @@ public class DataProvider {
 		return isAdmin;
 	}
 
+	/**
+	 * Returns a string containing the configured password for Inara
+	 *
+	 * @return password as string
+	 */
 	public static String getInaraPW() {
 		return info.inara.password;
 	}
 
+	/**
+	 * Returns a string containing the configured username for Inara
+	 *
+	 * @return username as string
+	 */
 	public static String getInaraName() {
 	    return info.inara.name;
     }
 
+	/**
+	 * Returns a string containing the configured token for googles API
+	 *
+	 * @return token as string
+	 */
 	public static String getGoogleToken() {
 		return info.googleToken;
 	}
 
 	/**
+	 * Returns if the bot runs in development
 	 *
 	 * @return if the bot runs in development
 	 */
@@ -273,14 +382,35 @@ public class DataProvider {
 		return info.dev;
 	}
 
-	public static ConData getConData(String conName) {
+	/**
+	 * Returns a object of ConData containing connection data for a
+	 * database with the given name
+	 *
+	 * @param conName the name of the connection as in the config file
+	 * @return ConData object containing connection info
+	 */
+	static ConData getConData(String conName) {
 		return info.connections.get(conName);
 	}
 
+	/**
+	 * Returns a string containing the configured token for github
+	 *
+	 * @return token as string
+	 */
 	public static String getGithubToken() {
 	    return info.githubToken;
     }
 
+	/**
+	 * Takes connection information and a name to save a new connection to the config file
+	 *
+	 * @param name by which the connection can be retrieved
+	 * @param ip where the database can be reached
+	 * @param db name of the database
+	 * @param us username for the connection
+	 * @param pw password for the connection
+	 */
     public static void addConnection(String name, String ip, String db, String us, String pw) {
 	    ConData con = new ConData();
 	    con.IP = ip; con.DB = db;
@@ -290,24 +420,60 @@ public class DataProvider {
 	    setInfo();
     }
 
+	/**
+	 * Returns a string containing the path to the java binaries
+	 *
+	 * @return string containing java path
+	 */
 	public static String getJavaHome() {
 		return info.JAVA_HOME;
 	}
 
-	public static Map<String, String> getGuildCommands() {
-		return info.bot.guildCommands;
+	/**
+	 * Returns a map of guild commands by name with their corresponding location in the .jar
+	 *
+     * @param name of the bot you want the commands for
+	 * @return map of guild commands
+	 */
+	public static Map<String, String> getGuildCommands(String name) {
+		return info.bots.get(name).guildCommands;
 	}
 
-	public static Map<String, String> getPMCommands() {
-		return info.bot.pmCommands;
+    /**
+     * Returns a map of pm commands by name with their corresponding location in the .jar
+     *
+     * @param name of the bot you want the commands for
+     * @return map of pm commands
+     */
+	public static Map<String, String> getPMCommands(String name) {
+		return info.bots.get(name).pmCommands;
 	}
 
-    public static String getBotName() {
-        return info.bot.name;
+    /**
+     * Returns a bot object that corresponds to the given name
+     *
+     * @param name of the bot
+     * @return the bot object
+     */
+    public static Bot getBotByName(String name) {
+        return info.bots.get(name);
     }
 
-    public static boolean isGuildOwner(String id, String id1) {
-        //TODO
-	    return false;
-	}
+    /**
+     * Returns a list of strings of all bot names
+     *
+     * @return list of bot names
+     */
+    public static String[] getBotNames() {
+        return (String[]) info.bots.keySet().toArray();
+    }
+
+    /**
+     * Returns a map of all bots
+     *
+     * @return map of all bots
+     */
+    public static Map<String, Bot> getBots() {
+        return info.bots;
+    }
 }

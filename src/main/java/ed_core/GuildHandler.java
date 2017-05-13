@@ -14,6 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import static core.Main.GUILDS_LOC;
+
 public class GuildHandler {
 
     static class Guild {
@@ -48,7 +50,7 @@ public class GuildHandler {
         Gson gson = new Gson();
         Type listType = new TypeToken<List<Guild>>() {}.getType();
         try {
-            guilds = gson.fromJson(new JsonReader(new FileReader("./guilds.json")), listType);
+            guilds = gson.fromJson(new JsonReader(new FileReader(GUILDS_LOC)), listType);
             return guilds;
         } catch (Exception e) {
             e.printStackTrace();
@@ -62,7 +64,7 @@ public class GuildHandler {
         Gson gson = new Gson();
         Type listType = new TypeToken<List<Guild>>() {}.getType();
         try {
-            JsonWriter jw = new JsonWriter(new FileWriter("./guilds.json"));
+            JsonWriter jw = new JsonWriter(new FileWriter(GUILDS_LOC));
             jw.setIndent("  ");
             gson.toJson(guilds, listType, jw);
         } catch (Exception e) {

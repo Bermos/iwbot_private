@@ -1,0 +1,92 @@
+{
+  "discord": {
+    "token": "MjgwNDk3NjI4NTMyMTc4OTU5.C4OLxw.l05bURP22pdJxW3v4Ok0fXc9B3U",
+    "idOwner": [
+      "135891021048315904"
+    ],
+    "idRoles": [
+      "199021330236964864",
+      "168687170696118272"
+    ],
+    "newMember": "Hey, how are you, \u003cuser\u003e?",
+    "adminChanID": "",
+    "prefix": "!!"
+  },
+  "connections": {
+    "influx": {
+      "IP": "",
+      "DB": "",
+      "US": "",
+      "PW": ""
+    },
+    "mysql": {
+      "IP": "localhost:3306",
+      "DB": "iw_dev",
+      "US": "iwbot",
+      "PW": "!req7YMsGX!vsMLtDCYN"
+    }
+  },
+  "inara": {
+    "name": "Bermos",
+    "password": "F[R4a;798V914o5Ew(bh8]aNR"
+  },
+  "googleToken": "AIzaSyB0GjrLBERmtWf55f0QcJSeyl1hkkybvp0",
+  "githubToken": "774381038b7fa0731f9b185601a7a846d5e13fe7",
+  "JAVA_HOME": "/home/bermos/bin/Java/jdk1.8.0_121",
+  "dev": true,
+  "bot": {
+    "IWBot": {
+      "pmCommands": {
+        "update": "core_commands.Update",
+        "time": "core_commands.UTCTime",
+        "status": "core_commands.Status",
+        "restart": "core_commands.Restart",
+        "shutdown": "core_commands.Shutdown",
+        "owner": "core_commands.EditOwner",
+        "send": "core_commands.SendMessage",
+        "dist": "ed_commands.Distance",
+        "roll": "misc_commands.RollDice",
+        "feedback": "misc_commands.Feedback",
+        "account": "iw_commands.Auth",
+        "iwfeedback": "iw_commands.Feedback",
+        "bgs": "iw_commands.BGS"
+      },
+      "guildCommands": {
+        "debug": "core_commands.DebugMode",
+        "update": "core_commands.Update",
+        "setavatar": "core_commands.Setavatar",
+        "setname": "core_commands.Setname",
+        "setgame": "core_commands.Setgame",
+        "role": "core_commands.Role",
+        "welcome": "core_commands.Welcome",
+        "adminchannel": "core_commands.AdminChannel",
+        "adminrole": "core_commands.AdminRole",
+        "topic": "core_commands.Topic",
+        "time": "core_commands.UTCTime",
+        "status": "core_commands.Status",
+        "info": "core_commands.Status",
+        "restart": "core_commands.Restart",
+        "shutdown": "core_commands.Shutdown",
+        "clear": "core_commands.BulkDelete",
+        "dist": "ed_commands.Distance",
+        "whois": "ed_commands.CMDRLookup",
+        "note": "misc_commands.Notes",
+        "roll": "misc_commands.RollDice",
+        "xkcd": "misc_commands.XKCD",
+        "dance": "misc_commands.Dance",
+        "memes": "misc_commands.Memes",
+        "stripme": "misc_commands.Stripme",
+        "reminder": "misc_commands.Reminder",
+        "feedback": "misc_commands.Feedback",
+        "bgs": "iw_commands.BGS",
+        "list": "iw_commands.MissionsList",
+        "next": "iw_commands.MissionsNext",
+        "mission": "iw_commands.Missions",
+        "applicant": "iw_commands.Applicant"
+      }
+    },
+    "EDBot": {
+
+    }
+  }
+}

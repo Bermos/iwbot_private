@@ -16,7 +16,7 @@ import provider.DataProvider;
 
 import java.util.Date;
 
-public class ListenerIW extends Listener{
+public class ListenerIWBot extends Listener{
 
     @Override
     public void onReady(ReadyEvent event) {

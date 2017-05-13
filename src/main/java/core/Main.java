@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import org.apache.commons.lang3.RandomStringUtils;
 import provider.Connections;
 import provider.DataProvider;
+import provider.DataProvider.Bot;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -14,38 +15,36 @@ import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class Main {
+	public static final String CONFIG_LOC = "./data/config.json";
+	public static final String GUILDS_LOC = "./data/guilds.json";
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-		if (DataProvider.getToken().isEmpty())
-			install();
 
-		try {
-			Listener listener;
-			switch (DataProvider.getBotName()) {
-				case "IWBot": listener = new ListenerIW(); break;
-				case "EDBot": listener = new ListenerED(); break;
+		for (Entry<String, Bot> bot : DataProvider.getBots().entrySet()) {
+			try {
+				Object listener = Class.forName("Listener" + bot.getKey()).newInstance();
 
-				default: listener = new Listener();
+                System.out.println("Starting " + bot.getKey());
+                new JDABuilder(AccountType.BOT)
+						.setToken(bot.getValue().getToken())
+						.addListener(listener)
+						.buildBlocking();
+
+			} catch (LoginException e) {
+				System.out.println("[Error] invalid bot token.");
+			} catch (IllegalArgumentException e) {
+				System.out.println("[Error] no bot token found.");
+			} catch (InterruptedException | RateLimitedException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+				System.out.println("[Error] listener class could not be loaded.");
+				e.printStackTrace();
 			}
-
-
-			new JDABuilder(AccountType.BOT)
-			.setToken(DataProvider.getToken())
-			.addListener(listener)
-			.buildBlocking();
-			
-		} catch (LoginException e) {
-			System.out.println("[Error] invalid bot token.");
-		} catch (IllegalArgumentException e) {
-			System.out.println("[Error] no bot token found.");
-		} catch (InterruptedException | RateLimitedException e) {
-			e.printStackTrace();
 		}
 	}
 
