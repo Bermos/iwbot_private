@@ -22,7 +22,7 @@ import java.util.List;
 public class Missions implements GuildCommand {
 	private static List<MissionChannel> missionChannels = new ArrayList<>();
 
-	private static MissionChannel getChannel(String textChanID) {
+	public static MissionChannel getChannel(String textChanID) {
 		for (MissionChannel chan : missionChannels) {
 			if (chan.getId().equals(textChanID))
 				return chan;
@@ -51,7 +51,7 @@ public class Missions implements GuildCommand {
 		getChannel(textChanID).print(true);
 	}
 	
-	private static void create(String name, GuildManager guildManager, Member explorer) {
+	public static void create(String name, GuildManager guildManager, Member explorer) {
 		Channel missionChannel;
 		Guild guild = guildManager.getGuild();
 		Role iwRole = guild.getRoleById("143171790225670145");

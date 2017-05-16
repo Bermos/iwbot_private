@@ -7,12 +7,13 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.impl.TextChannelImpl;
 
-class MissionChannel extends TextChannelImpl {
+public class MissionChannel extends TextChannelImpl {
 	private Message message;
 	private int next = 0;
 	private String delRequestID = null;
 	private List<NavSystem> systems = new ArrayList<>();
-	
+	private String voteMessageId;
+
 	private class NavSystem {
 		String name;
 		boolean scoopable;
@@ -69,5 +70,13 @@ class MissionChannel extends TextChannelImpl {
 	
 	boolean isPrimed(String id) {
 		return delRequestID != null && delRequestID.equals(id);
+	}
+
+	public String getVoteMessageId() {
+		return voteMessageId;
+	}
+
+	public void setVoteMessageId(String voteMessageId) {
+		this.voteMessageId = voteMessageId;
 	}
 }
