@@ -120,7 +120,7 @@ class BGSGoal {
                             factionNamesList.add(rs1.getString("f_shortname") + " = " + rs1.getString("f_fullname"));
                         }
                         if (showUserP) {
-                            message += String.format("%1$-17s | %2$-16s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", (Integer.parseInt(rs1.getString("usergoal")) == 0 ? "No Target" :int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)"), (Integer.parseInt(rs1.getString("globalgoal")) == 0 ? "No Target" : int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)"));
+                            message += String.format("%1$-17s | %2$-16s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", (Integer.parseInt(rs1.getString("usergoal")) == 0 ? "Unlimited" :int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + int_format_short(rs1.getInt("userdone")) + "/" + (int) userP + "%)"), (Integer.parseInt(rs1.getString("globalgoal")) == 0 ? "Unlimited" : int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)"));
                         } else {
                             ps = connect.prepareStatement("SELECT IFNULL(COUNT(*),0) AS userfinished FROM (SELECT SUM(a.amount) AS total FROM bgs_activity a WHERE a.activity = ? AND a.timestamp >= ? AND a.timestamp <= ? AND a.systemid = ? AND a.factionid = ? GROUP BY userid HAVING total >= ?) AS tmp");
                             ps.setString(1, rs1.getString("activity"));
@@ -131,7 +131,7 @@ class BGSGoal {
                             ps.setInt(6, rs1.getInt("usergoal"));
                             ResultSet rs2 = ps.executeQuery();
                             rs2.first();
-                            message += String.format("%1$-17s | %2$-15s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", (Integer.parseInt(rs1.getString("usergoal")) == 0 ? "No Target" : int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs2.getString("userfinished") + ")"), (Integer.parseInt(rs1.getString("globalgoal")) == 0 ? "No Target" : int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)"));
+                            message += String.format("%1$-17s | %2$-15s | %3$s\n", rs1.getString("activity") + " (" + rs1.getString("f_shortname") + ")", (Integer.parseInt(rs1.getString("usergoal")) == 0 ? "Unlimited" : int_format_short(Integer.parseInt(rs1.getString("usergoal"))) + " (" + rs2.getString("userfinished") + ")"), (Integer.parseInt(rs1.getString("globalgoal")) == 0 ? "Unlimited" : int_format_short(Integer.parseInt(rs1.getString("globalgoal"))) + " (" + int_format_short(rs1.getInt("globaldone")) + "/" + (int) globalP + "%)"));
                         }
                     }
                     if (rs.getString("note").length() > 0) {
