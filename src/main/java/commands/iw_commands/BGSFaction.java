@@ -1,6 +1,5 @@
 package commands.iw_commands;
 
-import com.google.common.base.Joiner;
 import iw_bot.LogUtil;
 
 import provider.Connections;
@@ -114,7 +113,7 @@ class BGSFaction {
                 } catch (SQLException e) {
                     return "**WARNING FACTION NOT UPDATED**";
                 }
-                return "Faction updated\n" + Joiner.on("").join(getFactions(true, 0));
+                return "Faction updated\n" + String.join("",getFactions(true, 0));
             } else {
                 return "**WARNING FACTION NOT UPDATED**\nCheck that a faction with  ID '" + args[2] + "' exists and that no other faction with a shortname/fullname of '" + args[3] + "' or '" + args[4] + "' already exists!\n" + String.join("",getFactions(true, 0));
             }
