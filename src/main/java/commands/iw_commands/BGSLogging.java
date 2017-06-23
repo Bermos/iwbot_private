@@ -100,7 +100,7 @@ class BGSLogging {
 
                 } else {
                     message = "**WARNING ACTION NOT LOGGED**\nInvalid faction entered. You can use either the shortname or the fullname. Please select from:\n";
-                    return message + BGSFaction.getFactions(admin, systemid);
+                    return message + String.join("",BGSFaction.getFactions(admin, systemid));
                 }
 
             } else {

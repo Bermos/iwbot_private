@@ -169,9 +169,32 @@ public class BGS implements PMCommand, GuildCommand {
                 } else if (args[1].equalsIgnoreCase("list")) { // Output a list of the factions available
                     //bgs faction, list, <system>
                     if (args.length == 2) {
-                        event.getChannel().sendMessage("**BGS Factions**\n" + BGSFaction.getFactions(true, 0) + BGSFaction.getFactions(true, -1)).queue();
+                        ArrayList<String> messages = BGSFaction.getFactions(true, 0);
+                        messages.addAll(BGSFaction.getFactions(true, -1));
+                        String messageToSend = "**BGS Factions**\n";
+                        for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                            if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                                event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                                messageToSend = "";
+                                messageToSend += message;
+                            } else { // need the line break if not going to be seperate messages.
+                                messageToSend += "\n" + message;
+                            }
+                        }
+                        event.getChannel().sendMessage(messageToSend).queue();
                     } else if (args.length == 3) {
-                        event.getChannel().sendMessage(BGSFaction.getFactions(DataProvider.isAdmin(event), BGSSystem.systemExists(args[2], args[2], 0, true))).queue();
+                        ArrayList<String> messages = BGSFaction.getFactions(DataProvider.isAdmin(event), BGSSystem.systemExists(args[2], args[2], 0, true));
+                        String messageToSend = "**BGS Factions**\n";
+                        for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                            if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                                event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                                messageToSend = "";
+                                messageToSend += message;
+                            } else { // need the line break if not going to be seperate messages.
+                                messageToSend += "\n" + message;
+                            }
+                        }
+                        event.getChannel().sendMessage(messageToSend).queue();
                     } else {
                         event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
                     }
@@ -180,7 +203,18 @@ public class BGS implements PMCommand, GuildCommand {
                     if (args.length == 4) {
                         event.getChannel().sendMessage(BGSFaction.setFactionVisibility(args[1].equalsIgnoreCase("show"), args[2], args[3])).queue();
                     } else { // show system help if wrong number of arguments
-                        event.getChannel().sendMessage(BGS_FACTION_HIDE_HELP + "\n" + BGSFaction.getFactions(DataProvider.isAdmin(event), -1)).queue();
+                        ArrayList<String> messages = BGSFaction.getFactions(DataProvider.isAdmin(event), -1);
+                        String messageToSend = BGS_FACTION_HIDE_HELP + "\n";
+                        for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                            if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                                event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                                messageToSend = "";
+                                messageToSend += message;
+                            } else { // need the line break if not going to be seperate messages.
+                                messageToSend += "\n" + message;
+                            }
+                        }
+                        event.getChannel().sendMessage(messageToSend).queue();
                     }
 
                 } else if (args[1].equalsIgnoreCase("add")) { // add a new faction to the database
@@ -365,18 +399,26 @@ public class BGS implements PMCommand, GuildCommand {
             event.getChannel().sendMessage(message).queue();
 
         } else if (args.length == 3) {
-            String message;
             int systemid = BGSSystem.systemExists(args[2], args[2], 0, false);
             if (systemid > 0) {
-                message = "**WARNING ACTION NOT LOGGED**\nFaction not specified? Enter '" + Listener.prefix + "bgs help' or use one of the factions below:\n";
-                message += BGSFaction.getFactions(DataProvider.isAdmin(event), systemid);
+                ArrayList<String> messages = BGSFaction.getFactions(DataProvider.isAdmin(event), systemid);
+                String messageToSend = "**WARNING ACTION NOT LOGGED**\nFaction not specified? Enter '" + Listener.prefix + "bgs help' or use one of the factions below:\n";
+                for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                    if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                        event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                        messageToSend = "";
+                        messageToSend += message;
+                    } else { // need the line break if not going to be seperate messages.
+                        messageToSend += "\n" + message;
+                    }
+                }
+                event.getChannel().sendMessage(messageToSend).queue();
             } else {
+                String message;
                 message = "**WARNING ACTION NOT LOGGED**\nYou specified an invalid system. Enter '" + Listener.prefix + "bgs help' or use one of the star system names below:\n";
                 message += BGSSystem.getSystems(DataProvider.isAdmin(event));
+                event.getChannel().sendMessage(message).queue();
             }
-
-            event.getChannel().sendMessage(message).queue();
-
         } else if (args.length == 4) {
             //bgs activity, amount, system, faction
             event.getChannel().sendMessage(BGSLogging.logActivity(DataProvider.isAdmin(event), args[0], event.getAuthor().getId(), event.getMember().getEffectiveName(), args[1], args[2], args[3])).queue();
