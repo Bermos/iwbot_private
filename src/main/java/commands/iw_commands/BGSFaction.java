@@ -1,5 +1,6 @@
 package commands.iw_commands;
 
+import com.google.common.base.Joiner;
 import iw_bot.LogUtil;
 
 import provider.Connections;
@@ -8,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import static iw_bot.Constants.*;
 
@@ -112,12 +114,12 @@ class BGSFaction {
                 } catch (SQLException e) {
                     return "**WARNING FACTION NOT UPDATED**";
                 }
-                return "Faction updated\n" + getFactions(true, 0);
+                return "Faction updated\n" + Joiner.on("").join(getFactions(true, 0));
             } else {
-                return "**WARNING FACTION NOT UPDATED**\nCheck that a faction with  ID '" + args[2] + "' exists and that no other faction with a shortname/fullname of '" + args[3] + "' or '" + args[4] + "' already exists!\n" + getFactions(true, 0);
+                return "**WARNING FACTION NOT UPDATED**\nCheck that a faction with  ID '" + args[2] + "' exists and that no other faction with a shortname/fullname of '" + args[3] + "' or '" + args[4] + "' already exists!\n" + String.join("",getFactions(true, 0));
             }
         } else {
-            return BGS_FACTION_EDIT_HELP + "\n" + getFactions(true, 0);
+            return BGS_FACTION_EDIT_HELP + "\n" + String.join("",getFactions(true, 0));
         }
     }
 
@@ -140,16 +142,16 @@ class BGSFaction {
                         } catch (SQLException e) {
                             return "**WARNING FACTION NOT ASSIGNED**\nSQL Error";
                         }
-                        return "Faction Assigned\n" + getFactions(true, systemid);
+                        return "Faction Assigned\n" + String.join("",getFactions(true, systemid));
                     }
                 } else {
                     return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true);
                 }
             } else {
-                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + getFactions(true, 0);
+                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + String.join("",getFactions(true, 0));
             }
         } else {
-            return BGS_FACTION_ASSIGN_HELP + "\n" + getFactions(true, 0) + BGSSystem.getSystems(true);
+            return BGS_FACTION_ASSIGN_HELP + "\n" + String.join("",getFactions(true, 0) + BGSSystem.getSystems(true));
         }
     }
 
@@ -172,16 +174,16 @@ class BGSFaction {
                         } catch (SQLException e) {
                             return "**WARNING FACTION NOT REMOVED**\nSQL Error";
                         }
-                        return "Faction Removed\n" + getFactions(true, systemid);
+                        return "Faction Removed\n" + String.join("",getFactions(true, systemid));
                     }
                 } else {
                     return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true);
                 }
             } else {
-                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + getFactions(true, 0);
+                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + String.join("",getFactions(true, 0));
             }
         } else {
-            return BGS_FACTION_REMOVE_HELP + "\n" + getFactions(true, 0) + BGSSystem.getSystems(true);
+            return BGS_FACTION_REMOVE_HELP + "\n" + String.join("",getFactions(true, 0)) + BGSSystem.getSystems(true);
         }
     }
 
@@ -198,12 +200,12 @@ class BGSFaction {
                     ps.setString(2, args[3]);
                     ps.executeUpdate();
                 } else
-                    return "**WARNING FACTION NOT ADDED**\nFaction with shortname/fullname set to either: '" + args[2] + "' or '" + args[3] + "' already exists!\n" + getFactions(true, 0);
+                    return "**WARNING FACTION NOT ADDED**\nFaction with shortname/fullname set to either: '" + args[2] + "' or '" + args[3] + "' already exists!\n" + String.join("",getFactions(true, 0));
             } catch (SQLException e) {
                 //This only happens when there's a serious issue with mysql or the connection to it
                 return "**WARNING FACTION NOT ADDED**";
             }
-            return "New faction added to BGS logging.\n" + getFactions(true, 0);
+            return "New faction added to BGS logging.\n" + String.join("",getFactions(true, 0));
         } else {
             return BGS_FACTION_ADD_HELP;
         }
@@ -226,9 +228,9 @@ class BGSFaction {
                         // if one row was altered
                         if (ps.executeUpdate() == 1) {
                             if (show)
-                                return "BGS faction **VISIBLE**. Logging possible for this '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n" + getFactions(true, systemid);
+                                return "BGS faction **VISIBLE**. Logging possible for this '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n" + String.join("",getFactions(true, systemid));
                             else
-                                return "BGS faction **HIDDEN** Logging no longer possible for '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n" + getFactions(true, systemid);
+                                return "BGS faction **HIDDEN** Logging no longer possible for '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n" + String.join("",getFactions(true, systemid));
                         } else { // if no row was altered the system wasn't found
                             return "**WARNING FACTION VISIBILITY NOT CHANGED**\nSystem '" + system + "' not found.\n" + BGSSystem.getSystems(true);
                         }
@@ -237,19 +239,20 @@ class BGSFaction {
                         return "**WARNING SYSTEM VISIBILITY NOT CHANGED**";
                     }
                 } else {
-                    return "**WARNING FACTION '" + getFactionFullname(factionid) + "' IS NOT ASSIGNED TO '" + BGSSystem.getSystemFullname(systemid) + "'**\nPlease select from the following\n" + getFactions(true, systemid);
+                    return "**WARNING FACTION '" + getFactionFullname(factionid) + "' IS NOT ASSIGNED TO '" + BGSSystem.getSystemFullname(systemid) + "'**\nPlease select from the following\n" + String.join("",getFactions(true, systemid));
                 }
 
             } else {
                 return "**WARNING SYSTEM '" + system + "' DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true);
             }
         } else {
-            return "**WARNING FACTION '" + faction + "' DOES NOT EXIST**\nPlease select from the following\n" + getFactions(true, 0);
+            return "**WARNING FACTION '" + faction + "' DOES NOT EXIST**\nPlease select from the following\n" + String.join("",getFactions(true, 0));
         }
     }
 
-    static String getFactions(boolean admin, int systemid) {
+    static ArrayList<String> getFactions(boolean admin, int systemid) {
         String message = "";
+        ArrayList<String> messages = new ArrayList<>();
         try {
             // show hidden factions in italics for admins
             Connection connect = new Connections().getConnection();
@@ -262,7 +265,7 @@ class BGSFaction {
                         ps = connect.prepareStatement("SELECT * FROM bgs_faction f LEFT JOIN bgs_system_faction sf ON f.factionid = sf.factionid WHERE sf.systemid = ? ORDER BY f_fullname ASC");
                         ps.setInt(1, rs.getInt("systemid"));
                         ResultSet rs1 = ps.executeQuery();
-                        message += "**" + BGS.getRows(rs1) + " Factions assigned to " + BGSSystem.getSystemFullname(rs.getInt("systemid")) + "**\n";
+                        message = "**" + BGS.getRows(rs1) + " Factions assigned to " + BGSSystem.getSystemFullname(rs.getInt("systemid")) + "**\n";
                         message += "```ID   | Short | Full\n";
                         if (!rs1.isBeforeFirst()) {
                             message += "No Factions";
@@ -275,6 +278,7 @@ class BGSFaction {
                             }
                         }
                         message += "```\n";
+                        messages.add(message);
                     }
                 } else {
                     if (systemid > 0) { // list factions in one system
@@ -300,6 +304,7 @@ class BGSFaction {
                         }
                     }
                     message += "```\n";
+                    messages.add(message);
                 }
 
             } else { // just show live systems
@@ -313,10 +318,11 @@ class BGSFaction {
                     message += String.format("%1$-6s| %2$s\n", rs.getString("f_shortname"), rs.getString("f_fullname"));
                 }
                 message += "```\n";
+                messages.add(message);
             }
         } catch (SQLException e) {
             LogUtil.logErr(e);
         }
-        return message;
+        return messages;
     }
 }

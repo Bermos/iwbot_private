@@ -319,9 +319,9 @@ class BGSGoal {
             if (factionid <= 0) {
                 factionid = BGSFaction.checkFactionInSystem(goalitem[1], BGSSystem.getSystemFullname(systemid), true);
                 if (factionid > 0) {
-                    return "Faction (" + BGSFaction.getFactionFullname(factionid) + ") is currently hidden in " + BGSSystem.getSystemFullname(systemid) + ". Make the faction visible or try use of these:\n" + BGSFaction.getFactions(true, systemid);
+                    return "Faction (" + BGSFaction.getFactionFullname(factionid) + ") is currently hidden in " + BGSSystem.getSystemFullname(systemid) + ". Make the faction visible or try use of these:\n" + String.join("",BGSFaction.getFactions(true, systemid));
                 } else {
-                    return "Incorrect faction (" + goalitem[1] + ") for goal item #" + Integer.toString(i) + ". Try one of these:\n" + BGSFaction.getFactions(true, systemid);
+                    return "Incorrect faction (" + goalitem[1] + ") for goal item #" + Integer.toString(i) + ". Try one of these:\n" + String.join("",BGSFaction.getFactions(true, systemid));
                 }
             } else if (activity == null) {
                 String output = "";
