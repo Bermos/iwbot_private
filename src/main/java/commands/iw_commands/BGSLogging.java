@@ -60,8 +60,8 @@ class BGSLogging {
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
                             "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
                             "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.userid = ? AND " +
-                            "i.factionid = ? " +
-                            "AND a.timestamp >= g.startts AND a.timestamp <= g.endts " +
+                            "i.factionid = ? AND i.usergoal > 0 AND " +
+                            "a.timestamp >= g.startts AND a.timestamp <= g.endts " +
                             "GROUP BY a.userid HAVING total >= i.usergoal;");
                     ps.setInt(1, systemid);
                     ps.setString(2, activity.toString());
@@ -78,7 +78,7 @@ class BGSLogging {
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
                             "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
                             "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND " +
-                            "i.factionid = ? " +
+                            "i.factionid = ? AND i.globalgoal > 0 " +
                             "HAVING total >= i.globalgoal;");
                     ps.setInt(1, systemid);
                     ps.setString(2, activity.toString());
@@ -88,16 +88,19 @@ class BGSLogging {
                     ResultSet rs1 = ps.executeQuery();
 
                     if (BGS.getRows(rs) > 0 && BGS.getRows(rs1) > 0) { //CMDR and system goal met
-                        message = "**CMDR and System '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " have been met. o7**\nPlease use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
+                        message = "**CMDR and System '" + activity.toString() + "' target met. Congratulations!**\nThe '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " is complete. o7\nPlease use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
                     } else if (BGS.getRows(rs) > 0) { // system goal not met but cmdr goal is
-                        message = "**Congratulations you have met the '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + ". o7**\nYou can continue with this activity but the effect on the BGS is reduced. Use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
-                    } else { // no goals met
+                        message = "**CMDR '" + activity.toString() + "' target met. Congratulations!**\nThe '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " is complete. o7\nYou can continue with this activity but the effect on the BGS is reduced. Use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
+                    } else if (BGS.getRows(rs1) > 0) { // system goal met but cmdr goal isn't
+                        message = "**System '" + activity.toString() + "' target met. Congratulations!**\nThe '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + "is complete. o7\nYou can continue to with this activity but the effect on the BGS is reduced. Use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
+                    }
+                    else { // no goals met
                         message = "**Your engagement with " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " has been noticed. o7.**\n*" + BGS.getRandom(QUOTE) + "*";
                     }
 
                 } else {
                     message = "**WARNING ACTION NOT LOGGED**\nInvalid faction entered. You can use either the shortname or the fullname. Please select from:\n";
-                    return message + BGSFaction.getFactions(admin, systemid);
+                    return message + String.join("",BGSFaction.getFactions(admin, systemid));
                 }
 
             } else {
