@@ -99,8 +99,9 @@ class BGSFaction {
         }
     }
 
-    static String editFaction(String[] args) {
+    static ArrayList<String> editFaction(String[] args) {
         //bgs faction, edit, <factionid>, <shortname>, <fullname>
+        ArrayList<String> messages = new ArrayList<>();
         if (args.length == 5) {
             if (factionExists(args[3], args[4], Integer.parseInt(args[2])) == 0 && checkFactionID(Integer.parseInt(args[2])) == Integer.parseInt(args[2])) {
                 Connection connect = new Connections().getConnection();
@@ -111,26 +112,35 @@ class BGSFaction {
                     ps.setInt(3, Integer.parseInt(args[2]));
                     ps.executeUpdate();
                 } catch (SQLException e) {
-                    return "**WARNING FACTION NOT UPDATED**";
+                    messages.add("**WARNING FACTION NOT UPDATED**");
+                    return messages;
                 }
-                return "Faction updated\n" + String.join("",getFactions(true, 0));
+                messages.add("Faction updated\n");
+                messages.addAll(getFactions(true, 0));
+                return messages;
             } else {
-                return "**WARNING FACTION NOT UPDATED**\nCheck that a faction with  ID '" + args[2] + "' exists and that no other faction with a shortname/fullname of '" + args[3] + "' or '" + args[4] + "' already exists!\n" + String.join("",getFactions(true, 0));
+                messages.add("**WARNING FACTION NOT UPDATED**\nCheck that a faction with  ID '" + args[2] + "' exists and that no other faction with a shortname/fullname of '" + args[3] + "' or '" + args[4] + "' already exists!\n");
+                messages.addAll(getFactions(true, 0));
+                return messages;
             }
         } else {
-            return BGS_FACTION_EDIT_HELP + "\n" + String.join("",getFactions(true, 0));
+            messages.add(BGS_FACTION_EDIT_HELP + "\n");
+            messages.addAll(getFactions(true, 0));
+            return messages;
         }
     }
 
-    static String assignFaction(String[] args) {
+    static ArrayList<String> assignFaction(String[] args) {
         //bgs faction, assign, <factionname>, <systemname>
+        ArrayList<String> messages = new ArrayList<>();
         if (args.length == 4) {
             int factionid = factionExists(args[2], args[2], 0);
             int systemid = BGSSystem.systemExists(args[3], args[3], 0, true);
             if (factionid > 0) {
                 if (systemid > 0) {
                     if (checkFactionInSystem(args[2], args[3], true) > 0) {
-                        return "**WARNING FACTION NOT ASSIGNED**\n" + getFactionFullname(factionid) + " is already assigned to " + BGSSystem.getSystemFullname(systemid) + "!";
+                        messages.add("**WARNING FACTION NOT ASSIGNED**\n" + getFactionFullname(factionid) + " is already assigned to " + BGSSystem.getSystemFullname(systemid) + "!");
+                        return messages;
                     } else {
                         Connection connect = new Connections().getConnection();
                         try {
@@ -139,30 +149,42 @@ class BGSFaction {
                             ps.setInt(2, systemid);
                             ps.executeUpdate();
                         } catch (SQLException e) {
-                            return "**WARNING FACTION NOT ASSIGNED**\nSQL Error";
+                            messages.add("**WARNING FACTION NOT ASSIGNED**\nSQL Error");
+                            return messages;
                         }
-                        return "Faction Assigned\n" + String.join("",getFactions(true, systemid));
+                        messages.add("Faction Assigned\n" + String.join("",getFactions(true, systemid)));
+                        return messages;
                     }
                 } else {
-                    return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true);
+                    messages.add("**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true));
+                    return messages;
                 }
             } else {
-                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + String.join("",getFactions(true, 0));
+                messages.add("**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n");
+                messages.addAll(getFactions(true, 0));
+                return messages;
             }
         } else {
-            return BGS_FACTION_ASSIGN_HELP + "\n" + String.join("",getFactions(true, 0) + BGSSystem.getSystems(true));
+            messages.add(BGS_FACTION_ASSIGN_HELP + "\n");
+            messages.add("**Factions**\n");
+            messages.addAll(getFactions(true, 0));
+            messages.add("**Systems**\n");
+            messages.add(BGSSystem.getSystems(true));
+            return messages;
         }
     }
 
-    static String removeFaction(String[] args) {
+    static ArrayList<String> removeFaction(String[] args) {
         //bgs faction, remove, <factionname>, <systemname>
+        ArrayList<String> messages = new ArrayList<>();
         if (args.length == 4) {
             int factionid = factionExists(args[2], args[2], 0);
             int systemid = BGSSystem.systemExists(args[3], args[3], 0, true);
             if (factionid > 0) {
                 if (systemid > 0) {
                     if (checkFactionInSystem(args[2], args[3], true) <= 0) {
-                        return "**WARNING FACTION NOT REMOVED**\n" + getFactionFullname(factionid) + " is not assigned to " + BGSSystem.getSystemFullname(systemid) + "!";
+                        messages.add("**WARNING FACTION NOT REMOVED**\n" + getFactionFullname(factionid) + " is not assigned to " + BGSSystem.getSystemFullname(systemid) + "!");
+                        return messages;
                     } else {
                         Connection connect = new Connections().getConnection();
                         try {
@@ -171,24 +193,36 @@ class BGSFaction {
                             ps.setInt(2, systemid);
                             ps.executeUpdate();
                         } catch (SQLException e) {
-                            return "**WARNING FACTION NOT REMOVED**\nSQL Error";
+                            messages.add("**WARNING FACTION NOT REMOVED**\nSQL Error");
+                            return messages;
                         }
-                        return "Faction Removed\n" + String.join("",getFactions(true, systemid));
+                        messages.add("Faction Removed\n");
+                        messages.addAll(getFactions(true, systemid));
+                        return messages;
                     }
                 } else {
-                    return "**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true);
+                    messages.add("**WARNING SYSTEM DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true));
+                    return messages;
                 }
             } else {
-                return "**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n" + String.join("",getFactions(true, 0));
+                messages.add("**WARNING FACTION DOES NOT EXIST**\nPlease select from the following\n");
+                messages.addAll(getFactions(true, 0));
+                return messages;
             }
         } else {
-            return BGS_FACTION_REMOVE_HELP + "\n" + String.join("",getFactions(true, 0)) + BGSSystem.getSystems(true);
+            messages.add(BGS_FACTION_REMOVE_HELP + "\n");
+            messages.add("**Factions**\n");
+            messages.addAll(getFactions(true, 0));
+            messages.add("**Systems**\n");
+            messages.add(BGSSystem.getSystems(true));
+            return messages;
         }
     }
 
 
-    static String addFaction(String[] args) {
+    static ArrayList<String> addFaction(String[] args) {
         //bgs faction, add, <shortname>, <fullname>
+        ArrayList<String> messages = new ArrayList<>();
         if (args.length == 4) {
             Connection connect = new Connections().getConnection();
             try {
@@ -198,20 +232,28 @@ class BGSFaction {
                     ps.setString(1, args[2]);
                     ps.setString(2, args[3]);
                     ps.executeUpdate();
-                } else
-                    return "**WARNING FACTION NOT ADDED**\nFaction with shortname/fullname set to either: '" + args[2] + "' or '" + args[3] + "' already exists!\n" + String.join("",getFactions(true, 0));
+                } else {
+                    messages.add("**WARNING FACTION NOT ADDED**\nFaction with shortname/fullname set to either: '" + args[2] + "' or '" + args[3] + "' already exists!\n");
+                    messages.addAll(getFactions(true, 0));
+                    return messages;
+                }
             } catch (SQLException e) {
                 //This only happens when there's a serious issue with mysql or the connection to it
-                return "**WARNING FACTION NOT ADDED**";
+                messages.add("**WARNING FACTION NOT ADDED**");
+                return messages;
             }
-            return "New faction added to BGS logging.\n" + String.join("",getFactions(true, 0));
+            messages.add("New faction added to BGS logging.\n");
+            messages.addAll(getFactions(true, 0));
+            return messages;
         } else {
-            return BGS_FACTION_ADD_HELP;
+            messages.add(BGS_FACTION_ADD_HELP);
+            return messages;
         }
     }
 
-    static String setFactionVisibility(boolean show, String faction, String system) {
+    static ArrayList<String> setFactionVisibility(boolean show, String faction, String system) {
         //bgs faction, show|hide, faction, system
+        ArrayList<String> messages = new ArrayList<>();
         int factionid = factionExists(faction, faction, 0);
         int systemid = BGSSystem.systemExists(system, system, 0, true);
         if (factionid > 0) {
@@ -226,26 +268,40 @@ class BGSFaction {
 
                         // if one row was altered
                         if (ps.executeUpdate() == 1) {
-                            if (show)
-                                return "BGS faction **VISIBLE**. Logging possible for this '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n" + String.join("",getFactions(true, systemid));
-                            else
-                                return "BGS faction **HIDDEN** Logging no longer possible for '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n" + String.join("",getFactions(true, systemid));
+                            if (show) {
+                                messages.add("BGS faction **VISIBLE**. Logging possible for this '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n");
+                                messages.addAll(getFactions(true, systemid));
+                                return messages;
+                            }
+                            else {
+                                messages.add("BGS faction **HIDDEN** Logging no longer possible for '" + getFactionFullname(factionid) + "' in '" + BGSSystem.getSystemFullname(systemid) + "'.\n");
+                                messages.addAll(getFactions(true, systemid));
+                                return messages;
+                            }
                         } else { // if no row was altered the system wasn't found
-                            return "**WARNING FACTION VISIBILITY NOT CHANGED**\nSystem '" + system + "' not found.\n" + BGSSystem.getSystems(true);
+                            messages.add("**WARNING FACTION VISIBILITY NOT CHANGED**\nSystem '" + system + "' not found.\n");
+                            messages.add(BGSSystem.getSystems(true));
+                            return messages;
                         }
                     } catch (SQLException e) {
                         //This only happens when there's a serious issue with mysql or the connection to it
-                        return "**WARNING SYSTEM VISIBILITY NOT CHANGED**";
+                        messages.add("**WARNING SYSTEM VISIBILITY NOT CHANGED**");
+                        return messages;
                     }
                 } else {
-                    return "**WARNING FACTION '" + getFactionFullname(factionid) + "' IS NOT ASSIGNED TO '" + BGSSystem.getSystemFullname(systemid) + "'**\nPlease select from the following\n" + String.join("",getFactions(true, systemid));
+                    messages.add("**WARNING FACTION '" + getFactionFullname(factionid) + "' IS NOT ASSIGNED TO '" + BGSSystem.getSystemFullname(systemid) + "'**\nPlease select from the following\n");
+                    messages.addAll(getFactions(true, systemid));
+                    return messages;
                 }
 
             } else {
-                return "**WARNING SYSTEM '" + system + "' DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true);
+                messages.add("**WARNING SYSTEM '" + system + "' DOES NOT EXIST**\nPlease select from the following\n" + BGSSystem.getSystems(true));
+                return messages;
             }
         } else {
-            return "**WARNING FACTION '" + faction + "' DOES NOT EXIST**\nPlease select from the following\n" + String.join("",getFactions(true, 0));
+            messages.add("**WARNING FACTION '" + faction + "' DOES NOT EXIST**\nPlease select from the following\n");
+            messages.addAll(getFactions(true, 0));
+            return messages;
         }
     }
 
@@ -286,7 +342,6 @@ class BGSFaction {
                     } else { // list factions
                         ps = connect.prepareStatement("SELECT *, 0 AS f_hidden FROM bgs_faction ORDER BY f_fullname ASC");
                     }
-
                     ResultSet rs = ps.executeQuery();
                     if (systemid > 0) {
                         message += "**" + BGS.getRows(rs) + " Factions assigned to " + BGSSystem.getSystemFullname(systemid) + "**\n";
@@ -296,6 +351,11 @@ class BGSFaction {
                         message += "No Factions";
                     }
                     while (rs.next()) {
+                        if (message.length()> 1800) {
+                            message += "```";
+                            messages.add(message);
+                            message = "```";
+                        }
                         if (rs.getString("f_hidden").equals("1")) {
                             message += String.format("%1$-4s | %2$-5s | %3$s (hidden faction)\n", rs.getString("factionid"), rs.getString("f_shortname"), rs.getString("f_fullname"));
                         } else {

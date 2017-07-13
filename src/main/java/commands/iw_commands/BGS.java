@@ -201,7 +201,16 @@ public class BGS implements PMCommand, GuildCommand {
                 } else if (args[1].equalsIgnoreCase("hide") || args[1].equalsIgnoreCase("show")) { // show or hide a faction
                     //bgs faction, <show | hide>, faction, system
                     if (args.length == 4) {
-                        event.getChannel().sendMessage(BGSFaction.setFactionVisibility(args[1].equalsIgnoreCase("show"), args[2], args[3])).queue();
+                        ArrayList<String> messages = BGSFaction.setFactionVisibility(args[1].equalsIgnoreCase("show"), args[2], args[3]);
+                        String messageToSend = "";
+                        for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                            if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                                event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                                messageToSend = "";
+                            }
+                            messageToSend += message;
+                        }
+                        event.getChannel().sendMessage(messageToSend).queue();
                     } else { // show system help if wrong number of arguments
                         ArrayList<String> messages = BGSFaction.getFactions(DataProvider.isAdmin(event), -1);
                         String messageToSend = BGS_FACTION_HIDE_HELP + "\n";
@@ -219,19 +228,52 @@ public class BGS implements PMCommand, GuildCommand {
 
                 } else if (args[1].equalsIgnoreCase("add")) { // add a new faction to the database
                     //bgs faction, add, <shortname>, <fullname>
-                    event.getChannel().sendMessage(BGSFaction.addFaction(args)).queue();
-
+                    ArrayList<String> messages = BGSFaction.addFaction(args);
+                    String messageToSend = "";
+                    for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                        if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                            event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                            messageToSend = "";
+                        }
+                        messageToSend += message;
+                    }
+                    event.getChannel().sendMessage(messageToSend).queue();
                 } else if (args[1].equalsIgnoreCase("edit")) { // edit a faction in the database
                     //bgs faction, edit, <factionid>, <shortname>, <fullname>
-                    event.getChannel().sendMessage(BGSFaction.editFaction(args)).queue();
-
+                    ArrayList<String> messages = BGSFaction.editFaction(args);
+                    String messageToSend = "";
+                    for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                        if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                            event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                            messageToSend = "";
+                        }
+                        messageToSend += message;
+                    }
+                    event.getChannel().sendMessage(messageToSend).queue();
                 } else if (args[1].equalsIgnoreCase("assign") || args[1].equalsIgnoreCase("ass")) { // assign a faction to a system
                     //bgs faction, assign, <factionname>, <systemname>
-                    event.getChannel().sendMessage(BGSFaction.assignFaction(args)).queue();
-
+                    ArrayList<String> messages = BGSFaction.assignFaction(args);
+                    String messageToSend = "";
+                    for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                        if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                            event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                            messageToSend = "";
+                        }
+                        messageToSend += message;
+                    }
+                    event.getChannel().sendMessage(messageToSend).queue();
                 } else if (args[1].equalsIgnoreCase("remove") || args[1].equalsIgnoreCase("rem")) { // remove a faction from a system
                     //bgs faction, remove, <factionname>, <systemname>
-                    event.getChannel().sendMessage(BGSFaction.removeFaction(args)).queue();
+                    ArrayList<String> messages = BGSFaction.removeFaction(args);
+                    String messageToSend = "";
+                    for (String message : messages) { // check if we are going to exceed the 2000 character limit of a message
+                        if (messageToSend.length() > 0 && (messageToSend.length() + message.length() > 2000)) {
+                            event.getChannel().sendMessage(messageToSend + "\u0000").queue();
+                            messageToSend = "";
+                        }
+                        messageToSend += message;
+                    }
+                    event.getChannel().sendMessage(messageToSend).queue();
 
                 } else { // if got this far something went wrong. Show system help
                     event.getChannel().sendMessage(BGS_FACTION_HELP).queue();
