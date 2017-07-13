@@ -6,7 +6,7 @@
 
     <groupId>tech.bermos</groupId>
     <artifactId>iwbot</artifactId>
-    <version>3.1.10_86</version>
+    <version>3.1.10_87</version>
     <packaging>jar</packaging>
 
     <properties>
