@@ -20,9 +20,7 @@ import provider.DataProvider;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 class CombatLogger {
     CombatLogger (String a, String b, String c, String d) {
@@ -97,14 +95,15 @@ public class CMDRLookup implements PMCommand, GuildCommand {
         InaraUser user = new InaraUser();
         user.info = "Nothing found";
 
-        String url = "http://inara.cz/search?location=search&searchglobal=" + username.replaceAll(" ", "+");
+        String url = "https://inara.cz/search?location=search&searchglobal=" + username.replaceAll(" ", "+");
         try {
-            Connection.Response loginResponse = Jsoup.connect("http://inara.cz/login")
+            Connection.Response loginResponse = Jsoup.connect("https://inara.cz/login")
                     .header("User-Agent", "Mozilla")
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("Host", "inara.cz")
                     .header("Origin", "http://inara.cz")
                     .header("Upgrade-Insecure-Requests", "1")
+                    .header("Cookie", "elitesheet=21111; esid=cc6746691b3b5359c5d887bdae12a148")
                     .data("loginid", "Bermos")
                     .data("loginpass", DataProvider.getInaraPW())
                     .data("formact", "ENT_LOGIN")
@@ -113,8 +112,15 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .method(Connection.Method.POST)
                     .execute();
 
+
+            System.out.println(loginResponse.cookie("esid"));
+
             //Use the inara search function to get candidates
-            Document doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
+            Document doc = Jsoup.connect(url)
+                    .header("User-Agent", "Mozilla")
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .header("Cookie", "esid=cc6746691b3b5359c5d887bdae12a148; elitesheet=21111")
+                    .ignoreContentType(true).get();
 
             //Find closest match from search results
             double closestScore = 0.0;
@@ -134,7 +140,10 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 url = "http://inara.cz" + closest.attr("href");
                 user.pageUrl = url;
                 user.info = "";
-                doc = Jsoup.connect(url).userAgent("Mozilla").cookie("elitesheet", "21111").cookie("esid", loginResponse.cookie("esid")).ignoreContentType(true).get();
+                doc = Jsoup.connect(url)
+                        .header("User-Agent", "Mozilla")
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .header("Cookie", "esid=cc6746691b3b5359c5d887bdae12a148; elitesheet=21111").ignoreContentType(true).get();
 
                 user.name = doc.select("span.pflheadersmall").get(0).parent().text();
                 for (Element image : doc.select("img")) {
@@ -151,7 +160,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 return user;
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             LogUtil.logErr(e);
         }

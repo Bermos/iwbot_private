@@ -3,8 +3,7 @@ package iw_bot;
 import commands.GuildCommand;
 import commands.PMCommand;
 import commands.core_commands.*;
-import commands.ed_commands.CMDRLookup;
-import commands.ed_commands.Distance;
+import commands.ed_commands.*;
 import commands.iw_commands.*;
 import commands.misc_commands.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -78,6 +77,7 @@ class Commands {
 
 		guildCommands.put("update", new Update());
 
+		//TODO Unify all 3 setters
 		guildCommands.put("setavatar", new Setavatar());
 
 		guildCommands.put("setname", new Setname());
@@ -131,6 +131,18 @@ class Commands {
 		guildCommands.put("restart", new Restart());
 
 		guildCommands.put("shutdown", new Shutdown());
+
+		guildCommands.put("shitdown", new GuildCommand() {
+			@Override
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				event.getChannel().sendMessage(":poop:").queue();
+			}
+
+			@Override
+			public String getHelp(GuildMessageReceivedEvent event) {
+				return "";
+			}
+		});
 
 		//end of commands
 	}

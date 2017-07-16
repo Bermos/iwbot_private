@@ -40,12 +40,13 @@ public class Auth implements PMCommand {
             hashedpw = new String(hexChars);
             PreparedStatement ps = new Connections().getConnection()
                     .prepareStatement("UPDATE user SET sessionkey = ?, salt = ?, password = ? WHERE iduser = ?");
-            ps.setString		(1, new BigInteger(40, sRandom).toString(32));
-            ps.setString		(2, salt);
-            ps.setString		(3, hashedpw);
-            ps.setLong		(4, Long.parseLong(event.getAuthor().getId()));
+            ps.setString(1, new BigInteger(40, sRandom).toString(32));
+            ps.setString(2, salt);
+            ps.setString(3, hashedpw);
+            ps.setLong	(4, Long.parseLong(event.getAuthor().getId()));
             ps.executeUpdate();
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException | SQLException e) {
+            event.getChannel().sendMessage("[Error] Something went terribly worong. I don't think I can create your account at the moment.").queue();
             LogUtil.logErr(e);
         }
 

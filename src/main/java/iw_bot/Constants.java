@@ -23,6 +23,8 @@ public class Constants {
     public final static SimpleDateFormat SQL_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public final static SimpleDateFormat USER_SDF = new SimpleDateFormat("dd/MM/yy HH:mm");
 
+    public final static String MOD_ONLY_CMD_ERROR = "**You have to be a moderator to use this bot command.**\nCheck pinned messages in the #bgs_ops channel or use **" + Listener.prefix + "bgs mystats** for a customised report on active goals and progress towards them.";
+
     public final static String BGS_STATS_HELP = "**Help: Produce Statistics on BGS Data**\n" + Listener.prefix + "bgs stats, <type {summary,csv}, <tick count>, <start date time DD:MM:YY HH:MM>, [system filter {shortname,longname}]";
 
     public final static String BGS_SYSTEM_HELP = "**Help: Manage BGS Star Systems**\n" + Listener.prefix + "bgs system, <command modifier {add, edit, hide, show, list}>";
@@ -38,7 +40,10 @@ public class Constants {
     public final static String BGS_FACTION_EDIT_HELP = "**Help: Edit BGS Faction**\n" + Listener.prefix + "bgs faction, edit, <factionid>, <shortname>, <fullname>";
 
 
-    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list}>\n";
+    public final static String BGS_GOAL_HELP = "**Help: Manage BGS Goals**\n" + Listener.prefix + "bgs goal, <command modifier {add, delete, edit, addactivity, deleteactivity, editactivity, end, list, note}>\n\n"+
+            "Example of active goal list: " + Listener.prefix + "bgs goals,list\n"+
+            "Example of X recent goals: " + Listener.prefix + "bgs goals,list,{X}\n"+
+            "Example of X recent goals starting from Y goal ID: " + Listener.prefix + "bgs goals,list,{X},{Y}";
     public final static String BGS_GOAL_ADD_HELP = "**Help: Add BGS Goal**\n" + Listener.prefix + "bgs goal, add, <system>, <Start dd/MM/yy HH:mm>, <ticks #>, <Activity/Faction/CMDRGoal #/GlobalGoal #>\n" +
             "You can append as many <Activity/Faction/CMDRGoal #/GlobalGoal #> to the command as you require. Just seperate them by commas.";
     public final static String BGS_GOAL_DEL_HELP = "**Help: Delete BGS Goal**\n" + Listener.prefix + "bgs goal, {delete,del}, <goalid #>\n" +
@@ -92,4 +97,8 @@ public class Constants {
             "**Important Notes / Caveats:**\n" +
             "When entering numbers (#) do not use thousand / million seperators.\n" +
             "e.g. '" + Listener.prefix + "bgs trade, 1500000'\n";
+
+    public final static String MISSIONS_SOP = "Please review our Standard Operating Procedures (SOP) before the " +
+            "mission as we will refer to specific verbiage and techniques during the mission. This link will take " +
+            "you to a google document detailing our SOP. https://goo.gl/cmyvZC";
 }

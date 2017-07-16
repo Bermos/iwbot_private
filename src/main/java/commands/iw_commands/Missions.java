@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static iw_bot.Constants.MISSIONS_SOP;
+
 public class Missions implements GuildCommand {
 	private static List<MissionChannel> missionChannels = new ArrayList<>();
 
@@ -52,7 +54,7 @@ public class Missions implements GuildCommand {
 	}
 	
 	private static void create(String name, GuildManager guildManager, Member explorer) {
-		Channel missionChannel;
+		TextChannel missionChannel;
 		Guild guild = guildManager.getGuild();
 		Role iwRole = guild.getRoleById("143171790225670145");
 		Role explorerRole = guild.getRoleById("143403360081543168");
@@ -62,7 +64,7 @@ public class Missions implements GuildCommand {
 		String channelName = "mission_" + name;
 		String explorerName = "*edit*";
 
-		missionChannel = guild.getController().createTextChannel(channelName).complete();
+		missionChannel = (TextChannel) guild.getController().createTextChannel(channelName).complete();
 
 		// Set permissions for moderators
 		PermOverrideManagerUpdatable permManager = missionChannel.createPermissionOverride(moderatorRole).complete().getManagerUpdatable();
@@ -89,7 +91,7 @@ public class Missions implements GuildCommand {
 			.update().queue();
 
 		// In case the explorer is mentioned in the message...
-		if (explorer != null) {
+        if (explorer != null) {
 			// Set permissions for the explorer
 			permManager = missionChannel.createPermissionOverride(explorer).complete().getManagerUpdatable();
 			permManager.grant(Permission.MESSAGE_READ)
@@ -122,6 +124,11 @@ public class Missions implements GuildCommand {
 							+ "Bravo: *TBA*\n";
 		
 		missionChannel.getManager().setTopic(topic).queue();
+
+		// Send out SOP
+        if (explorerName.equals("*edit*")) { explorerName = "explorer"; }
+
+		missionChannel.sendMessage("Hello " + explorerName + "\n" + MISSIONS_SOP).queue();
 	}
 
 	private static void archive(TextChannel channel, String id) {
@@ -196,9 +203,9 @@ public class Missions implements GuildCommand {
 	public void runCommand(GuildMessageReceivedEvent event, String[] args) {
 
 		//Create new mission channel and assign role to mentioned explorer
-		if (args.length == 3 && args[0].equalsIgnoreCase("new")) {
+		if (args.length > 1 && args[0].equalsIgnoreCase("new")) {
 			User explorer = event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(0);
-			Missions.create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
+			create(args[1], event.getGuild().getManager(), event.getGuild().getMember(explorer));
 			event.getChannel().sendMessage("Mission channel created and permissions set. Good luck!").queue();
 		}
 
@@ -218,13 +225,12 @@ public class Missions implements GuildCommand {
             event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage("Explorer tags removed.").queue();
         }
 
-        //Post SOP link via command "mission sop"
+		//Post SOP link via command "mission sop"
 		if (Arrays.binarySearch(args, "sop") > -1) {
-        	Missions.archive(event.getChannel(), event.getAuthor().getId());
-        	event.getChannel().sendMessage("Please review our Standard Operating Procedures before the mission as we will refer to specific verbiage and techniques during the mission. This link will take you to a google document detailing our SOP. https://goo.gl/izg7wl");
+			event.getChannel().sendMessage(MISSIONS_SOP).queue();
 		}
 
-        //State the intent of deleting that channel. Ask if they are for sure
+		//State the intent of deleting that channel. Ask if they are for sure
 		if (Arrays.binarySearch(args, "close") > -1) {
 			Missions.archiveRequest(event.getChannel(), event.getAuthor().getId());
 			event.getChannel().sendMessage("Please confirm with '/mission yes' that you actually want to delete this channel. " +

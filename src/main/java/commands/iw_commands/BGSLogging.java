@@ -58,40 +58,49 @@ class BGSLogging {
                     ps = connect.prepareStatement("SELECT a.username, i.usergoal,SUM(a.amount) AS total FROM bgs_goal g " +
                             "LEFT JOIN bgs_goal_item i ON i.goalid = g.goalid " +
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
-                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND " +
-                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.userid = ? " +
-                            "AND a.timestamp >= g.startts AND a.timestamp <= g.endts " +
+                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
+                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.userid = ? AND " +
+                            "i.factionid = ? AND i.usergoal > 0 AND " +
+                            "a.timestamp >= g.startts AND a.timestamp <= g.endts " +
                             "GROUP BY a.userid HAVING total >= i.usergoal;");
-                    ps.setString(1, activity.toString());
-                    ps.setInt(2, systemid);
-                    ps.setInt(3, factionid);
-                    ps.setString(4, userid);
+                    ps.setInt(1, systemid);
+                    ps.setString(2, activity.toString());
+                    ps.setInt(3, systemid);
+                    ps.setInt(4, factionid);
+                    ps.setString(5, userid);
+                    ps.setInt(6, factionid);
                     ResultSet rs = ps.executeQuery();
+
 
                     // check if global goal has been met
                     ps = connect.prepareStatement("SELECT a.username, i.globalgoal, SUM(a.amount) AS total FROM bgs_goal g " +
                             "LEFT JOIN bgs_goal_item i ON i.goalid = g.goalid " +
                             "LEFT JOIN bgs_activity a ON a.activity = i.activity " +
-                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND " +
-                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? " +
-                            "AND a.timestamp >= g.startts AND a.timestamp <= g.endts " +
+                            "WHERE g.startts <= CURRENT_TIMESTAMP AND g.endts >= CURRENT_TIMESTAMP AND g.systemid = ? AND " +
+                            "a.activity = ? AND a.systemid = ? AND a.factionid = ? AND a.timestamp >= g.startts AND a.timestamp <= g.endts AND " +
+                            "i.factionid = ? AND i.globalgoal > 0 " +
                             "HAVING total >= i.globalgoal;");
-                    ps.setString(1, activity.toString());
-                    ps.setInt(2, systemid);
-                    ps.setInt(3, factionid);
+                    ps.setInt(1, systemid);
+                    ps.setString(2, activity.toString());
+                    ps.setInt(3, systemid);
+                    ps.setInt(4, factionid);
+                    ps.setInt(5, factionid);
                     ResultSet rs1 = ps.executeQuery();
 
                     if (BGS.getRows(rs) > 0 && BGS.getRows(rs1) > 0) { //CMDR and system goal met
-                        message = "**CMDR and System '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " have been met. o7**\nPlease use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
+                        message = "**CMDR and System '" + activity.toString() + "' target met. Congratulations!**\nThe '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " is complete. o7\nPlease use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
                     } else if (BGS.getRows(rs) > 0) { // system goal not met but cmdr goal is
-                        message = "**Congratulations you have met the '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + ". o7**\nYou can continue with this activity but the effect on the BGS is reduced. Use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
-                    } else { // no goals met
+                        message = "**CMDR '" + activity.toString() + "' target met. Congratulations!**\nThe '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " is complete. o7\nYou can continue with this activity but the effect on the BGS is reduced. Use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
+                    } else if (BGS.getRows(rs1) > 0) { // system goal met but cmdr goal isn't
+                        message = "**System '" + activity.toString() + "' target met. Congratulations!**\nThe '" + activity.toString() + "' target for " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + "is complete. o7\nYou can continue to with this activity but the effect on the BGS is reduced. Use /bgs mystats to see if there any other goals you can work towards.\n**Action logged succesfully.**";
+                    }
+                    else { // no goals met
                         message = "**Your engagement with " + BGSFaction.getFactionFullname(factionid) + " in " + BGSSystem.getSystemFullname(systemid) + " has been noticed. o7.**\n*" + BGS.getRandom(QUOTE) + "*";
                     }
 
                 } else {
                     message = "**WARNING ACTION NOT LOGGED**\nInvalid faction entered. You can use either the shortname or the fullname. Please select from:\n";
-                    return message + BGSFaction.getFactions(admin, systemid);
+                    return message + String.join("",BGSFaction.getFactions(admin, systemid));
                 }
 
             } else {
