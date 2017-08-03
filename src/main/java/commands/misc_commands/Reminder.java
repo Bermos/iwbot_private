@@ -3,6 +3,7 @@ package commands.misc_commands;
 import commands.GuildCommand;
 import commands.PMCommand;
 import iw_bot.LogUtil;
+import iw_bot.JDAUtil;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
@@ -130,7 +131,7 @@ public class Reminder implements PMCommand, GuildCommand {
                 ResultSet rs = ps.executeQuery();
 
                 while (rs.next()) {
-                    jda.getUserById(rs.getString("userid")).getPrivateChannel().sendMessage("REMINDED!\n" + rs.getString("reason")).queue();
+                    JDAUtil.getPrivateChannel(jda.getUserById(rs.getString("userid"))).sendMessage("REMINDED!\n" + rs.getString("reason")).queue();
                 }
                 ps.close();
                 ps = con.getConnection().prepareStatement("UPDATE reminders SET reminded = 1 WHERE reminded = 0 AND time < ?");
