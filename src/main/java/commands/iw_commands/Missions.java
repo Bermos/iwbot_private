@@ -109,19 +109,14 @@ public class Missions implements GuildCommand {
 		String topic = "__**Explorer:**__\n"
 							+ "CMDR " + explorerName + "\n"
 							+ "Status: *edit*\n"
-							+ "PP affiliation: *edit*\n"
 							+ "\n"
 							+ "__**Systems:**__\n"
 							+ "RV: *edit*\n"
 							+ "Dest: *edit*\n"
 							+ "Dest Station: *edit*\n"
 							+ "\n"
-							+ "Prep time: *edit*\n"
-							+ "T-0: *edit* UTC\n"
-							+ "Mission duration: *edit*\n"
-							+ "\n"
-							+ "Alpha: *TBA*\n"
-							+ "Bravo: *TBA*\n";
+        					+ "__**Time:**__\n"
+							+ "T-0: *edit* UTC\n";
 		
 		missionChannel.getManager().setTopic(topic).queue();
 
