@@ -128,7 +128,8 @@ class Commands {
 
 		guildCommands.put("applicant", new Applicant());
 
-		guildCommands.put("restart", new Restart());
+		//guildCommands.put("restart", new Restart());
+		//TODO: reactivate by removing // from in front of command line
 
 		guildCommands.put("shutdown", new Shutdown());
 
