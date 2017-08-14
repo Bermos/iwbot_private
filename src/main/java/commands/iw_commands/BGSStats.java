@@ -102,8 +102,13 @@ class BGSStats {
 
     static String getUserStats(String userID) {
         String output = "**All Time Totals**\n```";
-        for (Entry<BGS.Activity, Double> entry : getTotalAmount(userID).entrySet()) {
-            output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+        Set userTotals = getTotalAmount(userID).entrySet();
+        if (userTotals.isEmpty()) {
+            output += "You have not logged any BGS activity yet";
+        } else {
+            for (Entry<BGS.Activity, Double> entry : getTotalAmount(userID).entrySet()) {
+                output += entry.getKey().toString() + ": " + NumberFormat.getInstance(Locale.GERMANY).format(entry.getValue().intValue()).replace('.', '\'') + "\n";
+            }
         }
         output += "```\n";
         return output;

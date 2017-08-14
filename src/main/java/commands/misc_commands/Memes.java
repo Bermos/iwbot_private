@@ -15,7 +15,7 @@ public class Memes implements PMCommand, GuildCommand {
 
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-        event.getChannel().sendMessage(event.getAuthor().getId()).queue();
+        event.getChannel().sendMessage(memes(event.getAuthor().getId(), args)).queue();
     }
 
     @Override
