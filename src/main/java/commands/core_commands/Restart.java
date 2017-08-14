@@ -9,7 +9,7 @@ import provider.DataProvider;
 
 public class Restart implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    //public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
         Member author = event.getJDA().getGuildById("142749481530556416").getMember(event.getAuthor());
         if ( !( DataProvider.isOwner(event) || (author != null && DataProvider.isAdmin(author.getRoles())) ) ) {
@@ -22,7 +22,7 @@ public class Restart implements PMCommand, GuildCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+   // public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
         if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
@@ -41,3 +41,6 @@ public class Restart implements PMCommand, GuildCommand {
         return "Restarts the bot. Use when he behaves strangely or throws a fit";
     }
 }
+
+
+//TODO: reactivate by removing // from in front of command line
