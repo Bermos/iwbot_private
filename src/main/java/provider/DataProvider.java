@@ -41,6 +41,7 @@ public class DataProvider {
 		Discord discord;
 		Map<String, ConData> connections;
 		String inaraPW;
+		String inaraUser;
 		String googleToken;
 		String githubToken;
 		String JAVA_HOME;
@@ -236,6 +237,10 @@ public class DataProvider {
 
 	public static String getInaraPW() {
 		return info.inaraPW;
+	}
+
+	public static String getInaraUser() {
+		return info.inaraUser;
 	}
 
 	public static String getGoogleToken() {

@@ -104,7 +104,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .header("Origin", "http://inara.cz")
                     .header("Upgrade-Insecure-Requests", "1")
                     .header("Cookie", "elitesheet=21111; esid=cc6746691b3b5359c5d887bdae12a148")
-                    .data("loginid", "Bermos")
+                    .data("loginid", DataProvider.getInaraUser())
                     .data("loginpass", DataProvider.getInaraPW())
                     .data("formact", "ENT_LOGIN")
                     .data("location", "intro")
