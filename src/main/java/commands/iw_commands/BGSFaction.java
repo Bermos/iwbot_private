@@ -368,7 +368,7 @@ class BGSFaction {
 
             } else { // just show live systems
                 message = "```Short | Full\n";
-                PreparedStatement ps = connect.prepareStatement("SELECT * FROM bgs_faction WHERE f_hidden = 0 ORDER BY f_fullname ASC");
+                PreparedStatement ps = connect.prepareStatement("SELECT * FROM bgs_faction ORDER BY f_fullname ASC");
                 ResultSet rs = ps.executeQuery();
                 if (!rs.isBeforeFirst()) {
                     message += "No Factions";

@@ -101,8 +101,8 @@ public class Users {
 		Member member = event.getMember();
 		String rName = member.getRoles().isEmpty() ? "none" : member.getRoles().get(0).getName();
 		
-		try {
-			PreparedStatement ps = connections.getConnection().prepareStatement("INSERT INTO user (iduser, username, role, onlinestatus, added, ppurl) VALUES (?, ?, ?, ?, ?, ?)");
+		try { // first try insert
+			PreparedStatement ps = connections.getConnection().prepareStatement("REPLACE INTO user (iduser, username, role, onlinestatus, added, ppurl) VALUES (?, ?, ?, ?, ?, ?)");
 			ps.setLong		(1, Long.parseLong(member.getUser().getId().replaceAll("[^0-9]", "")));
 			ps.setString	(2, member.getEffectiveName());
 			ps.setString	(3, rName);
