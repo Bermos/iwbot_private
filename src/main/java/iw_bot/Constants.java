@@ -100,5 +100,5 @@ public class Constants {
 
     public final static String MISSIONS_SOP = "Please review our Standard Operating Procedures (SOP) before the " +
             "mission as we will refer to specific verbiage and techniques during the mission. This link will take " +
-            "you to a google document detailing our SOP. https://goo.gl/cmyvZC";
+            "you to a google document detailing our SOP. https://goo.gl/ojEXLh";
 }
