@@ -104,19 +104,22 @@ public class Missions implements GuildCommand {
 			guildManager.getGuild().getController().addRolesToMember(explorer, explorerRole).queue();
 
 			explorerName = explorer.getEffectiveName();
+
 		}
-		
+
+		//Set topic for mission channel
 		String topic = "__**Explorer:**__\n"
 							+ "CMDR " + explorerName + "\n"
 							+ "Status: *edit*\n"
 							+ "\n"
 							+ "__**Systems:**__\n"
-							+ "RV: *edit*\n"
-							+ "Dest: *edit*\n"
+							+ "RV: " + "edit" + "\n"
+							+ "Dest: " + "edit" + "\n"
 							+ "Dest Station: *edit*\n"
 							+ "\n"
         					+ "__**Time:**__\n"
-							+ "T-0: *edit* UTC\n";
+							+ "T-0: " + "edit" + "\n"
+							+ "Date: " + "edit" + "\n";
 		
 		missionChannel.getManager().setTopic(topic).queue();
 
@@ -238,6 +241,11 @@ public class Missions implements GuildCommand {
       
 			event.getJDA().getTextChannelById(DataProvider.getAdminChanID()).sendMessage(event.getChannel().getName() + " channel deleted.").queue();
       	}
+
+      	//Ping pilots with information about the mission. Initiate voting.
+		if (args.length > 1 & args[0].equalsIgnoreCase("ping")) {
+        	event.getChannel().sendMessage("This channel is meant for" + missionChannels);
+		}
 	}
 
 	@Override

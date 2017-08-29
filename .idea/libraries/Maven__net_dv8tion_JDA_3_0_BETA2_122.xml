@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: net.dv8tion:JDA:3.0.BETA2_122">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/dv8tion/JDA/3.0.BETA2_122/JDA-3.0.BETA2_122.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/net/dv8tion/JDA/3.0.BETA2_122/JDA-3.0.BETA2_122-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/dv8tion/JDA/3.0.BETA2_122/JDA-3.0.BETA2_122-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
