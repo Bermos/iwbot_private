@@ -56,14 +56,15 @@ public class Listener extends ListenerAdapter {
 
 		jda = event.getJDA();
 
-		if (!DataProvider.isDev()) {
+		//ToDo Disabled the influx stats logger as I have no idea what the fuck it does
+		/*if (!DataProvider.isDev()) {
 			//Start metadata statistics logging
-			Statistics stats = Statistics.getInstance();
-			stats.connect(event.getJDA());
+			//Statistics stats = Statistics.getInstance();
+			//stats.connect(event.getJDA());
 
             //Start random Playing... generator
-            new StatusGenerator(event.getJDA().getPresence());
-		}
+            //new StatusGenerator(event.getJDA().getPresence());
+		}*/
 
         //Setup and synchronise users and online status with MySQL db
         new Users();
@@ -112,8 +113,10 @@ public class Listener extends ListenerAdapter {
 			String[] args = getArgs(content, commandName);
 			
 			if (commands.guildCommands.containsKey(commandName)) {
-                if(!DataProvider.isDev())
-                    Statistics.getInstance().logCommandReceived(commandName, event.getMember().getEffectiveName());
+				//todo commented out as influx goodness
+               /* if(!DataProvider.isDev()) {
+					Statistics.getInstance().logCommandReceived(commandName, event.getMember().getEffectiveName());
+				}*/
 
 				event.getChannel().sendTyping();
 				commands.guildCommands.get(commandName).runCommand(event, args);
@@ -121,9 +124,10 @@ public class Listener extends ListenerAdapter {
 		}
 		//Check for dankness
 		 DankMemes.check(event);
-
-        if (!DataProvider.isDev())
-		    Statistics.getInstance().logMessage(event);
+		//todo commented out as influx goodness
+		/*if (!DataProvider.isDev()) {
+			//Statistics.getInstance().logMessage(event);
+		}*/
 
         event.getAuthor().isFake();
 	}

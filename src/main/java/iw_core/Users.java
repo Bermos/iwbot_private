@@ -1,5 +1,6 @@
 package iw_core;
 
+import commands.core_commands.Welcome;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -97,9 +98,11 @@ public class Users {
 	}
 
 	public static void joined(GuildMemberJoinEvent event) {
-		System.out.printf("[%s] %s has joined the guild.\n", event.getGuild().getName(), event.getMember().getNickname());
 		Member member = event.getMember();
 		String rName = member.getRoles().isEmpty() ? "none" : member.getRoles().get(0).getName();
+		System.out.printf("[%s] %s has joined the guild.\n", member.getEffectiveName(), event.getMember().getNickname());
+
+
 		
 		try { // first try insert
 			PreparedStatement ps = connections.getConnection().prepareStatement("REPLACE INTO user (iduser, username, role, onlinestatus, added, ppurl) VALUES (?, ?, ?, ?, ?, ?)");
@@ -116,7 +119,7 @@ public class Users {
 	}
 	
 	public static void left(GuildMemberLeaveEvent event) {
-		System.out.printf("[%s] %s has left the guild.\n", event.getGuild().getName(), event.getMember().getNickname());
+		System.out.printf("[%s] %s has left the guild.\n", event.getMember().getEffectiveName(), event.getMember().getNickname());
 		
 		try {
 			PreparedStatement ps = connections.getConnection().prepareStatement("UPDATE user SET onlinestatus = ?, role = ?, password = default, sessionkey = default, salt = default WHERE iduser = ?");

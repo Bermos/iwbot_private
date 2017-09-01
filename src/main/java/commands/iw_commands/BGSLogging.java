@@ -21,7 +21,7 @@ class BGSLogging {
         //ToDo Logging: If goal is already met direct message once per activity with details on what still needs work.
         //ToDo Logging: Consider automatically choose the faction unless more than one faction has a goal for that activity
         //ToDo Logging: Consider default to IW if no goals for that activity and no faction specified.
-        int amount = 0;
+        int amount;
         int systemid;
         int factionid;
         String message = "";
@@ -119,9 +119,11 @@ class BGSLogging {
             LogUtil.logErr(e);
             return "**WARNING ACTION NOT LOGGED**\nSomething went wrong saving your contribution. Please retry later";
         }
+        //todo commented out as influx goodness
+        /*if (!DataProvider.isDev()) {
 
-        if (!DataProvider.isDev())
             Statistics.getInstance().logBGSActivity(System.currentTimeMillis(), userid, username, activity.toString(), amount, system.toUpperCase());
+        }*/
 
         return message;
     }
