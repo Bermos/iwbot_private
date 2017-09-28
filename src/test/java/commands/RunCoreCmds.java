@@ -6,9 +6,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        AdminChannelTest.class,
+        MessageChannelTest.class,
         DebugModeTest.class,
-        EditOwnerTest.class,
         ShutdownTest.class,
         //StatusTest.class,
         TopicTest.class,

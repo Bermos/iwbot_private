@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import commands.GuildCommand;
 import commands.PMCommand;
+import core.Listener;
 import core.LogUtil;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
@@ -25,12 +26,12 @@ public class Distance implements PMCommand, GuildCommand {
     }
 
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         event.getChannel().sendMessage(distance(args)).queue();
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         event.getChannel().sendMessage(distance(args)).queue();
     }
 

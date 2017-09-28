@@ -16,7 +16,13 @@ import provider.DataProvider;
 
 import java.util.Date;
 
+import static core.Main.SDF_TIME;
+
 public class ListenerIWBot extends Listener{
+
+    public ListenerIWBot(String botName) {
+        super(botName);
+    }
 
     @Override
     public void onReady(ReadyEvent event) {
@@ -25,7 +31,7 @@ public class ListenerIWBot extends Listener{
         //Initial parsing of the memes.json file
         DankMemes.update();
 
-        if (!DataProvider.isDev()) {
+        if (!DataProvider.isDev(BOT_NAME)) {
             //Start random Playing... generator
             new StatusGenerator(event.getJDA().getPresence());
         }
@@ -62,7 +68,7 @@ public class ListenerIWBot extends Listener{
     @Override
     public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
         if (isDebug)
-            System.out.printf("[" + sdf.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
+            System.out.printf("[" + SDF_TIME.format(new Date()) + "][Online Status] %s: %s\n", event.getUser().getName(), event.getGuild().getMember(event.getUser()).getOnlineStatus().name());
 
         Users.setOnlineStatus(event);
     }

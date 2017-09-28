@@ -2,6 +2,8 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import core.JDAUtil;
+import core.Listener;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -10,9 +12,9 @@ import provider.DataProvider;
 
 public class Setgame implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
+        if (!DataProvider.isBotAdmin(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -21,9 +23,9 @@ public class Setgame implements PMCommand, GuildCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+        if (!JDAUtil.isAuthorized(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -34,7 +36,7 @@ public class Setgame implements PMCommand, GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+        if (!JDAUtil.isAuthorized(event))
             return "";
         return "<game?> - To set the Playing: ...";
     }

@@ -2,6 +2,7 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
@@ -11,12 +12,12 @@ import java.util.TimeZone;
 
 public class UTCTime implements PMCommand, GuildCommand {
     @Override //PM part
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         event.getChannel().sendMessage(time()).queue();
     }
 
     @Override //Guild part
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         event.getChannel().sendMessage(time()).queue();
     }
 

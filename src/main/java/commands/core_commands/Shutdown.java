@@ -2,15 +2,16 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import provider.DataProvider;
 
 public class Shutdown implements GuildCommand, PMCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
+        if (!DataProvider.isBotAdmin(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -21,9 +22,9 @@ public class Shutdown implements GuildCommand, PMCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
+        if (!DataProvider.isBotAdmin(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }

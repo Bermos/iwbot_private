@@ -12,19 +12,19 @@ class Commands {
 	Map<String, PMCommand> pmCommands = new LinkedHashMap<>();
 	Map<String, GuildCommand> guildCommands = new LinkedHashMap<>();
 	
-	Commands() {
+	Commands(Listener listener) {
 		//Private message commands
-		pmCommands.put("ping", (event, args) -> event.getChannel().sendMessage("pong").queue());
+		pmCommands.put("ping", (listenerInstance, event, args) -> event.getChannel().sendMessage("pong").queue());
 
-		pmCommands.put("version", (event, args) -> event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue());
+		pmCommands.put("version", (listenerInstance, event, args) -> event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue());
 
 		//Guild message commands
 		guildCommands.put("help", new GuildCommand() {
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+			public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
 				String message = "Commands available:\n```html\n";
 				for (Map.Entry<String, GuildCommand> entry : guildCommands.entrySet()) {
 					if (!entry.getValue().getHelp(event).isEmpty())
-						message += String.format(Listener.prefix + "%-12s | " + entry.getValue().getHelp(event) + "\n", entry.getKey());
+						message += String.format(listener.gh.getPrefix(event.getGuild().getId()) + "%-12s | " + entry.getValue().getHelp(event) + "\n", entry.getKey());
 				}
 				message += "```\n";
 				message += "For a detailed help please use this guide: https://drive.google.com/file/d/0B1EHAnlL83qgbnRLV2ktQmVlOXM/view?usp=sharing";
@@ -38,7 +38,7 @@ class Commands {
 
 		guildCommands.put("version", new GuildCommand() {
 			@Override
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+			public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
 				event.getChannel().sendMessage(Listener.VERSION_NUMBER).queue();
 			}
 
@@ -50,18 +50,18 @@ class Commands {
 
 		guildCommands.put("reloadcmds", new GuildCommand() {
 			@Override
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				if (!DataProvider.isOwner(event)) {
+			public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
+				if (!DataProvider.isBotAdmin(event)) {
 					event.getChannel().sendMessage("[Error] You aren't authorized to do that.").queue();
 					return;
 				}
 
-				Listener.reloadCmds(event);
+				listener.reloadCmds(event);
 			}
 
 			@Override
 			public String getHelp(GuildMessageReceivedEvent event) {
-				if (!DataProvider.isOwner(event)) {
+				if (!DataProvider.isBotAdmin(event)) {
 					event.getChannel().sendMessage("[Error] You aren't authorized to do that.").queue();
 					return "";
 				}
@@ -70,28 +70,16 @@ class Commands {
 			}
 		});
 
-		guildCommands.put("shitdown", new GuildCommand() {
-			@Override
-			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
-				event.getChannel().sendMessage(":poop:").queue();
-			}
-
-			@Override
-			public String getHelp(GuildMessageReceivedEvent event) {
-				return "";
-			}
-		});
-
 		//end of commands
 
-		loadPMCommands();
+		loadPMCommands(listener.BOT_NAME);
 
-		loadGuildCommands();
+		loadGuildCommands(listener.BOT_NAME);
 	}
 
-	private int loadGuildCommands() {
+	private int loadGuildCommands(String botName) {
 		int i = 0;
-		for (Map.Entry<String, String> entry: DataProvider.getGuildCommands().entrySet()) {
+		for (Map.Entry<String, String> entry: DataProvider.getGuildCommands(botName).entrySet()) {
 			try {
 			    Class t = Class.forName("commands." + entry.getValue());
 
@@ -106,9 +94,9 @@ class Commands {
 		return i;
 	}
 
-	private int loadPMCommands() {
+	private int loadPMCommands(String botName) {
 		int i = 0;
-        for (Map.Entry<String, String> entry: DataProvider.getPMCommands().entrySet()) {
+        for (Map.Entry<String, String> entry: DataProvider.getPMCommands(botName).entrySet()) {
             try {
                 Class t = Class.forName("commands." + entry.getValue());
 

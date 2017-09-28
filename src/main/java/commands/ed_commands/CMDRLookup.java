@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import commands.GuildCommand;
 import commands.PMCommand;
 import core.JDAUtil;
+import core.Listener;
 import core.LogUtil;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
@@ -52,12 +53,12 @@ public class CMDRLookup implements PMCommand, GuildCommand {
     private static List<CombatLogger> combat_loggers = new ArrayList<>();
 
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         JDAUtil.getPrivateChannel(event.getAuthor()).sendMessage(lookup(args)).queue();
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         event.getChannel().sendMessage(lookup(args)).queue();
     }
 
@@ -104,8 +105,8 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .header("Origin", "http://inara.cz")
                     .header("Upgrade-Insecure-Requests", "1")
                     .header("Cookie", "elitesheet=21111; esid=cc6746691b3b5359c5d887bdae12a148")
-                    .data("loginid", DataProvider.getInaraName())
-                    .data("loginpass", DataProvider.getInaraPW())
+                    .data("loginid", DataProvider.getLoginUsername("inara"))
+                    .data("loginpass", DataProvider.getLoginPassword("inara"))
                     .data("formact", "ENT_LOGIN")
                     .data("location", "intro")
                     .followRedirects(false)
@@ -177,7 +178,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
         if ((last_lookup + (3*60*60*1000) < System.currentTimeMillis()) || force_update) {
             try {
                 //Get doc from google
-                URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D600?key=" + DataProvider.getGoogleToken());
+                URL url = new URL("https://sheets.googleapis.com/v4/spreadsheets/16A8s5WFXI2sjOEIlZhcz_KAlO3jI7RWXZlbsOYxzF7E/values/A2:D600?key=" + DataProvider.getLoginPassword("google"));
                 Scanner scanner = new Scanner( url.openConnection().getInputStream() );
 
                 String json = "";

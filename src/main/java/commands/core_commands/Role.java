@@ -1,6 +1,8 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
+import core.JDAUtil;
+import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
 
@@ -8,10 +10,10 @@ import java.awt.*;
 
 public class Role implements GuildCommand {
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         event.getChannel().sendTyping();
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+        if (!JDAUtil.isAuthorized(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -60,7 +62,7 @@ public class Role implements GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+        if (!JDAUtil.isAuthorized(event))
             return "";
         return "<add|del|rename|color|colour>, <name>, <newname|#color> - Edits the role in the specified way.";
     }

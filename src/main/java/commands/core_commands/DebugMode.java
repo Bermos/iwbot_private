@@ -1,5 +1,6 @@
 package commands.core_commands;
 
+import core.JDAUtil;
 import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.DataProvider;
@@ -10,20 +11,23 @@ import provider.DataProvider;
  */
 public class DebugMode implements commands.GuildCommand {
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
+        if (!JDAUtil.isAuthorized(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
-        Listener.isDebug = !Listener.isDebug;
+        listener.isDebug = !listener.isDebug;
 
-        event.getChannel().sendMessage("Debug mode: " + Listener.isDebug).queue();
+        event.getChannel().sendMessage("Debug mode: " + listener.isDebug).queue();
     }
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        return "";
+        //Permission check
+        if (!JDAUtil.isAuthorized(event))
+            return "";
+        return "Switches debug mode on/off";
     }
 }

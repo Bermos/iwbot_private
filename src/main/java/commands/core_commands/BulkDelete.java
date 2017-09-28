@@ -1,6 +1,9 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
+import core.JDAUtil;
+import core.Listener;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageHistory;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.PermissionOverride;
@@ -28,9 +31,9 @@ import java.util.List;
  */
 public class BulkDelete implements GuildCommand {
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles()))) {
+        if (!JDAUtil.isAuthorized(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -117,7 +120,7 @@ public class BulkDelete implements GuildCommand {
             if (number > 500) {
                 event.getChannel().sendMessage("It looks like you are trying to delete over 500 messages. I recommend using 'clear all' instead which will " +
                         "delete and recreate the channel so it is wiped. Chances are you are overestimating the number of messages there are to delete.\n" +
-                        "In case that is not true and you are sure you need to prune over 500 message you have to do it in baches of that size.").queue();
+                        "In case that is not true and you are sure you need to prune over 500 message you have to do it in batches of that size.").queue();
                 return;
             }
 
@@ -145,7 +148,7 @@ public class BulkDelete implements GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+        if (!JDAUtil.isAuthorized(event))
             return "";
         return "<###|##t> - deletes either the last ## messages or the last ##h/##m of messages";
     }

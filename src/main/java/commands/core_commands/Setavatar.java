@@ -2,6 +2,8 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import core.JDAUtil;
+import core.Listener;
 import core.LogUtil;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Icon;
@@ -16,9 +18,9 @@ import java.io.UnsupportedEncodingException;
 
 public class Setavatar implements PMCommand, GuildCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event))) {
+        if (!DataProvider.isBotAdmin(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -27,9 +29,9 @@ public class Setavatar implements PMCommand, GuildCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+        if (!JDAUtil.isAuthorized(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -40,7 +42,7 @@ public class Setavatar implements PMCommand, GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event)))
+        if (!JDAUtil.isAuthorized(event))
             return "";
         return "Upload desired pic to discord and enter command in the description prompt";
     }

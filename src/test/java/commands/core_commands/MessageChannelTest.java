@@ -9,10 +9,9 @@ import test_helper.GTestCase;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import static test_helper.FakeStuff.getGMREvent;
 
-public class AdminChannelTest {
+public class MessageChannelTest {
     private List<GTestCase> tests = new ArrayList<>();
     private DataProvider.Info infoBackup;
 
@@ -30,7 +29,7 @@ public class AdminChannelTest {
 
     @Test
     public void runCommand() throws Exception {
-        AdminChannel adminChannel = new AdminChannel();
+        MessageChannel messageChannel = new MessageChannel();
 
         for (GTestCase tc : tests) {
             //adminChannel.runCommand(tc.event, tc.args);

@@ -1,24 +1,25 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
+import core.JDAUtil;
+import core.Listener;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import provider.DataProvider;
 
-public class AdminChannel implements GuildCommand {
+public class MessageChannel implements GuildCommand {
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getMember().getRoles()))) {
+        if (!JDAUtil.isAuthorized(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
         if (args.length == 0){
-            event.getChannel().sendMessage("Admin channel is: <#" + DataProvider.getAdminChanID() + ">").queue();
+            event.getChannel().sendMessage("Admin channel is: <#" + listener.gh.getMessageChannel(event.getGuild().getId()) + ">").queue();
         }
         else if (!event.getMessage().getMentionedChannels().isEmpty()) {
-            DataProvider.setAdminChanID(event.getMessage().getMentionedChannels().get(0).getId());
+            listener.gh.setMessageChannel(event.getGuild().getId(), event.getMessage().getMentionedChannels().get(0).getId());
             event.getChannel().sendMessage("[Success] Admin channel saved").queue();
         }
         else {
@@ -28,7 +29,7 @@ public class AdminChannel implements GuildCommand {
                 event.getChannel().sendMessage("Channel not found").queue();
                 return;
             } else
-                DataProvider.setAdminChanID(chan.getId());
+                listener.gh.setMessageChannel(event.getGuild().getId(), chan.getId());
             event.getChannel().sendMessage("[Success] Admin channel saved").queue();
         }
     }
@@ -36,7 +37,7 @@ public class AdminChannel implements GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || DataProvider.isAdmin(event.getGuild().getMember(event.getAuthor()).getRoles())))
+        if (!JDAUtil.isAuthorized(event))
             return "";
         return "<channel> - sets admin channel";
     }

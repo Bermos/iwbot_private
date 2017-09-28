@@ -1,23 +1,17 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Role;
+import core.JDAUtil;
+import core.Listener;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import provider.DataProvider;
 
 public class Setprefix implements GuildCommand {
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        boolean allowed = false;
-        for (Role role : event.getMember().getRoles()) {
-            if (role.hasPermission(Permission.ADMINISTRATOR))
-                allowed = true;
-        }
-        if (!allowed) {
-            event.getChannel().sendMessage("Sorry, you aren't allowed to do that. Please let someone with the Administrator permission do that.").queue();
+        if (!JDAUtil.isAuthorized(event)) {
+            event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
 
@@ -28,7 +22,7 @@ public class Setprefix implements GuildCommand {
             event.getChannel().sendMessage("',' is not allowed. Sorry").queue();
         }
         else {
-            DataProvider.setPrefix(event.getGuild().getId(), args[0]);
+            listener.gh.setGuildPrefix(event.getGuild().getId(), args[0]);
             event.getChannel().sendMessage("Prefix set to '" + args[0] + "'").queue();
         }
     }
@@ -36,14 +30,10 @@ public class Setprefix implements GuildCommand {
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         //Permission check
-        boolean allowed = false;
-        for (Role role : event.getMember().getRoles()) {
-            if (role.hasPermission(Permission.ADMINISTRATOR))
-                allowed = true;
+        if (!JDAUtil.isAuthorized(event)) {
+            return "";
         }
 
-        if(!allowed)
-            return "";
         return "<prefix> - To set the desired prefix for this bot. Standard is '!!'";
     }
 }

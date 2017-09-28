@@ -2,6 +2,7 @@ package commands.core_commands;
 
 import commands.GuildCommand;
 import commands.PMCommand;
+import core.Listener;
 import core.LogUtil;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -16,9 +17,9 @@ import java.util.stream.Collectors;
 public class Update implements GuildCommand, PMCommand {
 
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()))) {
+        if (!DataProvider.isBotAdmin(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -28,9 +29,9 @@ public class Update implements GuildCommand, PMCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event.getAuthor().getId()) || event.getMember().getRoles().contains(event.getGuild().getRolesByName("Bot Wizard", true).get(0)))) {
+        if (!DataProvider.isBotAdmin(event)) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }
@@ -50,7 +51,7 @@ public class Update implements GuildCommand, PMCommand {
             final String[] envp = new String[]{};
             final FileWriter fw = new FileWriter(new File("build.log"));
             final File WORKDIR  = new File("./iwbot_private");
-            final String token  = DataProvider.getGithubToken();
+            final String token  = DataProvider.getLoginPassword("github");
             final Runtime rt    = Runtime.getRuntime();
 
             Process p;

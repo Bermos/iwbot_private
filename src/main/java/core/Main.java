@@ -15,25 +15,41 @@ import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class Main {
-	public static final String CONFIG_LOC = "./data/config.json";
-	public static final String GUILDS_LOC = "./data/guilds.json";
+	public static final String CONFIG_LOC = "./config.json";
+	public static final SimpleDateFormat SDF_TIME = new SimpleDateFormat("HH:mm:ss");
+	public static final long startupTime = new Date().getTime();
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
 		for (Entry<String, Bot> bot : DataProvider.getBots().entrySet()) {
 			try {
-				Object listener = Class.forName("Listener" + bot.getKey()).newInstance();
+			    // Load correct listener for each bot
+                // Add listeners here for new bots
+			    Listener listener;
+				switch (bot.getKey()) {
+                    case "TEBot": listener = new ListenerIWBot(bot.getKey()); break;
+                    case "IWBot": listener = new ListenerIWBot(bot.getKey()); break;
+                    case "EDBot": listener = new ListenerEDBot(bot.getKey()); break;
+                    case "KKBot": listener = new ListenerKKBot(bot.getKey()); break;
+
+                    default: listener = new Listener(bot.getKey());
+                }
+
+                if (bot.getValue().token.isEmpty())
+                    install(bot.getKey());
 
                 System.out.println("Starting " + bot.getKey());
                 new JDABuilder(AccountType.BOT)
-						.setToken(bot.getValue().getToken())
+						.setToken(bot.getValue().token)
 						.addListener(listener)
 						.buildBlocking();
 
@@ -41,14 +57,14 @@ public class Main {
 				System.out.println("[Error] invalid bot token.");
 			} catch (IllegalArgumentException e) {
 				System.out.println("[Error] no bot token found.");
-			} catch (InterruptedException | RateLimitedException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			} catch (InterruptedException | RateLimitedException e) {
 				System.out.println("[Error] listener class could not be loaded.");
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private static void install() throws SQLException, FileNotFoundException {
+	private static void install(String botName) throws SQLException, FileNotFoundException {
 		Scanner scanner = new Scanner(System.in);
 		Connection con = null;
 		String us, pw, ip, db;
@@ -78,7 +94,7 @@ public class Main {
 			pw = RandomStringUtils.random(20, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@*?()$");
 			// Create new random passwords until they contain both numbers and special characters
 		} while (!numPat.matcher(pw).find() || !sozPat.matcher(pw).find());
-		DataProvider.addConnection("mysql", ip, db, us, pw);
+		DataProvider.addConnection(botName,"mysql", ip, db, us, pw);
 
 		PreparedStatement ps = con.prepareStatement("CREATE USER 'iwbot'@'localhost' IDENTIFIED BY ?;");
 		ps.setString(1, pw);
@@ -104,7 +120,7 @@ public class Main {
 
 		do {
             System.out.print("Discord token: ");
-            DataProvider.setDiscordToken(scanner.nextLine());
+            DataProvider.setDiscordToken(botName, scanner.nextLine());
             System.out.println();
             System.out.println("Testing token...");
 
@@ -122,7 +138,7 @@ public class Main {
         } while (jda == null);
 
         System.out.println("Please chose a prefix for the commands. Best would be something that isn't in use yet: ");
-        DataProvider.setPrefix(scanner.nextLine());
+        GuildHandler.setGuildPrefix("*" ,scanner.nextLine());
 
 		System.out.println("Setup complete. You may still want to go into the data.json and add missing information");
 	}

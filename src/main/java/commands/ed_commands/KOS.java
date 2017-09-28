@@ -22,7 +22,7 @@ import java.sql.SQLException;
  */
 public class KOS implements GuildCommand, PMCommand {
     @Override
-    public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, PrivateMessageReceivedEvent event, String[] args) {
         String message = "Your command seems invalid, maybe this helps:\n" + getHelp(null);
         if (args.length == 1) {
             message = getForAllGuilds(args[0], event.getAuthor());
@@ -32,7 +32,7 @@ public class KOS implements GuildCommand, PMCommand {
     }
 
     @Override
-    public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+    public void runCommand(Listener listener, GuildMessageReceivedEvent event, String[] args) {
         String message = "Your command seems invalid, maybe this helps:\n" + getHelp(null);
         if (args.length == 1) {
             message = getForAllGuilds(args[0], event.getAuthor());

@@ -1,12 +1,16 @@
 package core;
 
-import ed_core.GuildHandler;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.guild.update.GuildUpdateNameEvent;
 
 public class ListenerEDBot extends Listener {
+
+    public ListenerEDBot(String botName) {
+        super(botName);
+    }
+
     @Override
     public void onGuildJoin (GuildJoinEvent event) {
         GuildHandler.newGuild(event.getGuild().getId(), event.getGuild().getName(),event.getGuild().getOwner().getUser().getId(), event.getGuild().getOwner().getEffectiveName());

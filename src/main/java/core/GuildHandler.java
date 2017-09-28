@@ -1,4 +1,4 @@
-package ed_core;
+package core;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -14,15 +14,31 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import static core.Main.GUILDS_LOC;
-
 public class GuildHandler {
+    private String GUILDS_LOC;
+
+    public GuildHandler(String guild_loc) {
+        this.GUILDS_LOC = guild_loc;
+    }
+
+    public String getWelcomeMessage(String id) {
+        return guilds.get(id).welcomeMessage;
+    }
+
+    public void setWelcomeMessage(String id, String message) {
+        guilds.get(id).welcomeMessage = message;
+    }
+
+    public boolean autoWelcome(String guildId) {
+        return guilds.get(guildId).welcome;
+    }
 
     static class Guild {
         public String name;
         public String ownerId;
         public String ownerName;
         public String prefix;
+        public String messageChannel;
         public String welcomeMessage;
         public String welcomeChannel;
         public boolean welcome;
@@ -43,9 +59,9 @@ public class GuildHandler {
         }
     }
 
-    private static LinkedHashMap<String, Guild> guilds = loadGuilds();
+    private LinkedHashMap<String, Guild> guilds = loadGuilds();
 
-    public static LinkedHashMap<String,Guild> loadGuilds() {
+    public LinkedHashMap<String,Guild> loadGuilds() {
         LinkedHashMap<String, Guild> guilds;
         Gson gson = new Gson();
         Type listType = new TypeToken<List<Guild>>() {}.getType();
@@ -60,7 +76,7 @@ public class GuildHandler {
         return null;
     }
 
-    private static void saveGuilds() {
+    private void saveGuilds() {
         Gson gson = new Gson();
         Type listType = new TypeToken<List<Guild>>() {}.getType();
         try {
@@ -72,7 +88,7 @@ public class GuildHandler {
         }
     }
 
-    public static void newGuild(String guildId, String guildName, String ownerId, String ownerName) {
+    public void newGuild(String guildId, String guildName, String ownerId, String ownerName) {
         if (guilds.containsKey(guildId)) {
             guilds.remove(guildId);
         }
@@ -81,21 +97,21 @@ public class GuildHandler {
         saveGuilds();
     }
 
-    public static void memberJoined(String userId, String guildId) {
+    public void memberJoined(String userId, String guildId) {
         guilds.get(guildId).newUsers.add(userId);
         saveGuilds();
     }
 
-    public static void leaveGuild(String id) {
+    public void leaveGuild(String id) {
         guilds.remove(id);
         saveGuilds();
     }
 
-    public static boolean isAutoWelcome(String id) {
+    public boolean isAutoWelcome(String id) {
         return guilds.get(id).autoWelcome;
     }
 
-    public static void welcome(String guildId, String userId) {
+    public void welcome(String guildId, String userId) {
         Guild guild = guilds.get(guildId);
         JDA jda = Listener.jda;
 
@@ -117,9 +133,47 @@ public class GuildHandler {
         saveGuilds();
     }
 
-    public static void updateGuildName(String id, String name) {
+    public void updateGuildName(String id, String name) {
         guilds.get(id).name = name;
 
         saveGuilds();
+    }
+
+    public void setGuildPrefix(String id, String prefix) {
+        if (id.equals("*")) {
+            for (Guild guild : guilds.values())
+                guild.prefix = prefix;
+        }
+        else
+            guilds.get(id).prefix = prefix;
+
+        saveGuilds();
+    }
+
+    /**
+     *
+     * @param id
+     * @param channelId
+     */
+    public void setMessageChannel(String id, String channelId) {
+        guilds.get(id).messageChannel = channelId;
+    }
+
+    /**
+     * Returns the standard MessageChannel object the bot uses for the guild with the id
+     * @param id of the Guild
+     * @return the MessageChannel object
+     */
+    public String getMessageChannel(String id) {
+        return guilds.get(id).messageChannel;
+    }
+
+    /**
+     * Returns the prefix set for the guild
+     * @param guildId of the guild
+     * @return the prefix
+     */
+    public String getPrefix(String guildId) {
+        return guilds.get(guildId).prefix;
     }
 }
